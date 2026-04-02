@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Already Mine</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f5f0e8;
+    --warm-white: #faf7f2;
+    --gold: #c9a96e;
+    --gold-light: #e8d5b0;
+    --deep: #1a1610;
+    --muted: #8a7d6b;
+    --soft: #d4c9b8;
+    --glow: rgba(201, 169, 110, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Jost', sans-serif;
+    background: var(--deep);
+    color: var(--cream);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SCREENS ── */
+  .screen {
+    display: none;
+    min-height: 100vh;
+    position: relative;
+  }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ── BACKGROUND TEXTURE ── */
+  .bg-texture {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,169,110,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(201,169,110,0.05) 0%, transparent 50%),
+      radial-gradient(ellipse 40% 60% at 10% 60%, rgba(201,169,110,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SPLASH SCREEN ── */
+  #splash {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 40px;
+  }
+
+  .splash-inner {
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 1.2s ease forwards;
+  }
+
+  .orb {
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 48px;
+    position: relative;
+  }
+
+  .orb-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(201,169,110,0.3);
+    animation: pulse-ring 3s ease-in-out infinite;
+  }
+  .orb-ring:nth-child(2) {
+    inset: 12px;
+    border-color: rgba(201,169,110,0.2);
+    animation-delay: 0.5s;
+  }
+  .orb-ring:nth-child(3) {
+    inset: 24px;
+    border-color: rgba(201,169,110,0.15);
+    animation-delay: 1s;
+  }
+
+  .orb-core {
+    position: absolute;
+    inset: 36px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,169,110,0.4) 0%, rgba(201,169,110,0.1) 60%, transparent 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+  }
+
+  .app-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(42px, 10vw, 64px);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    color: var(--cream);
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .app-tagline {
+    font-family: 'Jost', sans-serif;
+    font-weight: 200;
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 64px;
+  }
+
+  .splash-desc {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--soft);
+    line-height: 1.8;
+    max-width: 320px;
+    margin: 0 auto 56px;
+  }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    display: inline-block;
+    padding: 16px 48px;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    transform: translateX(-100%);
+    transition: transform 0.4s ease;
+    z-index: -1;
+  }
+
+  .btn-primary:hover {
+    color: var(--deep);
+  }
+  .btn-primary:hover::before {
+    transform: translateX(0);
+  }
+
+  .btn-ghost {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    margin-top: 20px;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: color 0.3s;
+  }
+  .btn-ghost:hover { color: var(--cream); }
+
+  /* ── ONBOARDING SCREEN ── */
+  #onboarding {
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0;
+  }
+
+  .onboarding-header {
+    width: 100%;
+    padding: 40px 40px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .progress-bar-track {
+    height: 1px;
+    background: rgba(201,169,110,0.15);
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .progress-bar-fill {
+    height: 1px;
+    background: var(--gold);
+    transition: width 0.6s ease;
+  }
+
+  .progress-label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .question-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 40px 60px;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .question-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.1s ease forwards;
+  }
+
+  .question-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(26px, 6vw, 36px);
+    font-weight: 300;
+    line-height: 1.3;
+    color: var(--cream);
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s ease forwards;
+  }
+
+  .options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.3s ease forwards;
+  }
+
+  .option-btn {
+    padding: 18px 24px;
+    background: rgba(201,169,110,0.04);
+    border: 1px solid rgba(201,169,110,0.15);
+    color: var(--soft);
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .option-btn:hover {
+    border-color: var(--gold);
+    color: var(--cream);
+    background: rgba(201,169,110,0.08);
+  }
+
+  .option-btn.selected {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(201,169,110,0.1);
+  }
+
+  .option-btn .option-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    margin-right: 14px;
+    vertical-align: middle;
+    transition: background 0.3s;
+  }
+
+  .option-btn.selected .option-dot {
+    background: var(--gold);
+  }
+
+  .next-btn-wrap {
+    margin-top: 36px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.4s ease forwards;
+  }
+
+  /* ── REVEAL SCREEN ── */
+  #reveal {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 40px;
+  }
+
+  .reveal-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .reveal-label {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.3s ease forwards;
+  }
+
+  .affirmation-card {
+    position: relative;
+    padding: 56px 40px;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s ease forwards;
+  }
+
+  .affirmation-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(201,169,110,0.2);
+    pointer-events: none;
+  }
+
+  .affirmation-card::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px solid rgba(201,169,110,0.08);
+    pointer-events: none;
+  }
+
+  .affirmation-quote-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 80px;
+    line-height: 0.5;
+    color: var(--gold);
+    opacity: 0.3;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .affirmation-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(22px, 5vw, 30px);
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--cream);
+  }
+
+  .affirmation-category {
+    margin-top: 28px;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .reveal-message {
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--soft);
+    line-height: 1.8;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.9s ease forwards;
+  }
+
+  .reveal-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    opacity: 0;
+    animation: fadeUp 0.8s 1.1s ease forwards;
+  }
+
+  .day-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border: 1px solid rgba(201,169,110,0.2);
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.15s ease forwards;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    margin: 0 auto 32px;
+    opacity: 0.4;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.04); opacity: 0.7; }
+  }
+
+  /* ── TRANSITION ── */
+  .screen-transition {
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  /* ── MOBILE ADJUSTMENTS ── */
+  @media (max-width: 400px) {
+    .question-container { padding: 32px 28px 48px; }
+    .onboarding-header { padding: 32px 28px 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-texture"></div>
+
+<!-- ══════════════ SPLASH SCREEN ══════════════ -->
+<div id="splash" class="screen active">
+  <div class="splash-inner">
+    <div class="orb">
+      <div class="orb-ring"></div>
+      <div class="orb-ring"></div>
+      <div class="orb-ring"></div>
+      <div class="orb-core">✦</div>
+    </div>
+
+    <h1 class="app-name">Already Mine</h1>
+    <p class="app-tagline">Daily Manifestation</p>
+
+    <div class="divider"></div>
+
+    <p class="splash-desc">
+      Every morning, one affirmation chosen just for you. Unlock your library, one day at a time.
+    </p>
+
+    <button class="btn-primary" onclick="startOnboarding()">Begin Your Journey</button>
+    <br>
+    <button class="btn-ghost" onclick="showHome()">I already have an account</button>
+  </div>
+</div>
+
+<!-- ══════════════ ONBOARDING SCREEN ══════════════ -->
+<div id="onboarding" class="screen">
+  <div class="onboarding-header">
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progressFill" style="width: 20%"></div>
+    </div>
+    <div class="progress-label" id="progressLabel">Question 1 of 5</div>
+  </div>
+
+  <div class="question-container" id="questionContainer">
+    <!-- Dynamically rendered -->
+  </div>
+</div>
+
+<!-- ══════════════ REVEAL SCREEN ══════════════ -->
+<div id="reveal" class="screen">
+  <div class="reveal-inner">
+    <div class="day-badge">✦ Day 1 · Affirmation Unlocked</div>
+    <p class="reveal-label">Your first affirmation has been chosen for you</p>
+
+    <div class="affirmation-card">
+      <span class="affirmation-quote-mark">"</span>
+      <p class="affirmation-text" id="affirmationText">
+        Everything I need is already making its way to me.
+      </p>
+      <p class="affirmation-category" id="affirmationCategory">Abundance · Trust</p>
+    </div>
+
+    <p class="reveal-message" id="revealMessage">
+      This affirmation was chosen based on your answers. Return tomorrow to unlock the next one.
+    </p>
+
+    <div class="reveal-actions">
+      <button class="btn-primary" onclick="goToHome()">Enter the App</button>
+      <button class="btn-ghost">Save this affirmation</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  // ── QUESTIONS ──
+  const questions = [
+    {
+      id: 'lifeStage',
+      number: 'One',
+      text: 'Which best describes where you are in life right now?',
+      options: [
+        { label: 'Building something of my own', value: 'entrepreneur' },
+        { label: 'Focused on my career', value: 'career' },
+        { label: 'Navigating a major life transition', value: 'transition' },
+        { label: 'Raising a family', value: 'parent' },
+        { label: 'Growing into who I want to be', value: 'growth' },
+      ]
+    },
+    {
+      id: 'intention',
+      number: 'Two',
+      text: 'What do you most want to call into your life?',
+      options: [
+        { label: 'Abundance and financial freedom', value: 'abundance' },
+        { label: 'Love and deep connection', value: 'love' },
+        { label: 'Confidence and inner strength', value: 'confidence' },
+        { label: 'Health and vitality', value: 'health' },
+        { label: 'Peace and clarity', value: 'peace' },
+        { label: 'Career success and purpose', value: 'career' },
+      ]
+    },
+    {
+      id: 'currentState',
+      number: 'Three',
+      text: 'How would you describe where you are emotionally right now?',
+      options: [
+        { label: "I'm going through something hard", value: 'tough' },
+        { label: "I'm okay, but ready for more", value: 'ready' },
+        { label: "I'm in a good place and want to grow", value: 'good' },
+        { label: "I'm starting completely fresh", value: 'fresh' },
+      ]
+    },
+    {
+      id: 'tone',
+      number: 'Four',
+      text: 'How do you like to be spoken to?',
+      options: [
+        { label: 'Gently — soft, nurturing, warm', value: 'gentle' },
+        { label: 'Boldly — direct, powerful, certain', value: 'bold' },
+        { label: 'Spiritually — connected to something greater', value: 'spiritual' },
+        { label: 'Simply — clear, grounded, no fluff', value: 'simple' },
+      ]
+    },
+    {
+      id: 'morningOrNight',
+      number: 'Five',
+      text: 'When do you want to receive your daily affirmation?',
+      options: [
+        { label: 'Morning — to set the tone for my day', value: 'morning' },
+        { label: 'Midday — when I need a reset', value: 'midday' },
+        { label: 'Evening — to close the day with intention', value: 'evening' },
+        { label: 'Surprise me', value: 'random' },
+      ]
+    }
+  ];
+
+  // ── AFFIRMATION LIBRARY (small seed set for prototype) ──
+  const affirmations = {
+    abundance: {
+      gentle: "Everything I need is already flowing gently toward me.",
+      bold: "I am a magnet for wealth, and it comes to me with ease.",
+      spiritual: "The universe is abundant, and I am open to receive all that is mine.",
+      simple: "Money flows to me. Opportunities find me. I am ready."
+    },
+    love: {
+      gentle: "I am worthy of deep, gentle, lasting love — and it is on its way.",
+      bold: "Love is drawn to me because I am whole, alive, and magnetic.",
+      spiritual: "My heart is open. Love recognizes me and finds its way home.",
+      simple: "I give and receive love freely. It is enough. I am enough."
+    },
+    confidence: {
+      gentle: "I trust myself gently. My voice matters. My presence is enough.",
+      bold: "I walk into every room knowing exactly who I am and what I bring.",
+      spiritual: "My confidence is rooted in something deeper than approval.",
+      simple: "I believe in myself. That is where everything begins."
+    },
+    health: {
+      gentle: "My body is healing and growing stronger with every breath I take.",
+      bold: "I am powerful, energized, and fully alive in this body.",
+      spiritual: "My body is sacred. I honor it, and it honors me in return.",
+      simple: "I choose health today. One step, one breath, one choice at a time."
+    },
+    peace: {
+      gentle: "I release what I cannot control and breathe into the present moment.",
+      bold: "My peace is not dependent on circumstances. It lives inside me.",
+      spiritual: "Stillness is my natural state. I return to it again and again.",
+      simple: "I am calm. I am steady. This moment is enough."
+    },
+    career: {
+      gentle: "My gifts are valuable. The right opportunities are finding me.",
+      bold: "I am built for this. My success is not a matter of if — only when.",
+      spiritual: "I am aligned with my purpose, and my work carries that light.",
+      simple: "I show up. I do the work. The results take care of themselves."
+    }
+  };
+
+  // ── STATE ──
+  let currentQuestion = 0;
+  let answers = {};
+  let selectedOption = null;
+
+  // ── NAVIGATION ──
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active', 'screen-transition');
+    window.scrollTo(0, 0);
+  }
+
+  function startOnboarding() {
+    showScreen('onboarding');
+    renderQuestion(0);
+  }
+
+  function showHome() {
+    alert('Login coming in a future session!');
+  }
+
+  function goToHome() {
+    alert('The main home screen is coming in Session 2!');
+  }
+
+  // ── RENDER QUESTION ──
+  function renderQuestion(index) {
+    selectedOption = null;
+    const q = questions[index];
+    const pct = ((index + 1) / questions.length) * 100;
+
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = `Question ${index + 1} of ${questions.length}`;
+
+    const container = document.getElementById('questionContainer');
+    container.innerHTML = `
+      <div class="question-number">${q.number}</div>
+      <div class="question-text">${q.text}</div>
+      <div class="options-grid">
+        ${q.options.map((opt, i) => `
+          <button class="option-btn" onclick="selectOption(this, '${opt.value}')">
+            <span class="option-dot"></span>${opt.label}
+          </button>
+        `).join('')}
+      </div>
+      <div class="next-btn-wrap">
+        <button class="btn-primary" id="nextBtn" onclick="nextQuestion()" style="opacity:0.3; pointer-events:none;">
+          ${index < questions.length - 1 ? 'Continue' : 'Reveal My Affirmation'}
+        </button>
+      </div>
+    `;
+  }
+
+  function selectOption(el, value) {
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedOption = value;
+
+    const nextBtn = document.getElementById('nextBtn');
+    nextBtn.style.opacity = '1';
+    nextBtn.style.pointerEvents = 'auto';
+  }
+
+  function nextQuestion() {
+    if (!selectedOption) return;
+
+    answers[questions[currentQuestion].id] = selectedOption;
+
+    if (currentQuestion < questions.length - 1) {
+      currentQuestion++;
+      renderQuestion(currentQuestion);
+    } else {
+      showReveal();
+    }
+  }
+
+  // ── REVEAL ──
+  function showReveal() {
+    const intention = answers.intention || 'abundance';
+    const tone = answers.tone || 'gentle';
+
+    const categoryMap = {
+      abundance: 'Abundance · Prosperity',
+      love: 'Love · Connection',
+      confidence: 'Confidence · Strength',
+      health: 'Health · Vitality',
+      peace: 'Peace · Clarity',
+      career: 'Career · Purpose'
+    };
+
+    const affirmation = (affirmations[intention] && affirmations[intention][tone])
+      ? affirmations[intention][tone]
+      : "Everything I need is already making its way to me.";
+
+    const toneMessages = {
+      tough: "You came here looking for something. This affirmation meets you exactly where you are.",
+      ready: "You're ready for more — and more is ready for you.",
+      good: "From a place of strength, you're calling in even greater things.",
+      fresh: "Every fresh start is a gift. This is yours."
+    };
+
+    document.getElementById('affirmationText').textContent = affirmation;
+    document.getElementById('affirmationCategory').textContent = categoryMap[intention] || 'Manifestation';
+    document.getElementById('revealMessage').textContent =
+      (toneMessages[answers.currentState] || "Your journey begins today.") +
+      " Come back tomorrow to unlock the next affirmation in your library.";
+
+    showScreen('reveal');
+  }
+</script>
+</body>
+</html>
