@@ -164,10 +164,49 @@
   .modal-close { background:none; border:1px solid rgba(201,169,110,.2); color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; padding:12px 32px; cursor:pointer; transition:all .3s; }
   .modal-close:hover { border-color:var(--gold); color:var(--gold); }
 
+  /* Back button */
+  .back-btn { background:none; border:none; color:var(--muted); font-family:'Jost',sans-serif; font-weight:300; font-size:12px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; gap:8px; margin-top:12px; transition:color .3s; padding:0; }
+  .back-btn:hover { color:var(--cream); }
+  .back-btn svg { stroke:currentColor; }
+
+  /* ── JOURNAL ── */
+  #journal { padding-bottom:90px; }
+  .journal-header { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; padding:28px 32px 20px; border-bottom:1px solid rgba(201,169,110,.08); }
+  .journal-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--cream); letter-spacing:.05em; }
+  .journal-date { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
+
+  .journal-affirmation-ref { position:relative; z-index:1; margin:28px 32px 0; padding:20px 24px; background:rgba(201,169,110,.04); border-left:2px solid var(--gold); opacity:0; animation:fadeUp .6s .1s ease forwards; }
+  .journal-affirmation-ref-label { font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
+  .journal-affirmation-ref-text { font-family:'Cormorant Garamond',serif; font-size:16px; font-style:italic; color:var(--soft); line-height:1.5; }
+
+  .journal-section { position:relative; z-index:1; padding:28px 32px 0; opacity:0; animation:fadeUp .6s .2s ease forwards; }
+  .journal-section-title { font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); margin-bottom:6px; display:flex; align-items:center; gap:12px; }
+  .journal-section-title::after { content:''; flex:1; height:1px; background:rgba(201,169,110,.15); }
+  .journal-section-sub { font-size:13px; font-weight:300; color:var(--muted); margin-bottom:16px; font-style:italic; }
+
+  .journal-prompt { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300; color:var(--soft); line-height:1.6; margin-bottom:14px; font-style:italic; }
+
+  .journal-textarea { width:100%; background:rgba(201,169,110,.03); border:1px solid rgba(201,169,110,.12); color:var(--cream); font-family:'Jost',sans-serif; font-weight:300; font-size:14px; line-height:1.7; padding:16px 18px; resize:none; outline:none; transition:border-color .3s; font-size:15px; }
+  .journal-textarea::placeholder { color:var(--muted); opacity:.6; }
+  .journal-textarea:focus { border-color:rgba(201,169,110,.3); }
+
+  .gratitude-inputs { display:flex; flex-direction:column; gap:10px; }
+  .gratitude-row { display:flex; align-items:center; gap:12px; }
+  .gratitude-num { font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--gold); opacity:.4; min-width:16px; }
+  .gratitude-input { flex:1; background:rgba(201,169,110,.03); border:none; border-bottom:1px solid rgba(201,169,110,.12); color:var(--cream); font-family:'Jost',sans-serif; font-weight:300; font-size:14px; padding:10px 4px; outline:none; transition:border-color .3s; }
+  .gratitude-input::placeholder { color:var(--muted); opacity:.5; }
+  .gratitude-input:focus { border-bottom-color:var(--gold); }
+
+  .mood-grid { display:flex; gap:10px; flex-wrap:wrap; }
+  .mood-btn { padding:10px 18px; background:rgba(201,169,110,.03); border:1px solid rgba(201,169,110,.12); color:var(--muted); font-family:'Jost',sans-serif; font-size:13px; cursor:pointer; transition:all .3s; letter-spacing:.05em; }
+  .mood-btn:hover { border-color:rgba(201,169,110,.3); color:var(--soft); }
+  .mood-btn.selected { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.08); }
+
+  .journal-save-wrap { position:relative; z-index:1; padding:28px 32px 0; opacity:0; animation:fadeUp .6s .4s ease forwards; }
+
   @media(max-width:400px){
-    .question-container,.onboarding-header{padding-left:24px;padding-right:24px}
-    .home-nav,.home-greeting,.todays-card-wrap,.next-unlock-wrap,.library-wrap{padding-left:20px;padding-right:20px}
-    .upgrade-teaser{margin-left:20px;margin-right:20px}
+    .journal-header,.journal-affirmation-ref,.journal-section,.journal-save-wrap{padding-left:20px;padding-right:20px}
+    .journal-affirmation-ref{margin-left:20px;margin-right:20px}
   }
 </style>
 </head>
@@ -194,7 +233,13 @@
 <div id="onboarding" class="screen">
   <div class="onboarding-header">
     <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill" style="width:20%"></div></div>
-    <div class="progress-label" id="progressLabel">Question 1 of 5</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+      <div class="progress-label" id="progressLabel">Question 1 of 5</div>
+      <button class="back-btn" id="backBtn" onclick="prevQ()" style="display:none">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+    </div>
   </div>
   <div class="question-container" id="questionContainer"></div>
 </div>
@@ -237,7 +282,7 @@
       <div class="card-actions">
         <button class="card-action-btn" id="saveBtn" onclick="toggleSave()">♡ &nbsp;Save</button>
         <button class="card-action-btn" onclick="shareAffirmation()">↑ &nbsp;Share</button>
-        <button class="card-action-btn" onclick="alert('Journal coming in Session 3!')">✎ &nbsp;Journal</button>
+        <button class="card-action-btn" onclick="openJournal()">✎ &nbsp;Journal</button>
       </div>
     </div>
   </div>
@@ -265,7 +310,7 @@
       <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
       <span class="nav-tab-label">Library</span>
     </button>
-    <button class="nav-tab" onclick="setTab(this);alert('Journal coming in Session 3!')">
+    <button class="nav-tab" onclick="setTab(this);openJournal()">
       <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg></span>
       <span class="nav-tab-label">Journal</span>
     </button>
@@ -277,6 +322,65 @@
       <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
       <span class="nav-tab-label">Profile</span>
     </button>
+  </div>
+</div>
+
+<!-- JOURNAL -->
+<div id="journal" class="screen">
+  <div class="journal-header" style="position:relative;z-index:1">
+    <div>
+      <div class="journal-date" id="journalDate"></div>
+      <div class="journal-title">Today's Journal</div>
+    </div>
+    <button class="back-btn" onclick="showScreen('home');setTabByName('today')" style="margin-top:0">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </button>
+  </div>
+
+  <!-- Affirmation reference -->
+  <div class="journal-affirmation-ref">
+    <div class="journal-affirmation-ref-label">Today's Affirmation</div>
+    <div class="journal-affirmation-ref-text" id="journalAffirmationRef"></div>
+  </div>
+
+  <!-- Reflection prompt -->
+  <div class="journal-section" style="animation-delay:.15s">
+    <div class="journal-section-title">Reflection</div>
+    <div class="journal-prompt" id="journalPrompt"></div>
+    <textarea class="journal-textarea" rows="5" placeholder="Write freely — this space is only for you..."></textarea>
+  </div>
+
+  <!-- Mood check-in -->
+  <div class="journal-section" style="animation-delay:.25s">
+    <div class="journal-section-title">Mood Check-in</div>
+    <div class="journal-section-sub">How are you feeling right now?</div>
+    <div class="mood-grid">
+      <button class="mood-btn" onclick="selectMood(this)">Peaceful</button>
+      <button class="mood-btn" onclick="selectMood(this)">Hopeful</button>
+      <button class="mood-btn" onclick="selectMood(this)">Grateful</button>
+      <button class="mood-btn" onclick="selectMood(this)">Anxious</button>
+      <button class="mood-btn" onclick="selectMood(this)">Tired</button>
+      <button class="mood-btn" onclick="selectMood(this)">Excited</button>
+      <button class="mood-btn" onclick="selectMood(this)">Heavy</button>
+      <button class="mood-btn" onclick="selectMood(this)">Aligned</button>
+    </div>
+  </div>
+
+  <!-- Gratitude -->
+  <div class="journal-section" style="animation-delay:.35s">
+    <div class="journal-section-title">Gratitude</div>
+    <div class="journal-section-sub">Three things you're grateful for today</div>
+    <div class="gratitude-inputs">
+      <div class="gratitude-row"><span class="gratitude-num">I</span><input class="gratitude-input" type="text" placeholder="I am grateful for..."></div>
+      <div class="gratitude-row"><span class="gratitude-num">II</span><input class="gratitude-input" type="text" placeholder="I am grateful for..."></div>
+      <div class="gratitude-row"><span class="gratitude-num">III</span><input class="gratitude-input" type="text" placeholder="I am grateful for..."></div>
+    </div>
+  </div>
+
+  <!-- Save -->
+  <div class="journal-save-wrap">
+    <button class="btn-primary" style="width:100%;padding:18px" onclick="saveJournal()">Save Today's Entry</button>
   </div>
 </div>
 
@@ -316,17 +420,40 @@ function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classL
 function startOnboarding(){showScreen('onboarding');renderQuestion(0);}
 function skipToHome(){todayAffirmation=affirmations.abundance.gentle;todayCategory=catLabels.abundance;buildHome();showScreen('home');}
 
+function prevQ(){
+  if(currentQuestion>0){
+    currentQuestion--;
+    // restore previous answer as selected
+    selectedOption=answers[questions[currentQuestion].id]||null;
+    renderQuestion(currentQuestion);
+    // re-highlight the previously selected option
+    if(selectedOption){
+      setTimeout(()=>{
+        document.querySelectorAll('.option-btn').forEach(b=>{
+          if(b.textContent.trim()===questions[currentQuestion].options.find(o=>o.value===selectedOption)?.label){
+            b.classList.add('selected');
+            const nb=document.getElementById('nextBtn');
+            nb.style.opacity='1';nb.style.pointerEvents='auto';
+          }
+        });
+      },50);
+    }
+  }
+}
+
 function renderQuestion(i){
-  selectedOption=null;
+  selectedOption=answers[questions[i].id]||null;
   const q=questions[i];
   const pct=((i+1)/questions.length)*100;
   document.getElementById('progressFill').style.width=pct+'%';
   document.getElementById('progressLabel').textContent=`Question ${i+1} of ${questions.length}`;
+  const backBtn=document.getElementById('backBtn');
+  if(backBtn)backBtn.style.display=i>0?'flex':'none';
   document.getElementById('questionContainer').innerHTML=`
     <div class="question-number">${q.number}</div>
     <div class="question-text">${q.text}</div>
-    <div class="options-grid">${q.options.map(o=>`<button class="option-btn" onclick="selectOpt(this,'${o.value}')"><span class="option-dot"></span>${o.label}</button>`).join('')}</div>
-    <div class="next-btn-wrap"><button class="btn-primary" id="nextBtn" onclick="nextQ()" style="opacity:.3;pointer-events:none">${i<questions.length-1?'Continue':'Reveal My Affirmation'}</button></div>
+    <div class="options-grid">${q.options.map(o=>`<button class="option-btn${selectedOption===o.value?' selected':''}" onclick="selectOpt(this,'${o.value}')"><span class="option-dot"></span>${o.label}</button>`).join('')}</div>
+    <div class="next-btn-wrap"><button class="btn-primary" id="nextBtn" onclick="nextQ()" style="opacity:${selectedOption?'1':'0.3'};pointer-events:${selectedOption?'auto':'none'}">${i<questions.length-1?'Continue':'Reveal My Affirmation'}</button></div>
   `;
 }
 function selectOpt(el,val){document.querySelectorAll('.option-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');selectedOption=val;const nb=document.getElementById('nextBtn');nb.style.opacity='1';nb.style.pointerEvents='auto';}
@@ -386,6 +513,39 @@ function updateCountdown(){
 function toggleSave(){saved=!saved;const b=document.getElementById('saveBtn');b.textContent=saved?'♥  Saved':'♡  Save';b.classList.toggle('active',saved);}
 function shareAffirmation(){if(navigator.share){navigator.share({title:'Already Mine',text:todayAffirmation,url:window.location.href});}else{navigator.clipboard.writeText(todayAffirmation).then(()=>alert('Copied to clipboard!'));}}
 function setTab(el){document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function setTabByName(name){document.querySelectorAll('.nav-tab').forEach((t,i)=>{const labels=['today','library','journal','badges','profile'];if(labels[i]===name)t.classList.add('active');else t.classList.remove('active');});}
+
+const journalPrompts={
+  abundance:"What would your life look and feel like if abundance was already flowing freely to you?",
+  love:"Where in your life are you already experiencing love — and how can you open to receive more?",
+  confidence:"Describe a moment when you felt completely sure of yourself. What made that possible?",
+  health:"What is one small thing you can do today to honor your body and its strength?",
+  peace:"What thought or worry are you ready to release today? What would peace feel like in its place?",
+  career:"What does your most purposeful, fulfilled work life look like? What's one step toward it?"
+};
+
+function openJournal(){
+  const intent=answers.intention||'abundance';
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('journalDate').textContent=dateStr;
+  document.getElementById('journalAffirmationRef').textContent=todayAffirmation;
+  document.getElementById('journalPrompt').textContent=journalPrompts[intent]||journalPrompts.abundance;
+  showScreen('journal');
+  setTabByName('journal');
+}
+
+function selectMood(el){document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
+
+function saveJournal(){
+  const textarea=document.querySelector('#journal .journal-textarea');
+  const mood=document.querySelector('.mood-btn.selected');
+  const gratitude=[...document.querySelectorAll('.gratitude-input')].map(i=>i.value).filter(Boolean);
+  if(!textarea.value&&!mood&&gratitude.length===0){alert('Add at least one entry before saving.');return;}
+  // Show confirmation
+  const wrap=document.querySelector('.journal-save-wrap');
+  wrap.innerHTML=`<div style="text-align:center;padding:20px 0"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:var(--cream);margin-bottom:8px">Entry saved.</div><div style="font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)">✦ Day 1 complete</div></div>`;
+}
 function openModal(day,text,cat){document.getElementById('modalDay').textContent=day;document.getElementById('modalText').textContent=text;document.getElementById('modalCat').textContent=cat;document.getElementById('modalOverlay').classList.add('open');}
 function closeModal(e){if(e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('open');}
 </script>
