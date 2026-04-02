@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Already Mine</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.383.0/umd/lucide.min.js"></script>
 <style>
   :root {
     --cream: #f5f0e8;
@@ -222,7 +221,7 @@
 <div id="home" class="screen">
   <div class="home-nav" style="position:relative;z-index:1">
     <div class="nav-logo">Already Mine</div>
-    <div class="nav-streak"><i data-lucide="sun" style="width:13px;height:13px;stroke:var(--gold);opacity:.8"></i> <span id="streakCount">1</span> day</div>
+    <div class="nav-streak"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.8;vertical-align:middle"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg> <span id="streakCount">1</span> day</div>
     <div class="nav-avatar">✦</div>
   </div>
   <div class="home-greeting">
@@ -258,11 +257,26 @@
     <button class="btn-primary" style="padding:12px 32px;font-size:12px" onclick="alert('Upgrade screen coming in Session 5!')">Unlock Everything</button>
   </div>
   <div class="bottom-nav">
-    <button class="nav-tab active" onclick="setTab(this)"><span class="nav-tab-icon"><i data-lucide="sparkles" style="width:18px;height:18px"></i></span><span class="nav-tab-label">Today</span></button>
-    <button class="nav-tab" onclick="setTab(this)"><span class="nav-tab-icon"><i data-lucide="book-open" style="width:18px;height:18px"></i></span><span class="nav-tab-label">Library</span></button>
-    <button class="nav-tab" onclick="setTab(this);alert('Journal coming in Session 3!')"><span class="nav-tab-icon"><i data-lucide="feather" style="width:18px;height:18px"></i></span><span class="nav-tab-label">Journal</span></button>
-    <button class="nav-tab" onclick="setTab(this);alert('Badges coming in Session 4!')"><span class="nav-tab-icon"><i data-lucide="award" style="width:18px;height:18px"></i></span><span class="nav-tab-label">Badges</span></button>
-    <button class="nav-tab" onclick="setTab(this)"><span class="nav-tab-icon"><i data-lucide="circle-user" style="width:18px;height:18px"></i></span><span class="nav-tab-label">Profile</span></button>
+    <button class="nav-tab active" onclick="setTab(this)">
+      <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg></span>
+      <span class="nav-tab-label">Today</span>
+    </button>
+    <button class="nav-tab" onclick="setTab(this)">
+      <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+      <span class="nav-tab-label">Library</span>
+    </button>
+    <button class="nav-tab" onclick="setTab(this);alert('Journal coming in Session 3!')">
+      <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg></span>
+      <span class="nav-tab-label">Journal</span>
+    </button>
+    <button class="nav-tab" onclick="setTab(this);alert('Badges coming in Session 4!')">
+      <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+      <span class="nav-tab-label">Badges</span>
+    </button>
+    <button class="nav-tab" onclick="setTab(this)">
+      <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      <span class="nav-tab-label">Profile</span>
+    </button>
   </div>
 </div>
 
@@ -338,7 +352,6 @@ function buildHome(){
   buildLibrary();
   updateCountdown();
   setInterval(updateCountdown,1000);
-  if(window.lucide)lucide.createIcons();
 }
 
 function buildLibrary(){
@@ -354,10 +367,9 @@ function buildLibrary(){
   for(let d=2;d<=14;d++){
     const tile=document.createElement('div');
     tile.className='lib-tile locked';
-    tile.innerHTML=`<div class="locked-blur-text">${lockedTexts[(d-2)%lockedTexts.length]}</div><div class="locked-overlay"><div class="lock-icon"><i data-lucide="moon" style="width:14px;height:14px;stroke:rgba(201,169,110,0.25)"></i></div><div class="lock-day-label">Day ${d}</div></div>`;
+    tile.innerHTML=`<div class="locked-blur-text">${lockedTexts[(d-2)%lockedTexts.length]}</div><div class="locked-overlay"><div class="lock-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div><div class="lock-day-label">Day ${d}</div></div>`;
     grid.appendChild(tile);
   }
-  if(window.lucide)lucide.createIcons();
 }
 
 function updateCountdown(){
@@ -376,7 +388,6 @@ function shareAffirmation(){if(navigator.share){navigator.share({title:'Already 
 function setTab(el){document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
 function openModal(day,text,cat){document.getElementById('modalDay').textContent=day;document.getElementById('modalText').textContent=text;document.getElementById('modalCat').textContent=cat;document.getElementById('modalOverlay').classList.add('open');}
 function closeModal(e){if(e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('open');}
-document.addEventListener('DOMContentLoaded',()=>{if(window.lucide)lucide.createIcons();});
 </script>
 </body>
 </html>
