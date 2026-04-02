@@ -253,12 +253,8 @@
 <div id="onboarding" class="screen">
   <div class="onboarding-header">
     <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill" style="width:20%"></div></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+    <div style="margin-top:8px">
       <div class="progress-label" id="progressLabel">Question 1 of 5</div>
-      <button class="back-btn" id="backBtn" onclick="prevQ()" style="display:none">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        Back
-      </button>
     </div>
   </div>
   <div class="question-container" id="questionContainer"></div>
@@ -467,13 +463,14 @@ function renderQuestion(i){
   const pct=((i+1)/questions.length)*100;
   document.getElementById('progressFill').style.width=pct+'%';
   document.getElementById('progressLabel').textContent=`Question ${i+1} of ${questions.length}`;
-  const backBtn=document.getElementById('backBtn');
-  if(backBtn)backBtn.style.display=i>0?'flex':'none';
   document.getElementById('questionContainer').innerHTML=`
     <div class="question-number">${q.number}</div>
     <div class="question-text">${q.text}</div>
     <div class="options-grid">${q.options.map(o=>`<button class="option-btn${selectedOption===o.value?' selected':''}" onclick="selectOpt(this,'${o.value}')"><span class="option-dot"></span>${o.label}</button>`).join('')}</div>
-    <div class="next-btn-wrap"><button class="btn-primary" id="nextBtn" onclick="nextQ()" style="opacity:${selectedOption?'1':'0.3'};pointer-events:${selectedOption?'auto':'none'}">${i<questions.length-1?'Continue':'Reveal My Affirmation'}</button></div>
+    <div class="next-btn-wrap" style="display:flex;gap:12px;align-items:center">
+      <button onclick="prevQ()" style="flex:0 0 auto;padding:16px 20px;background:none;border:1px solid rgba(201,169,110,${i===0?'0.1':'0.3'});color:${i===0?'rgba(201,169,110,0.25)':'var(--muted)'};font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:${i===0?'default':'pointer'};transition:all .3s;" ${i===0?'disabled':''}>Back</button>
+      <button id="nextBtn" onclick="nextQ()" style="flex:1;padding:16px;background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-weight:300;font-size:13px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .4s;position:relative;overflow:hidden;opacity:${selectedOption?'1':'0.3'};pointer-events:${selectedOption?'auto':'none'}">${i<questions.length-1?'Continue':'Reveal My Affirmation'}</button>
+    </div>
   `;
 }
 function selectOpt(el,val){document.querySelectorAll('.option-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');selectedOption=val;const nb=document.getElementById('nextBtn');nb.style.opacity='1';nb.style.pointerEvents='auto';}
