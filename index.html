@@ -252,7 +252,72 @@
   .badge-modal-name { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300; color:var(--cream); margin-bottom:16px; }
   .badge-modal-desc { font-size:14px; font-weight:300; color:var(--soft); line-height:1.7; margin-bottom:32px; }
 
-  /* ── UPGRADE / PAYWALL ── */
+  /* ── PROFILE ── */
+  #profile { padding-bottom:90px; overflow-y:auto; }
+  .profile-hero { position:relative; z-index:1; padding:32px 32px 28px; text-align:center; border-bottom:1px solid rgba(201,169,110,.08); opacity:0; animation:fadeUp .6s .1s ease forwards; }
+  .profile-avatar { width:72px; height:72px; border-radius:50%; background:radial-gradient(circle,rgba(201,169,110,.2) 0%,rgba(201,169,110,.05) 100%); border:1px solid rgba(201,169,110,.3); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-family:'Cormorant Garamond',serif; font-size:28px; color:var(--gold); }
+  .profile-real-name { font-size:12px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+  .profile-nickname { font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:300; color:var(--cream); margin-bottom:4px; }
+  .profile-member-since { font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); }
+
+  .profile-nickname-edit { display:flex; align-items:center; gap:8px; justify-content:center; margin-top:12px; }
+  .profile-nickname-input { background:none; border:none; border-bottom:1px solid rgba(201,169,110,.2); color:var(--cream); font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; text-align:center; outline:none; width:200px; padding:4px 0; transition:border-color .3s; display:none; }
+  .profile-nickname-input:focus { border-bottom-color:var(--gold); }
+  .profile-edit-btn { background:none; border:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:11px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:color .3s; padding:4px 0; }
+  .profile-edit-btn:hover { color:var(--gold); }
+
+  .profile-rank-card { position:relative; z-index:1; margin:24px 32px 0; padding:20px 24px; background:linear-gradient(135deg,rgba(201,169,110,.08) 0%,rgba(201,169,110,.03) 100%); border:1px solid rgba(201,169,110,.18); opacity:0; animation:fadeUp .6s .2s ease forwards; }
+  .profile-rank-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .profile-rank-name { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:300; color:var(--gold); }
+  .profile-rank-label { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
+
+  .profile-section { position:relative; z-index:1; padding:24px 32px 0; opacity:0; animation:fadeUp .6s .25s ease forwards; }
+  .profile-section-title { font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; display:flex; align-items:center; gap:12px; }
+  .profile-section-title::after { content:''; flex:1; height:1px; background:rgba(201,169,110,.15); }
+
+  .profile-stats-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  .profile-stat { padding:16px 10px; border:1px solid rgba(201,169,110,.12); background:rgba(201,169,110,.03); text-align:center; }
+  .profile-stat-num { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--gold); line-height:1; margin-bottom:6px; }
+  .profile-stat-label { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); line-height:1.3; }
+
+  .profile-intention { padding:16px 20px; background:rgba(201,169,110,.04); border-left:2px solid var(--gold); }
+  .profile-intention-label { font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
+  .profile-intention-text { font-family:'Jost',sans-serif; font-size:14px; font-weight:300; color:var(--soft); line-height:1.6; font-style:italic; }
+  .profile-intention-none { font-size:13px; font-weight:300; color:var(--muted); font-style:italic; }
+
+  .profile-fav-affirmation { padding:20px; border:1px solid rgba(201,169,110,.15); background:rgba(201,169,110,.03); position:relative; }
+  .profile-fav-affirmation::before { content:'"'; font-family:'Cormorant Garamond',serif; font-size:48px; color:var(--gold); opacity:.2; line-height:.5; position:absolute; top:16px; left:16px; }
+  .profile-fav-text { font-family:'Jost',sans-serif; font-size:14px; font-weight:300; color:var(--soft); line-height:1.7; padding-left:8px; }
+  .profile-fav-none { font-size:13px; font-weight:300; color:var(--muted); font-style:italic; }
+
+  .profile-recent-badges { display:flex; gap:10px; flex-wrap:wrap; }
+  .profile-badge-pill { display:flex; align-items:center; gap:8px; padding:8px 14px; border:1px solid rgba(201,169,110,.2); background:rgba(201,169,110,.06); }
+  .profile-badge-icon { font-family:'Cormorant Garamond',serif; font-size:16px; color:var(--gold); }
+  .profile-badge-info { display:flex; flex-direction:column; }
+  .profile-badge-name { font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--cream); }
+  .profile-badge-tier { font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+
+  .profile-pref-row { display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid rgba(201,169,110,.06); }
+  .profile-pref-row:last-child { border-bottom:none; }
+  .profile-pref-label { font-size:13px; font-weight:300; color:var(--soft); }
+  .profile-pref-value { font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); }
+
+  .profile-sub-status { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border:1px solid rgba(201,169,110,.15); background:rgba(201,169,110,.03); }
+  .profile-sub-label { font-size:13px; font-weight:300; color:var(--soft); }
+  .profile-sub-label span { display:block; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
+  .profile-sub-badge { padding:4px 12px; border:1px solid rgba(201,169,110,.3); font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--gold); }
+
+  .profile-links { position:relative; z-index:1; padding:24px 32px 0; display:flex; gap:24px; opacity:0; animation:fadeUp .6s .5s ease forwards; }
+  .profile-link { background:none; border:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.1em; cursor:pointer; text-decoration:underline; text-underline-offset:3px; transition:color .3s; padding:0; }
+  .profile-link:hover { color:var(--cream); }
+
+  @media(max-width:480px){
+    .profile-hero,.profile-rank-card,.profile-section,.profile-links{padding-left:20px;padding-right:20px}
+    .profile-rank-card{margin-left:20px;margin-right:20px}
+    .profile-stats-grid{gap:8px}
+    .profile-stat{padding:12px 8px}
+    .profile-stat-num{font-size:24px}
+  }
   #upgrade { padding-bottom:40px; overflow-y:auto; }
   .upgrade-header { position:relative; z-index:1; padding:28px 32px 0; display:flex; align-items:center; justify-content:space-between; }
   .upgrade-close-btn { background:none; border:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:color .3s; }
@@ -393,7 +458,7 @@
   </div>
   <div class="home-greeting">
     <div class="greeting-time" id="greetingTime">Good morning</div>
-    <div class="greeting-name">Your library awaits.</div>
+    <div class="greeting-name" id="greetingName">Your library awaits.</div>
   </div>
   <div class="todays-card-wrap">
     <div class="section-label">Today's Affirmation</div>
@@ -423,8 +488,12 @@
     <p>You have <strong>29 more affirmations</strong> to unlock on the free plan — and <strong>800+ waiting</strong> for members.</p>
     <button class="btn-primary" style="padding:12px 32px;font-size:12px" onclick="openUpgrade()">Unlock Everything</button>
   </div>
-  <div class="bottom-nav">
-    <button class="nav-tab active" onclick="setTab(this)">
+  </div>
+</div>
+
+<!-- GLOBAL BOTTOM NAV -->
+<div class="bottom-nav" id="globalBottomNav" style="display:none">
+    <button class="nav-tab active" onclick="setTab(this);showScreen('home')">
       <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg></span>
       <span class="nav-tab-label">Today</span>
     </button>
@@ -440,11 +509,10 @@
       <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
       <span class="nav-tab-label">Badges</span>
     </button>
-    <button class="nav-tab" onclick="setTab(this)">
+    <button class="nav-tab" onclick="setTab(this);openProfile()">
       <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
       <span class="nav-tab-label">Profile</span>
     </button>
-  </div>
 </div>
 
 <!-- JOURNAL -->
@@ -595,6 +663,104 @@
   </div>
 </div>
 
+<!-- PROFILE -->
+<div id="profile" class="screen">
+  <div class="screen-logo-bar">
+    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today')">Already Mine</button>
+  </div>
+
+  <!-- Hero / Name -->
+  <div class="profile-hero">
+    <div class="profile-avatar" id="profileInitial">D</div>
+    <div class="profile-real-name" id="profileRealName">Douglas</div>
+    <div class="profile-nickname" id="profileNicknameDisplay">Dougy</div>
+    <input class="profile-nickname-input" id="profileNicknameInput" type="text" placeholder="Your nickname..." maxlength="20">
+    <div class="profile-nickname-edit">
+      <button class="profile-edit-btn" id="profileEditBtn" onclick="toggleNicknameEdit()">✎ Edit nickname</button>
+    </div>
+    <div class="profile-member-since">Member since Day 1 · <span id="profileMemberDate"></span></div>
+  </div>
+
+  <!-- Rank -->
+  <div class="profile-rank-card">
+    <div class="profile-rank-top">
+      <div class="profile-rank-name" id="profileRankName">Ember</div>
+      <div class="profile-rank-label">Current Rank</div>
+    </div>
+    <div class="xp-track"><div class="xp-fill" id="profileXpFill" style="width:10%"></div></div>
+    <div class="xp-label"><span id="profileXpCurrent">50</span> / <span id="profileXpNext">500</span> XP · Next: <span id="profileNextRank">Spark</span></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="profile-section">
+    <div class="profile-section-title">Your Journey</div>
+    <div class="profile-stats-grid">
+      <div class="profile-stat"><div class="profile-stat-num">1</div><div class="profile-stat-label">Day Streak</div></div>
+      <div class="profile-stat"><div class="profile-stat-num">1</div><div class="profile-stat-label">Affirmations Unlocked</div></div>
+      <div class="profile-stat"><div class="profile-stat-num">0</div><div class="profile-stat-label">Journal Entries</div></div>
+    </div>
+  </div>
+
+  <!-- Active Intention -->
+  <div class="profile-section" style="animation-delay:.3s">
+    <div class="profile-section-title">Current Intention</div>
+    <div class="profile-intention">
+      <div class="profile-intention-label">What I am calling in</div>
+      <div class="profile-intention-text" id="profileIntention">I am calling in abundance, clarity, and the confidence to walk toward what is already mine.</div>
+    </div>
+  </div>
+
+  <!-- Favorite Affirmation -->
+  <div class="profile-section" style="animation-delay:.35s">
+    <div class="profile-section-title">Saved Affirmation</div>
+    <div class="profile-fav-affirmation">
+      <div class="profile-fav-text" id="profileFavAffirmation">Tap the ♡ Save button on any affirmation to pin it here.</div>
+    </div>
+  </div>
+
+  <!-- Recent Badges -->
+  <div class="profile-section" style="animation-delay:.4s">
+    <div class="profile-section-title">Recent Achievements</div>
+    <div class="profile-recent-badges" id="profileRecentBadges"></div>
+  </div>
+
+  <!-- Preferences -->
+  <div class="profile-section" style="animation-delay:.42s">
+    <div class="profile-section-title">My Preferences</div>
+    <div class="profile-pref-row">
+      <div class="profile-pref-label">What I'm manifesting</div>
+      <div class="profile-pref-value" id="prefIntention">Abundance</div>
+    </div>
+    <div class="profile-pref-row">
+      <div class="profile-pref-label">My tone</div>
+      <div class="profile-pref-value" id="prefTone">Gentle</div>
+    </div>
+    <div class="profile-pref-row">
+      <div class="profile-pref-label">Notification time</div>
+      <div class="profile-pref-value" id="prefTiming">Morning</div>
+    </div>
+  </div>
+
+  <!-- Subscription -->
+  <div class="profile-section" style="animation-delay:.44s">
+    <div class="profile-section-title">Membership</div>
+    <div class="profile-sub-status">
+      <div class="profile-sub-label">
+        <span>Current Plan</span>
+        Free — 29 affirmations remaining
+      </div>
+      <button class="profile-sub-badge" onclick="openUpgrade()">Upgrade</button>
+    </div>
+  </div>
+
+  <!-- Links -->
+  <div class="profile-links">
+    <button class="profile-link">Terms of Service</button>
+    <button class="profile-link">Privacy Policy</button>
+    <button class="profile-link">Contact Us</button>
+  </div>
+</div>
+
 <!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal-card">
@@ -627,9 +793,16 @@ const lockedTexts=["The path forward is already illuminated for those who choose
 
 let currentQuestion=0,answers={},selectedOption=null,todayAffirmation='',todayCategory='',saved=false;
 
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+const noNavScreens = ['splash','onboarding','reveal'];
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  const nav = document.getElementById('globalBottomNav');
+  nav.style.display = noNavScreens.includes(id) ? 'none' : 'flex';
+}
 function startOnboarding(){showScreen('onboarding');renderQuestion(0);}
-function skipToHome(){todayAffirmation=affirmations.abundance.gentle;todayCategory=catLabels.abundance;buildHome();showScreen('home');}
+function skipToHome(){todayAffirmation=affirmations.abundance.gentle;todayCategory=catLabels.abundance;buildHome();showScreen('home');setTabByName('today');}
 
 function prevQ(){
   if(currentQuestion>0){
@@ -669,10 +842,11 @@ function showReveal(){
   showScreen('reveal');
 }
 
-function goToHome(){buildHome();showScreen('home');}
+function goToHome(){buildHome();showScreen('home');setTabByName('today');}
 function buildHome(){
   const h=new Date().getHours();
   document.getElementById('greetingTime').textContent=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  document.getElementById('greetingName').textContent=(userNickname||userRealName)+'.' ;
   document.getElementById('homeAffirmationText').textContent=todayAffirmation;
   document.getElementById('homeAffirmationCat').textContent='✦  '+todayCategory;
   buildLibrary();
@@ -711,8 +885,8 @@ function updateCountdown(){
 
 function toggleSave(){saved=!saved;const b=document.getElementById('saveBtn');b.textContent=saved?'♥  Saved':'♡  Save';b.classList.toggle('active',saved);}
 function shareAffirmation(){if(navigator.share){navigator.share({title:'Already Mine',text:todayAffirmation,url:window.location.href});}else{navigator.clipboard.writeText(todayAffirmation).then(()=>alert('Copied to clipboard!'));}}
-function setTab(el){document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
-function setTabByName(name){document.querySelectorAll('.nav-tab').forEach((t,i)=>{const labels=['today','library','journal','badges','profile'];if(labels[i]===name)t.classList.add('active');else t.classList.remove('active');});}
+function setTab(el){document.querySelectorAll('#globalBottomNav .nav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function setTabByName(name){document.querySelectorAll('#globalBottomNav .nav-tab').forEach((t,i)=>{const labels=['today','library','journal','badges','profile'];if(labels[i]===name)t.classList.add('active');else t.classList.remove('active');});}
 
 const journalPrompts={
   abundance:"What would your life look and feel like if abundance was already flowing freely to you?",
@@ -917,6 +1091,85 @@ function openBadgeModal(badgeId) {
   document.getElementById('modalText').innerHTML = `<div class="badge-modal-name">${badge.name}</div><div class="badge-modal-desc">${badge.desc}</div>`;
   document.getElementById('modalCat').textContent = '';
   document.getElementById('modalOverlay').classList.add('open');
+}
+
+// ── PROFILE ──
+let userNickname = 'Dougy';
+let userRealName = 'Douglas';
+let editingNickname = false;
+
+function openProfile() {
+  buildProfile();
+  showScreen('profile');
+  setTabByName('profile');
+}
+
+function buildProfile() {
+  // Avatar initial
+  document.getElementById('profileInitial').textContent = (userNickname || userRealName).charAt(0).toUpperCase();
+  document.getElementById('profileRealName').textContent = userRealName;
+  document.getElementById('profileNicknameDisplay').textContent = userNickname || userRealName;
+
+  // Member since
+  const now = new Date();
+  document.getElementById('profileMemberDate').textContent = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
+  // Rank
+  const info = getLevelInfo(currentXP);
+  document.getElementById('profileRankName').textContent = info.name;
+  document.getElementById('profileXpFill').style.width = info.pct + '%';
+  document.getElementById('profileXpCurrent').textContent = currentXP;
+  document.getElementById('profileXpNext').textContent = info.currentMax;
+  document.getElementById('profileNextRank').textContent = info.nextName;
+
+  // Preferences from onboarding
+  const intentMap = {abundance:'Abundance',love:'Love',confidence:'Confidence',health:'Health',peace:'Peace',career:'Career'};
+  const toneMap = {gentle:'Gentle',bold:'Bold',spiritual:'Spiritual',simple:'Simple'};
+  const timingMap = {morning:'Morning',midday:'Midday',evening:'Evening',random:'Surprise me'};
+  document.getElementById('prefIntention').textContent = intentMap[answers.intention] || 'Abundance';
+  document.getElementById('prefTone').textContent = toneMap[answers.tone] || 'Gentle';
+  document.getElementById('prefTiming').textContent = timingMap[answers.timing] || 'Morning';
+
+  // Saved affirmation
+  if(saved && todayAffirmation) {
+    document.getElementById('profileFavAffirmation').textContent = todayAffirmation;
+  }
+
+  // Recent badges
+  const earnedBadges = badgeCategories.flatMap(c=>c.badges).filter(b=>b.earned);
+  const recentWrap = document.getElementById('profileRecentBadges');
+  recentWrap.innerHTML = earnedBadges.length === 0
+    ? '<div style="font-size:13px;font-weight:300;color:var(--muted);font-style:italic">Your earned badges will appear here.</div>'
+    : earnedBadges.slice(0,4).map(b=>`
+        <div class="profile-badge-pill">
+          <div class="profile-badge-icon">${b.icon}</div>
+          <div class="profile-badge-info">
+            <div class="profile-badge-name">${b.name}</div>
+            <div class="profile-badge-tier">${b.tier}</div>
+          </div>
+        </div>`).join('');
+}
+
+function toggleNicknameEdit() {
+  editingNickname = !editingNickname;
+  const display = document.getElementById('profileNicknameDisplay');
+  const input = document.getElementById('profileNicknameInput');
+  const btn = document.getElementById('profileEditBtn');
+  if(editingNickname) {
+    display.style.display = 'none';
+    input.style.display = 'block';
+    input.value = userNickname;
+    input.focus();
+    btn.textContent = '✓ Save';
+  } else {
+    const newName = input.value.trim() || userNickname;
+    userNickname = newName;
+    display.textContent = newName;
+    display.style.display = 'block';
+    input.style.display = 'none';
+    btn.textContent = '✎ Edit nickname';
+    document.getElementById('profileInitial').textContent = newName.charAt(0).toUpperCase();
+  }
 }
 
 function closeModal(e){if(e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('open');}
