@@ -169,6 +169,11 @@
   .back-btn:hover { color:var(--cream); }
   .back-btn svg { stroke:currentColor; }
 
+  /* Secondary screen logo header */
+  .screen-logo-bar { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; padding:20px 32px 16px; border-bottom:1px solid rgba(201,169,110,.08); }
+  .screen-logo-link { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300; color:rgba(201,169,110,.6); letter-spacing:.05em; background:none; border:none; cursor:pointer; transition:color .3s; padding:0; }
+  .screen-logo-link:hover { color:var(--gold); }
+
   /* ── JOURNAL ── */
   #journal { padding-bottom:90px; }
   .journal-header { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; padding:28px 32px 20px; border-bottom:1px solid rgba(201,169,110,.08); }
@@ -247,6 +252,55 @@
   .badge-modal-name { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300; color:var(--cream); margin-bottom:16px; }
   .badge-modal-desc { font-size:14px; font-weight:300; color:var(--soft); line-height:1.7; margin-bottom:32px; }
 
+  /* ── UPGRADE / PAYWALL ── */
+  #upgrade { padding-bottom:40px; overflow-y:auto; }
+  .upgrade-header { position:relative; z-index:1; padding:28px 32px 0; display:flex; align-items:center; justify-content:space-between; }
+  .upgrade-close-btn { background:none; border:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:color .3s; }
+  .upgrade-close-btn:hover { color:var(--cream); }
+  .upgrade-hero { position:relative; z-index:1; text-align:center; padding:36px 32px 28px; opacity:0; animation:fadeUp .7s .1s ease forwards; }
+  .upgrade-orb { width:80px; height:80px; margin:0 auto 24px; position:relative; }
+  .upgrade-orb-ring { position:absolute; inset:0; border-radius:50%; border:1px solid rgba(201,169,110,.3); animation:pulseRing 3s ease-in-out infinite; }
+  .upgrade-orb-ring:nth-child(2){inset:8px;border-color:rgba(201,169,110,.2);animation-delay:.5s}
+  .upgrade-orb-core { position:absolute; inset:18px; border-radius:50%; background:radial-gradient(circle,rgba(201,169,110,.4) 0%,transparent 100%); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--gold); font-family:'Cormorant Garamond',serif; }
+  .upgrade-headline { font-family:'Cormorant Garamond',serif; font-size:clamp(28px,7vw,38px); font-weight:300; color:var(--cream); line-height:1.2; margin-bottom:12px; }
+  .upgrade-sub { font-size:14px; font-weight:300; color:var(--muted); line-height:1.7; max-width:300px; margin:0 auto; }
+  .pricing-toggle-wrap { position:relative; z-index:1; display:flex; justify-content:center; padding:0 32px 24px; opacity:0; animation:fadeUp .7s .2s ease forwards; }
+  .pricing-toggle { display:flex; background:rgba(201,169,110,.05); border:1px solid rgba(201,169,110,.12); padding:4px; gap:4px; }
+  .toggle-btn { padding:10px 24px; font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.12em; text-transform:uppercase; background:none; border:none; color:var(--muted); cursor:pointer; transition:all .3s; }
+  .toggle-btn.active { background:rgba(201,169,110,.12); color:var(--gold); }
+  .save-badge { display:inline-block; background:rgba(201,169,110,.15); border:1px solid rgba(201,169,110,.3); color:var(--gold); font-size:9px; letter-spacing:.1em; text-transform:uppercase; padding:2px 8px; margin-left:6px; vertical-align:middle; }
+  .price-card-wrap { position:relative; z-index:1; padding:0 32px 24px; opacity:0; animation:fadeUp .7s .3s ease forwards; }
+  .price-card { position:relative; padding:32px 28px; background:linear-gradient(135deg,rgba(201,169,110,.08) 0%,rgba(201,169,110,.03) 100%); border:1px solid rgba(201,169,110,.25); text-align:center; animation:glowPulse 5s ease-in-out infinite; }
+  .price-card::before { content:''; position:absolute; inset:4px; border:1px solid rgba(201,169,110,.06); pointer-events:none; }
+  .price-label { font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; }
+  .price-amount { font-family:'Cormorant Garamond',serif; font-size:56px; font-weight:300; color:var(--cream); line-height:1; margin-bottom:4px; }
+  .price-period { font-size:12px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .price-equiv { font-size:13px; font-weight:300; color:var(--soft); }
+  .features-wrap { position:relative; z-index:1; padding:0 32px 24px; opacity:0; animation:fadeUp .7s .4s ease forwards; }
+  .features-title { font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; display:flex; align-items:center; gap:12px; }
+  .features-title::after { content:''; flex:1; height:1px; background:rgba(201,169,110,.15); }
+  .feature-row { display:flex; align-items:flex-start; gap:14px; padding:12px 0; border-bottom:1px solid rgba(201,169,110,.06); }
+  .feature-row:last-child { border-bottom:none; }
+  .feature-check { color:var(--gold); font-size:14px; margin-top:1px; flex-shrink:0; }
+  .feature-text { font-size:14px; font-weight:300; color:var(--soft); line-height:1.5; }
+  .feature-text strong { color:var(--cream); font-weight:400; display:block; margin-bottom:2px; }
+  .compare-wrap { position:relative; z-index:1; padding:0 32px 24px; opacity:0; animation:fadeUp .7s .45s ease forwards; }
+  .compare-title { font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; display:flex; align-items:center; gap:12px; }
+  .compare-title::after { content:''; flex:1; height:1px; background:rgba(201,169,110,.15); }
+  .compare-table { width:100%; border-collapse:collapse; }
+  .compare-table th { font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); padding:8px 12px; text-align:center; border-bottom:1px solid rgba(201,169,110,.1); }
+  .compare-table th:first-child { text-align:left; }
+  .compare-table td { font-size:13px; font-weight:300; color:var(--soft); padding:10px 12px; text-align:center; border-bottom:1px solid rgba(201,169,110,.05); }
+  .compare-table td:first-child { text-align:left; color:var(--muted); font-size:12px; }
+  .compare-yes { color:var(--gold); }
+  .compare-no { color:rgba(255,255,255,.15); }
+  .compare-table .highlight-col { color:var(--cream); }
+  .upgrade-cta-wrap { position:relative; z-index:1; padding:0 32px 16px; opacity:0; animation:fadeUp .7s .5s ease forwards; }
+  .upgrade-cta-btn { width:100%; padding:20px; background:var(--gold); border:none; color:var(--deep); font-family:'Jost',sans-serif; font-weight:400; font-size:14px; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; transition:all .3s; }
+  .upgrade-cta-btn:hover { opacity:.9; }
+  .upgrade-fine-print { position:relative; z-index:1; text-align:center; padding:0 32px 8px; opacity:0; animation:fadeUp .7s .55s ease forwards; }
+  .upgrade-fine-print p { font-size:11px; font-weight:300; color:var(--muted); line-height:1.7; }
+
   @media(max-width:480px){
     .badges-header,.level-card,.badge-section{padding-left:20px;padding-right:20px}
     .level-card{margin-left:20px;margin-right:20px}
@@ -276,7 +330,9 @@
     .modal-card{padding:36px 24px}
     .modal-text{font-size:18px}
     .journal-prompt{font-size:16px}
-    .mood-btn{padding:9px 14px;font-size:12px}
+    .upgrade-header,.upgrade-hero,.pricing-toggle-wrap,.price-card-wrap,.features-wrap,.compare-wrap,.upgrade-cta-wrap,.upgrade-fine-print{padding-left:20px;padding-right:20px}
+    .price-amount{font-size:44px}
+    .upgrade-headline{font-size:26px}
   }
 </style>
 </head>
@@ -332,7 +388,7 @@
 <div id="home" class="screen">
   <div class="home-nav" style="position:relative;z-index:1">
     <div class="nav-logo">Already Mine</div>
-    <div class="nav-streak"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.8;vertical-align:middle"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg> <span id="streakCount">1</span> day</div>
+    <div class="nav-streak"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.8;vertical-align:middle"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg> Day <span id="streakCount">1</span></div>
     <div class="nav-avatar">✦</div>
   </div>
   <div class="home-greeting">
@@ -365,7 +421,7 @@
   </div>
   <div class="upgrade-teaser">
     <p>You have <strong>29 more affirmations</strong> to unlock on the free plan — and <strong>800+ waiting</strong> for members.</p>
-    <button class="btn-primary" style="padding:12px 32px;font-size:12px" onclick="alert('Upgrade screen coming in Session 5!')">Unlock Everything</button>
+    <button class="btn-primary" style="padding:12px 32px;font-size:12px" onclick="openUpgrade()">Unlock Everything</button>
   </div>
   <div class="bottom-nav">
     <button class="nav-tab active" onclick="setTab(this)">
@@ -393,15 +449,18 @@
 
 <!-- JOURNAL -->
 <div id="journal" class="screen">
+  <div class="screen-logo-bar">
+    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today')">Already Mine</button>
+    <button class="back-btn" onclick="showScreen('home');setTabByName('today')" style="margin-top:0">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </button>
+  </div>
   <div class="journal-header" style="position:relative;z-index:1">
     <div>
       <div class="journal-date" id="journalDate"></div>
       <div class="journal-title">Today's Journal</div>
     </div>
-    <button class="back-btn" onclick="showScreen('home');setTabByName('today')" style="margin-top:0">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      Back
-    </button>
   </div>
 
   <!-- Affirmation reference -->
@@ -452,6 +511,9 @@
 
 <!-- BADGES -->
 <div id="badges" class="screen">
+  <div class="screen-logo-bar">
+    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today')">Already Mine</button>
+  </div>
   <div class="badges-header">
     <div class="badges-header-top">
       <div class="badges-title">Trophy Room</div>
@@ -462,15 +524,75 @@
   <!-- Level card -->
   <div class="level-card">
     <div class="level-card-top">
-      <div class="level-name" id="levelName">Seeker</div>
+      <div class="level-name" id="levelName">Ember</div>
       <div class="level-num">Level <span id="levelNum">1</span></div>
     </div>
     <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:5%"></div></div>
-    <div class="xp-label"><span id="xpCurrent">50</span> / <span id="xpNext">1000</span> XP to <span id="nextLevelName">Believer</span></div>
+    <div class="xp-label"><span id="xpCurrent">50</span> / <span id="xpNext">500</span> XP to <span id="nextLevelName">Spark</span></div>
   </div>
 
   <!-- Badge grid populated by JS -->
   <div id="badgeSectionsWrap"></div>
+</div>
+
+<!-- UPGRADE / PAYWALL -->
+<div id="upgrade" class="screen">
+  <div class="screen-logo-bar">
+    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today')">Already Mine</button>
+    <button class="upgrade-close-btn" onclick="showScreen('home');setTabByName('today')">✕ Close</button>
+  </div>
+  <div class="upgrade-hero">
+    <div class="upgrade-orb">
+      <div class="upgrade-orb-ring"></div><div class="upgrade-orb-ring"></div>
+      <div class="upgrade-orb-core">∞</div>
+    </div>
+    <div class="upgrade-headline">Unlock Your Full<br>Library</div>
+    <p class="upgrade-sub">800+ affirmations, unlimited journaling, and everything you need to manifest without limits.</p>
+  </div>
+  <div class="pricing-toggle-wrap">
+    <div class="pricing-toggle">
+      <button class="toggle-btn" id="toggleMonthly" onclick="setPricing('monthly')">Monthly</button>
+      <button class="toggle-btn active" id="toggleAnnual" onclick="setPricing('annual')">Annual <span class="save-badge">Save 40%</span></button>
+    </div>
+  </div>
+  <div class="price-card-wrap">
+    <div class="price-card">
+      <div class="price-label" id="priceLabel">Annual Plan</div>
+      <div class="price-amount" id="priceAmount">$1.79</div>
+      <div class="price-period" id="pricePeriod">per month · billed $21.49/year</div>
+      <div class="price-equiv" id="priceEquiv">Less than a cup of coffee per month</div>
+    </div>
+  </div>
+  <div class="features-wrap">
+    <div class="features-title">Everything Included</div>
+    <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>800+ Affirmations</strong>Unlock the full library — one new affirmation every day, forever.</div></div>
+    <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Unlimited Journaling</strong>Write as much as you want. No entry limits, ever.</div></div>
+    <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Unlimited Intentions</strong>Free members can track 3 intentions. Members carry as many as they need.</div></div>
+    <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Ad Free</strong>A clean, uninterrupted space for your practice.</div></div>
+    <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Streak Freeze</strong>One streak freeze per month — so a missed day never breaks your momentum.</div></div>
+    <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Shareable Milestone Cards</strong>Share your badge achievements as beautiful branded graphics.</div></div>
+    <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Monthly Reflection Summary</strong>A curated look at your month — affirmations unlocked, moods tracked, intentions manifested.</div></div>
+    <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Early Access</strong>Be first to receive new affirmation packs and features.</div></div>
+  </div>
+  <div class="compare-wrap">
+    <div class="compare-title">Free vs Member</div>
+    <table class="compare-table">
+      <tr><th></th><th>Free</th><th style="color:var(--gold)">Member</th></tr>
+      <tr><td>Affirmations</td><td>30</td><td class="highlight-col">800+</td></tr>
+      <tr><td>Journal entries</td><td>30</td><td class="highlight-col">Unlimited</td></tr>
+      <tr><td>Intentions</td><td>3</td><td class="highlight-col">Unlimited</td></tr>
+      <tr><td>Ads</td><td class="compare-no">—</td><td class="compare-yes">Ad free</td></tr>
+      <tr><td>Streak freeze</td><td class="compare-no">—</td><td class="compare-yes">✦</td></tr>
+      <tr><td>Shareable cards</td><td class="compare-no">—</td><td class="compare-yes">✦</td></tr>
+      <tr><td>Monthly summary</td><td class="compare-no">—</td><td class="compare-yes">✦</td></tr>
+    </table>
+  </div>
+  <div class="upgrade-cta-wrap">
+    <button class="upgrade-cta-btn" onclick="handleSubscribe()" id="upgradeCtaBtn">Start My Member Journey</button>
+  </div>
+  <div class="upgrade-fine-print">
+    <p>Cancel anytime. Billed through your app store.<br>By subscribing you agree to our Terms and Privacy Policy.</p>
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -624,71 +746,124 @@ function saveJournal(){
   wrap.innerHTML=`<div style="text-align:center;padding:20px 0"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:var(--cream);margin-bottom:8px">Entry saved.</div><div style="font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)">✦ Day 1 complete</div></div>`;
 }
 function openModal(day,text,cat){document.getElementById('modalDay').textContent=day;document.getElementById('modalText').textContent=text;document.getElementById('modalCat').textContent=cat;document.getElementById('modalOverlay').classList.add('open');}
+// ── UPGRADE ──
+let currentPricing='annual';
+function openUpgrade(){showScreen('upgrade');setPricing(currentPricing);}
+function setPricing(type){
+  currentPricing=type;
+  document.getElementById('toggleMonthly').classList.toggle('active',type==='monthly');
+  document.getElementById('toggleAnnual').classList.toggle('active',type==='annual');
+  if(type==='annual'){
+    document.getElementById('priceLabel').textContent='Annual Plan';
+    document.getElementById('priceAmount').textContent='$1.79';
+    document.getElementById('pricePeriod').textContent='per month · billed $21.49/year';
+    document.getElementById('priceEquiv').textContent='A small commitment to something that changes everything.';
+  } else {
+    document.getElementById('priceLabel').textContent='Monthly Plan';
+    document.getElementById('priceAmount').textContent='$2.99';
+    document.getElementById('pricePeriod').textContent='per month · cancel anytime';
+    document.getElementById('priceEquiv').textContent='A small commitment to something that changes everything.';
+  }
+}
+function handleSubscribe(){
+  const wrap=document.querySelector('.upgrade-cta-wrap');
+  wrap.innerHTML=`<div style="text-align:center;padding:24px;border:1px solid rgba(201,169,110,.2)"><div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--cream);margin-bottom:8px">Welcome, Member.</div><div style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:20px">✦ Your library is now open</div><button onclick="showScreen('home');setTabByName('today')" style="padding:14px 32px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer">Enter the App</button></div>`;
+}
+
 // ── BADGE DATA ──
 const badgeCategories = [
   {
     name: 'Streak', id: 'streak',
     badges: [
-      { id:'streak7', icon:'☽', name:'7 Day Streak', tier:'Seed', desc:'You showed up for 7 days in a row. The seed is planted.', earned:true },
-      { id:'streak30', icon:'☽◌', name:'30 Day Streak', tier:'Awakening', desc:'30 days of intention. You are awakening to your power.', earned:false },
-      { id:'streak90', icon:'☽○', name:'90 Day Streak', tier:'Blooming', desc:'90 days. Your practice is blooming into something real.', earned:false },
-      { id:'streak180', icon:'☽◎', name:'180 Day Streak', tier:'Radiant', desc:'Half a year of daily devotion. You are radiant.', earned:false },
+      { id:'streak7', icon:'☽', name:'7 Day Streak', tier:'Intention', desc:'You showed up for 7 days in a row. The seed is planted.', earned:true },
+      { id:'streak30', icon:'☽◌', name:'30 Day Streak', tier:'Belief', desc:'30 days of intention. You are awakening to your power.', earned:false },
+      { id:'streak90', icon:'☽○', name:'90 Day Streak', tier:'Alignment', desc:'90 days. Your practice is blooming into something real.', earned:false },
+      { id:'streak180', icon:'☽◎', name:'180 Day Streak', tier:'Momentum', desc:'Half a year of daily devotion. You are radiant.', earned:false },
       { id:'streak365', icon:'☽✦', name:'365 Day Streak', tier:'Transcendent', desc:'A full year. You have transcended habit and become.', earned:false },
     ]
   },
   {
     name: 'Journal', id: 'journal',
     badges: [
-      { id:'journal1', icon:'✦', name:'First Entry', tier:'Seed', desc:'You wrote your first journal entry. Your story begins.', earned:true },
-      { id:'journal30', icon:'✦✦', name:'30 Entries', tier:'Awakening', desc:'30 reflections written. You are learning to listen within.', earned:false },
-      { id:'journal100', icon:'✦◌', name:'100 Entries', tier:'Blooming', desc:'100 entries. Your inner world is rich and alive.', earned:false },
-      { id:'journal365', icon:'✦◎', name:'365 Entries', tier:'Radiant', desc:'A year of daily reflection. You know yourself deeply.', earned:false },
+      { id:'journal1', icon:'✦', name:'First Entry', tier:'Intention', desc:'You wrote your first journal entry. Your story begins.', earned:true },
+      { id:'journal30', icon:'✦✦', name:'30 Entries', tier:'Belief', desc:'30 reflections written. You are learning to listen within.', earned:false },
+      { id:'journal100', icon:'✦◌', name:'100 Entries', tier:'Alignment', desc:'100 entries. Your inner world is rich and alive.', earned:false },
+      { id:'journal365', icon:'✦◎', name:'365 Entries', tier:'Momentum', desc:'A year of daily reflection. You know yourself deeply.', earned:false },
     ]
   },
   {
     name: 'Affirmations', id: 'affirmations',
     badges: [
-      { id:'aff1', icon:'◎', name:'First Unlock', tier:'Seed', desc:'Your first affirmation unlocked. The door is open.', earned:true },
-      { id:'aff30', icon:'◎◌', name:'30 Unlocked', tier:'Awakening', desc:'30 affirmations in your library. You are awakening.', earned:false },
-      { id:'aff100', icon:'◎○', name:'100 Unlocked', tier:'Blooming', desc:'100 affirmations. Your library is coming alive.', earned:false },
-      { id:'aff300', icon:'◎◎', name:'300 Unlocked', tier:'Radiant', desc:'300 affirmations. Your collection is radiant.', earned:false },
-      { id:'aff800', icon:'∞', name:'Full Library', tier:'Eternal', desc:'You have unlocked every affirmation. You are eternal.', earned:false },
+      { id:'aff1', icon:'◎', name:'First Unlock', tier:'Intention', desc:'Your first affirmation unlocked. The door is open.', earned:true },
+      { id:'aff30', icon:'◎◌', name:'30 Unlocked', tier:'Belief', desc:'30 affirmations in your library. You are awakening.', earned:false },
+      { id:'aff100', icon:'◎○', name:'100 Unlocked', tier:'Alignment', desc:'100 affirmations. Your library is coming alive.', earned:false },
+      { id:'aff300', icon:'◎◎', name:'300 Unlocked', tier:'Momentum', desc:'300 affirmations. Your collection is radiant.', earned:false },
+      { id:'aff800', icon:'∞', name:'Full Library', tier:'Transcendent', desc:'You have unlocked every affirmation. You are eternal.', earned:false },
     ]
   },
   {
     name: 'Manifestation', id: 'manifestation',
     badges: [
-      { id:'man1', icon:'❋', name:'First Received', tier:'Seed', desc:'Your first intention marked as received. It works.', earned:false },
-      { id:'man5', icon:'❋◌', name:'5 Received', tier:'Awakening', desc:'Five intentions manifested. You are in the flow.', earned:false },
-      { id:'man10', icon:'❋○', name:'10 Received', tier:'Blooming', desc:'Ten manifestations. You are becoming what you believe.', earned:false },
-      { id:'man25', icon:'❋✦', name:'25 Received', tier:'Radiant', desc:'25 intentions brought to life. You are radiant.', earned:false },
+      { id:'man1', icon:'❋', name:'First Received', tier:'Intention', desc:'Your first intention marked as received. It works.', earned:false },
+      { id:'man5', icon:'❋◌', name:'5 Received', tier:'Belief', desc:'Five intentions manifested. You are in the flow.', earned:false },
+      { id:'man10', icon:'❋○', name:'10 Received', tier:'Alignment', desc:'Ten manifestations. You are becoming what you believe.', earned:false },
+      { id:'man25', icon:'❋✦', name:'25 Received', tier:'Momentum', desc:'25 intentions brought to life. You are radiant.', earned:false },
     ]
   },
   {
     name: 'Mood', id: 'mood',
     badges: [
-      { id:'mood1', icon:'↑', name:'First Shift', tier:'Seed', desc:'Your mood shifted after an affirmation. It is working.', earned:false },
-      { id:'mood7', icon:'↑↑', name:'7 Day Lift', tier:'Awakening', desc:'7 days of mood improvement. You are rising.', earned:false },
-      { id:'mood30', icon:'↑◎', name:'30 Day Glow', tier:'Blooming', desc:'30 days trending upward. Your light is showing.', earned:false },
+      { id:'mood1', icon:'↑', name:'First Shift', tier:'Intention', desc:'Your mood shifted after an affirmation. It is working.', earned:false },
+      { id:'mood7', icon:'↑↑', name:'7 Day Lift', tier:'Belief', desc:'7 days of mood improvement. You are rising.', earned:false },
+      { id:'mood30', icon:'↑◎', name:'30 Day Glow', tier:'Alignment', desc:'30 days trending upward. Your light is showing.', earned:false },
     ]
   },
   {
     name: 'Comeback', id: 'comeback',
     badges: [
-      { id:'come1', icon:'∞', name:'Comeback', tier:'Awakening', desc:'You missed a day but came back and restored your streak. That is strength.', earned:false },
-      { id:'come3', icon:'∞✦', name:'Triple Return', tier:'Blooming', desc:'Three comebacks. You never stay down for long.', earned:false },
+      { id:'come1', icon:'∞', name:'Comeback', tier:'Belief', desc:'You missed a day but came back and restored your streak. That is strength.', earned:false },
+      { id:'come3', icon:'∞✦', name:'Triple Return', tier:'Alignment', desc:'Three comebacks. You never stay down for long.', earned:false },
     ]
   }
 ];
 
-const levels = [
-  { name:'Seeker', min:0, max:1000 },
-  { name:'Believer', min:1000, max:3000 },
-  { name:'Aligned', min:3000, max:6000 },
-  { name:'Illuminated', min:6000, max:10000 },
-  { name:'Abundant', min:10000, max:15000 },
-  { name:'Transcendent', min:15000, max:Infinity }
-];
+const baseNames = ['Ember','Spark','Flame','Radiant','Luminous','Transcendent'];
+const baseThresholds = [0,500,2000,5000,10000,18000];
+
+function getLevelInfo(xp) {
+  // Build prestige levels dynamically
+  // Each prestige cycle adds 18000 XP requirement scaled by prestige
+  const cycleSize = 18000;
+  let prestige = 0;
+  let remaining = xp;
+  while(remaining >= cycleSize * (prestige + 1)) {
+    remaining -= cycleSize * (prestige + 1);
+    prestige++;
+  }
+  // Find position within current cycle
+  let pos = 0;
+  for(let i = baseThresholds.length - 1; i >= 0; i--) {
+    if(remaining >= baseThresholds[i]) { pos = i; break; }
+  }
+  const name = prestige === 0 ? baseNames[pos] : `${baseNames[pos]} ${toRoman(prestige)}`;
+  const nextPos = pos < baseThresholds.length - 1 ? pos + 1 : null;
+  const cycleXP = cycleSize * (prestige + 1);
+  const currentMin = baseThresholds[pos];
+  const currentMax = nextPos !== null ? baseThresholds[nextPos] : cycleXP;
+  const pct = Math.round(((remaining - currentMin) / (currentMax - currentMin)) * 100);
+  const nextName = nextPos !== null ? (prestige === 0 ? baseNames[nextPos] : `${baseNames[nextPos]} ${toRoman(prestige)}`) : (prestige === 0 ? 'Ember I' : `Ember ${toRoman(prestige + 1)}`);
+  return { name, pct: Math.min(pct, 100), currentMin: currentMin, currentMax, nextName, prestige, pos };
+}
+
+function toRoman(n) {
+  const vals = [10,9,5,4,1];
+  const syms = ['X','IX','V','IV','I'];
+  let result = '';
+  for(let i = 0; i < vals.length; i++) {
+    while(n >= vals[i]) { result += syms[i]; n -= vals[i]; }
+  }
+  return result;
+}
 
 let currentXP = 50;
 
@@ -699,18 +874,13 @@ function openBadges() {
 }
 
 function buildBadgeScreen() {
-  // Level
-  const lvl = levels.find(l => currentXP >= l.min && currentXP < l.max) || levels[0];
-  const lvlIndex = levels.indexOf(lvl);
-  const nextLvl = levels[lvlIndex + 1] || lvl;
-  const pct = lvl.max === Infinity ? 100 : Math.round(((currentXP - lvl.min) / (nextLvl.min - lvl.min)) * 100);
-
-  document.getElementById('levelName').textContent = lvl.name;
-  document.getElementById('levelNum').textContent = lvlIndex + 1;
-  document.getElementById('xpFill').style.width = pct + '%';
+  const info = getLevelInfo(currentXP);
+  document.getElementById('levelName').textContent = info.name;
+  document.getElementById('levelNum').textContent = info.pos + 1 + (info.prestige * 6);
+  document.getElementById('xpFill').style.width = info.pct + '%';
   document.getElementById('xpCurrent').textContent = currentXP;
-  document.getElementById('xpNext').textContent = nextLvl.min === Infinity ? '∞' : nextLvl.min;
-  document.getElementById('nextLevelName').textContent = nextLvl.name;
+  document.getElementById('xpNext').textContent = info.currentMax;
+  document.getElementById('nextLevelName').textContent = info.nextName;
 
   // Count earned
   const totalEarned = badgeCategories.reduce((sum, cat) => sum + cat.badges.filter(b => b.earned).length, 0);
