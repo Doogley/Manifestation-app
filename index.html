@@ -257,7 +257,27 @@
   .badge-modal-name { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300; color:var(--cream); margin-bottom:16px; }
   .badge-modal-desc { font-size:14px; font-weight:300; color:var(--soft); line-height:1.7; margin-bottom:32px; }
 
-  /* ── PROFILE ── */
+  /* ── LIBRARY SCREEN ── */
+  #library { padding-bottom:90px; overflow-y:auto; }
+  .library-screen-header { position:relative; z-index:1; padding:28px 32px 16px; border-bottom:1px solid rgba(201,169,110,.08); }
+  .library-screen-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--cream); letter-spacing:.05em; margin-bottom:12px; }
+  .library-filter-wrap { display:flex; gap:8px; flex-wrap:wrap; }
+  .filter-btn { padding:6px 14px; background:rgba(201,169,110,.04); border:1px solid rgba(201,169,110,.12); color:var(--muted); font-family:'Jost',sans-serif; font-size:11px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; transition:all .3s; }
+  .filter-btn.active { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.08); }
+  .library-screen-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:20px 32px 0; position:relative; z-index:1; }
+  .library-screen-tile { padding:20px 16px; border:1px solid rgba(201,169,110,.18); background:rgba(201,169,110,.04); position:relative; cursor:pointer; transition:all .3s; }
+  .library-screen-tile:hover { border-color:rgba(201,169,110,.35); background:rgba(201,169,110,.07); }
+  .library-screen-tile.today-tile { border-color:rgba(201,169,110,.3); background:rgba(201,169,110,.07); grid-column:span 2; }
+  .library-screen-tile.locked-tile { background:var(--locked); border-color:rgba(255,255,255,.04); cursor:default; overflow:hidden; }
+  .library-screen-tile.locked-tile:hover { border-color:rgba(255,255,255,.04); background:var(--locked); }
+  .lib-screen-day { font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; opacity:.8; }
+  .lib-screen-text { font-family:'Jost',sans-serif; font-size:13px; font-weight:300; color:var(--soft); line-height:1.5; }
+  .lib-screen-cat { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:8px; }
+  .library-screen-tile.locked-tile::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent 0%,rgba(201,169,110,.03) 50%,transparent 100%); background-size:200% 100%; animation:shimmer 4s ease-in-out infinite; }
+
+  @media(max-width:480px){
+    .library-screen-header,.library-screen-grid{padding-left:20px;padding-right:20px}
+  }
   #profile { padding-bottom:90px; overflow-y:auto; }
   .profile-hero { position:relative; z-index:1; padding:32px 32px 28px; text-align:center; border-bottom:1px solid rgba(201,169,110,.08); opacity:0; animation:fadeUp .6s .1s ease forwards; }
   .profile-avatar { width:72px; height:72px; border-radius:50%; background:radial-gradient(circle,rgba(201,169,110,.2) 0%,rgba(201,169,110,.05) 100%); border:1px solid rgba(201,169,110,.3); display:flex; align-items:center; justify-content:center; font-family:'Cormorant Garamond',serif; font-size:28px; color:var(--gold); cursor:pointer; overflow:hidden; position:relative; transition:border-color .3s; }
@@ -502,7 +522,7 @@
       <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg></span>
       <span class="nav-tab-label">Today</span>
     </button>
-    <button class="nav-tab" onclick="setTab(this)">
+    <button class="nav-tab" onclick="setTab(this);openLibrary()">
       <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
       <span class="nav-tab-label">Library</span>
     </button>
@@ -666,6 +686,28 @@
   <div class="upgrade-fine-print">
     <p>Cancel anytime. Billed through your app store.<br>By subscribing you agree to our Terms and Privacy Policy.</p>
   </div>
+</div>
+
+<!-- LIBRARY -->
+<div id="library" class="screen">
+  <div class="screen-logo-bar">
+    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today')">Already Mine</button>
+  </div>
+  <div class="library-screen-header">
+    <div class="library-screen-title">Your Library</div>
+    <div class="library-filter-wrap" id="libraryFilters">
+      <button class="filter-btn active" onclick="filterLibrary('all',this)">All</button>
+      <button class="filter-btn" onclick="filterLibrary('Abundance',this)">Abundance</button>
+      <button class="filter-btn" onclick="filterLibrary('Love',this)">Love</button>
+      <button class="filter-btn" onclick="filterLibrary('Confidence',this)">Confidence</button>
+      <button class="filter-btn" onclick="filterLibrary('Health',this)">Health</button>
+      <button class="filter-btn" onclick="filterLibrary('Peace',this)">Peace</button>
+      <button class="filter-btn" onclick="filterLibrary('Career',this)">Career</button>
+      <button class="filter-btn" onclick="filterLibrary('Healing',this)">Healing</button>
+      <button class="filter-btn" onclick="filterLibrary('Courage',this)">Courage</button>
+    </div>
+  </div>
+  <div class="library-screen-grid" id="libraryScreenGrid"></div>
 </div>
 
 <!-- PROFILE -->
@@ -843,6 +885,121 @@ const affirmations={
 };
 const catLabels={abundance:'Abundance · Prosperity',love:'Love · Connection',confidence:'Confidence · Strength',health:'Health · Vitality',peace:'Peace · Clarity',career:'Career · Purpose'};
 const lockedTexts=["The path forward is already illuminated for those who choose to see.","Within you lives the answer to every question you have been afraid to ask.","Your desires are not accidents — they are directions pointing you home.","What is meant for you will always find a way to reach you.","Courage is not the absence of fear but the decision that something matters more.","Every morning is an invitation to begin again with fresh intention.","You are not chasing your dreams — you are walking toward what already belongs to you.","The version of you that has everything you want is real and waiting.","Trust the timing of your life even when it does not match your timeline.","You have survived every hard day so far — that is strength, not luck."];
+
+// ── FULL AFFIRMATION LIBRARY ──
+const affirmationLibrary = [
+  // ABUNDANCE
+  {id:1,text:"Everything I need is already flowing gently toward me.",cat:"Abundance"},
+  {id:2,text:"I am a magnet for wealth and it comes to me with ease.",cat:"Abundance"},
+  {id:3,text:"The universe is abundant and I am open to receive all that is mine.",cat:"Abundance"},
+  {id:4,text:"Money flows to me. Opportunities find me. I am ready.",cat:"Abundance"},
+  {id:5,text:"Abundance is not something I chase — it is something I embody.",cat:"Abundance"},
+  {id:6,text:"I release every belief that money is hard to come by.",cat:"Abundance"},
+  {id:7,text:"Financial freedom is my birthright and I claim it today.",cat:"Abundance"},
+  {id:8,text:"Every day I am moving closer to the life I have always envisioned.",cat:"Abundance"},
+  {id:9,text:"I am worthy of wealth, comfort, and security in every form.",cat:"Abundance"},
+  {id:10,text:"Prosperity flows through me and out into every area of my life.",cat:"Abundance"},
+  {id:11,text:"I attract opportunities that align with my highest good.",cat:"Abundance"},
+  {id:12,text:"The more I give, the more freely abundance returns to me.",cat:"Abundance"},
+  // LOVE
+  {id:13,text:"I am worthy of deep, gentle, lasting love and it is on its way.",cat:"Love"},
+  {id:14,text:"Love is drawn to me because I am whole, alive, and magnetic.",cat:"Love"},
+  {id:15,text:"My heart is open. Love recognizes me and finds its way home.",cat:"Love"},
+  {id:16,text:"I give and receive love freely. It is enough. I am enough.",cat:"Love"},
+  {id:17,text:"I attract relationships that are rooted in respect, depth, and truth.",cat:"Love"},
+  {id:18,text:"I release the need to earn love. I am loved simply for existing.",cat:"Love"},
+  {id:19,text:"My capacity for love grows deeper with every passing day.",cat:"Love"},
+  {id:20,text:"I am deserving of a love that feels like home.",cat:"Love"},
+  {id:21,text:"Love surrounds me in every form — in laughter, in kindness, in quiet moments.",cat:"Love"},
+  {id:22,text:"I am safe to love and to be loved fully.",cat:"Love"},
+  {id:23,text:"The right people are always drawn into my life at the right time.",cat:"Love"},
+  // CONFIDENCE
+  {id:24,text:"I trust myself gently. My voice matters. My presence is enough.",cat:"Confidence"},
+  {id:25,text:"I walk into every room knowing exactly who I am and what I bring.",cat:"Confidence"},
+  {id:26,text:"My confidence is rooted in something deeper than approval.",cat:"Confidence"},
+  {id:27,text:"I believe in myself. That is where everything begins.",cat:"Confidence"},
+  {id:28,text:"I am capable of far more than I have yet allowed myself to believe.",cat:"Confidence"},
+  {id:29,text:"I release the need for permission. I give it to myself.",cat:"Confidence"},
+  {id:30,text:"My opinion of myself matters more than anyone else's.",cat:"Confidence"},
+  {id:31,text:"I speak my truth with clarity and without apology.",cat:"Confidence"},
+  {id:32,text:"Every challenge I have faced has made me more capable, not less.",cat:"Confidence"},
+  {id:33,text:"I am becoming more comfortable in my own skin every single day.",cat:"Confidence"},
+  {id:34,text:"I choose myself — again and again and again.",cat:"Confidence"},
+  {id:35,text:"I no longer shrink to make others comfortable.",cat:"Confidence"},
+  // HEALTH
+  {id:36,text:"My body is healing and growing stronger with every breath I take.",cat:"Health"},
+  {id:37,text:"I am powerful, energized, and fully alive in this body.",cat:"Health"},
+  {id:38,text:"My body is sacred. I honor it and it honors me in return.",cat:"Health"},
+  {id:39,text:"I choose health today. One step, one breath, one choice at a time.",cat:"Health"},
+  {id:40,text:"My body knows how to heal. I trust it completely.",cat:"Health"},
+  {id:41,text:"I nourish my body with the care it deserves.",cat:"Health"},
+  {id:42,text:"Every cell in my body is vibrating with health and vitality.",cat:"Health"},
+  {id:43,text:"I listen to my body. It always knows what it needs.",cat:"Health"},
+  {id:44,text:"Rest is productive. Recovery is part of the plan.",cat:"Health"},
+  {id:45,text:"I am grateful for the strength my body carries me through each day.",cat:"Health"},
+  {id:46,text:"My energy is abundant. My body supports my greatest life.",cat:"Health"},
+  // PEACE
+  {id:47,text:"I release what I cannot control and breathe into the present moment.",cat:"Peace"},
+  {id:48,text:"My peace is not dependent on circumstances. It lives inside me.",cat:"Peace"},
+  {id:49,text:"Stillness is my natural state. I return to it again and again.",cat:"Peace"},
+  {id:50,text:"I am calm. I am steady. This moment is enough.",cat:"Peace"},
+  {id:51,text:"I choose peace over perfection every single time.",cat:"Peace"},
+  {id:52,text:"The chaos around me does not define the calm within me.",cat:"Peace"},
+  {id:53,text:"I breathe in stillness. I breathe out everything that no longer serves me.",cat:"Peace"},
+  {id:54,text:"I am at peace with where I am and excited about where I am going.",cat:"Peace"},
+  {id:55,text:"My mind is quiet. My heart is open. I am present.",cat:"Peace"},
+  {id:56,text:"I do not need to rush. Everything arrives exactly when it should.",cat:"Peace"},
+  {id:57,text:"I release the past with love and step into this moment fully.",cat:"Peace"},
+  // CAREER
+  {id:58,text:"My gifts are valuable. The right opportunities are finding me.",cat:"Career"},
+  {id:59,text:"I am built for this. My success is not a matter of if — only when.",cat:"Career"},
+  {id:60,text:"I am aligned with my purpose and my work carries that light.",cat:"Career"},
+  {id:61,text:"I show up. I do the work. The results take care of themselves.",cat:"Career"},
+  {id:62,text:"My career is expanding in ways I have not yet imagined.",cat:"Career"},
+  {id:63,text:"I bring something to the table that nobody else can.",cat:"Career"},
+  {id:64,text:"Success is not luck — it is the result of who I am becoming.",cat:"Career"},
+  {id:65,text:"I am open to being seen, recognized, and rewarded for my work.",cat:"Career"},
+  {id:66,text:"The right doors are opening for me right now.",cat:"Career"},
+  {id:67,text:"I trust the direction my career is heading even when the path is unclear.",cat:"Career"},
+  {id:68,text:"My work is meaningful and my impact is real.",cat:"Career"},
+  // HEALING
+  {id:69,text:"I give myself permission to heal at my own pace.",cat:"Healing"},
+  {id:70,text:"Every day I am releasing what no longer belongs to me.",cat:"Healing"},
+  {id:71,text:"I am not my past. I am everything I am choosing to become.",cat:"Healing"},
+  {id:72,text:"Healing is not linear and I honor every step of my journey.",cat:"Healing"},
+  {id:73,text:"I am worthy of tenderness, especially from myself.",cat:"Healing"},
+  {id:74,text:"What hurt me does not define me. My resilience does.",cat:"Healing"},
+  {id:75,text:"I am safe now. I can let go of the armor I no longer need.",cat:"Healing"},
+  {id:76,text:"I forgive myself for all the times I did not know better.",cat:"Healing"},
+  {id:77,text:"My wounds are becoming wisdom. My pain is becoming power.",cat:"Healing"},
+  {id:78,text:"I choose to move forward — gently, and with great compassion for myself.",cat:"Healing"},
+  // COURAGE
+  {id:79,text:"I move through fear because what is waiting on the other side matters more.",cat:"Courage"},
+  {id:80,text:"I am braver than I give myself credit for.",cat:"Courage"},
+  {id:81,text:"I do not need certainty to take the next step. I just need to begin.",cat:"Courage"},
+  {id:82,text:"Discomfort is not a sign to stop. It is a sign I am growing.",cat:"Courage"},
+  {id:83,text:"I choose courage over comfort — today and every day.",cat:"Courage"},
+  {id:84,text:"The boldest version of me is not far away. She is right here.",cat:"Courage"},
+  {id:85,text:"I trust myself enough to leap.",cat:"Courage"},
+  {id:86,text:"I have everything I need to face what is in front of me.",cat:"Courage"},
+  // NEW BEGINNINGS
+  {id:87,text:"Every ending is a door I did not know I needed opened.",cat:"New Beginnings"},
+  {id:88,text:"I embrace this new chapter with an open heart and no attachment to the last.",cat:"New Beginnings"},
+  {id:89,text:"Starting over is not losing — it is arriving somewhere better.",cat:"New Beginnings"},
+  {id:90,text:"My fresh start is a gift I am giving to my future self.",cat:"New Beginnings"},
+  {id:91,text:"I do not need to carry the weight of what was into what will be.",cat:"New Beginnings"},
+  {id:92,text:"This is my season of becoming.",cat:"New Beginnings"},
+  {id:93,text:"I welcome change as the vehicle that carries me toward my greatest life.",cat:"New Beginnings"},
+  // FAMILY
+  {id:94,text:"I am building a life that the people I love will be proud of.",cat:"Family"},
+  {id:95,text:"My family is my anchor and my inspiration.",cat:"Family"},
+  {id:96,text:"I show up for the people I love with my whole heart.",cat:"Family"},
+  {id:97,text:"The love in my home is a foundation nothing can shake.",cat:"Family"},
+  {id:98,text:"I create memories, moments, and a legacy worth leaving.",cat:"Family"},
+  // GENERAL
+  {id:99,text:"I am exactly where I need to be, and I trust the journey completely.",cat:"Growth"},
+  {id:100,text:"The best version of me is not a destination — it is who I am right now, still becoming.",cat:"Growth"},
+];
 
 let currentQuestion=0,answers={},selectedOption=null,todayAffirmation='',todayCategory='',saved=false;
 
@@ -1150,6 +1307,60 @@ function openBadgeModal(badgeId) {
   document.getElementById('modalOverlay').classList.add('open');
 }
 
+// ── LIBRARY ──
+let currentLibraryFilter = 'all';
+let unlockedCount = 1; // Day 1 — will grow with backend
+
+function openLibrary() {
+  buildLibraryScreen();
+  showScreen('library');
+  setTabByName('library');
+}
+
+function buildLibraryScreen(filter) {
+  filter = filter || currentLibraryFilter;
+  const grid = document.getElementById('libraryScreenGrid');
+  grid.innerHTML = '';
+
+  const isAdmin = adminMode;
+  const filtered = filter === 'all' ? affirmationLibrary : affirmationLibrary.filter(a => a.cat === filter);
+
+  filtered.forEach((aff, i) => {
+    const tile = document.createElement('div');
+    const isToday = aff.id === 1;
+    const isUnlocked = isAdmin || aff.id <= unlockedCount;
+
+    if(isToday) {
+      tile.className = 'library-screen-tile today-tile';
+      tile.innerHTML = `<div class="lib-screen-day">✦ Day ${aff.id} · Today</div><div class="lib-screen-text">${aff.text}</div><div class="lib-screen-cat">${aff.cat}</div>`;
+      tile.onclick = () => openModal(`Day ${aff.id} · Today`, aff.text, aff.cat);
+    } else if(isUnlocked) {
+      tile.className = 'library-screen-tile';
+      tile.innerHTML = `<div class="lib-screen-day">Day ${aff.id}</div><div class="lib-screen-text">${aff.text}</div><div class="lib-screen-cat">${aff.cat}</div>`;
+      tile.onclick = () => openModal(`Day ${aff.id}`, aff.text, aff.cat);
+    } else {
+      tile.className = 'library-screen-tile locked-tile';
+      tile.innerHTML = `<div style="filter:blur(5px);font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:rgba(255,255,255,.07);line-height:1.5;margin-bottom:8px">${aff.text}</div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2)">Day ${aff.id}</div></div>`;
+    }
+    grid.appendChild(tile);
+  });
+
+  // Add upgrade teaser at bottom if not admin
+  if(!isAdmin) {
+    const teaser = document.createElement('div');
+    teaser.style.cssText = 'grid-column:span 2;margin-top:8px;padding:20px;background:linear-gradient(135deg,rgba(201,169,110,.06) 0%,rgba(201,169,110,.02) 100%);border:1px solid rgba(201,169,110,.15);text-align:center';
+    teaser.innerHTML = `<p style="font-size:13px;font-weight:300;color:var(--soft);line-height:1.7;margin-bottom:12px">Members unlock <strong style="color:var(--gold);font-weight:400">800+ affirmations</strong> — one new one every day, forever.</p><button onclick="openUpgrade()" style="padding:10px 28px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer">Unlock Everything</button>`;
+    grid.appendChild(teaser);
+  }
+}
+
+function filterLibrary(cat, btn) {
+  currentLibraryFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  buildLibraryScreen(cat);
+}
+
 // ── ADMIN MODE ──
 let adminMode = false;
 let logoTapCount = 0;
@@ -1165,6 +1376,7 @@ function handleLogoTap() {
     if(adminMode) {
       // Unlock everything
       currentCinders = 18500;
+      unlockedCount = 100;
       badgeCategories.forEach(cat => cat.badges.forEach(b => b.earned = true));
       // Unlock all library tiles
       document.querySelectorAll('.lib-tile.locked').forEach(t => {
@@ -1175,6 +1387,7 @@ function handleLogoTap() {
       showAdminBanner(true);
     } else {
       currentCinders = 50;
+      unlockedCount = 1;
       badgeCategories.forEach((cat,ci) => cat.badges.forEach((b,bi) => b.earned = (ci===0&&bi===0)||(ci===1&&bi===0)||(ci===2&&bi===0)));
       showAdminBanner(false);
     }
