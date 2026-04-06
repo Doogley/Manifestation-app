@@ -220,9 +220,9 @@
   .level-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
   .level-name { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:300; color:var(--gold); }
   .level-num { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
-  .xp-track { height:2px; background:rgba(201,169,110,.12); width:100%; margin-bottom:6px; }
-  .xp-fill { height:2px; background:var(--gold); transition:width 1s ease; }
-  .xp-label { font-size:11px; letter-spacing:.1em; color:var(--muted); }
+  .cinders-track { height:2px; background:rgba(201,169,110,.12); width:100%; margin-bottom:6px; }
+  .cinders-fill { height:2px; background:var(--gold); transition:width 1s ease; }
+  .cinders-label { font-size:11px; letter-spacing:.1em; color:var(--muted); }
 
   /* Badge category section */
   .badge-section { position:relative; z-index:1; padding:24px 32px 0; opacity:0; animation:fadeUp .6s .2s ease forwards; }
@@ -255,7 +255,11 @@
   /* ── PROFILE ── */
   #profile { padding-bottom:90px; overflow-y:auto; }
   .profile-hero { position:relative; z-index:1; padding:32px 32px 28px; text-align:center; border-bottom:1px solid rgba(201,169,110,.08); opacity:0; animation:fadeUp .6s .1s ease forwards; }
-  .profile-avatar { width:72px; height:72px; border-radius:50%; background:radial-gradient(circle,rgba(201,169,110,.2) 0%,rgba(201,169,110,.05) 100%); border:1px solid rgba(201,169,110,.3); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-family:'Cormorant Garamond',serif; font-size:28px; color:var(--gold); }
+  .profile-avatar { width:72px; height:72px; border-radius:50%; background:radial-gradient(circle,rgba(201,169,110,.2) 0%,rgba(201,169,110,.05) 100%); border:1px solid rgba(201,169,110,.3); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-family:'Cormorant Garamond',serif; font-size:28px; color:var(--gold); cursor:pointer; overflow:hidden; position:relative; transition:border-color .3s; }
+  .profile-avatar:hover { border-color:var(--gold); }
+  .profile-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+  .profile-avatar-overlay { position:absolute; inset:0; background:rgba(0,0,0,.4); border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .3s; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--cream); }
+  .profile-avatar:hover .profile-avatar-overlay { opacity:1; }
   .profile-real-name { font-size:12px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
   .profile-nickname { font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:300; color:var(--cream); margin-bottom:4px; }
   .profile-member-since { font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); }
@@ -595,8 +599,8 @@
       <div class="level-name" id="levelName">Ember</div>
       <div class="level-num">Level <span id="levelNum">1</span></div>
     </div>
-    <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:5%"></div></div>
-    <div class="xp-label"><span id="xpCurrent">50</span> / <span id="xpNext">500</span> XP to <span id="nextLevelName">Spark</span></div>
+    <div class="cinders-track"><div class="cinders-fill" id="cindersFill" style="width:5%"></div></div>
+    <div class="cinders-label"><span id="cindersCurrent">50</span> / <span id="cindersNext">500</span> Cinders to <span id="nextLevelName">Spark</span></div>
   </div>
 
   <!-- Badge grid populated by JS -->
@@ -671,7 +675,8 @@
 
   <!-- Hero / Name -->
   <div class="profile-hero">
-    <div class="profile-avatar" id="profileInitial">D</div>
+    <div class="profile-avatar" id="profileInitial" onclick="document.getElementById('profilePicInput').click()">D<div class="profile-avatar-overlay">Change</div></div>
+    <input type="file" id="profilePicInput" accept="image/*" style="display:none" onchange="handleProfilePic(this)">
     <div class="profile-real-name" id="profileRealName">Douglas</div>
     <div class="profile-nickname" id="profileNicknameDisplay">Dougy</div>
     <input class="profile-nickname-input" id="profileNicknameInput" type="text" placeholder="Your nickname..." maxlength="20">
@@ -685,10 +690,10 @@
   <div class="profile-rank-card">
     <div class="profile-rank-top">
       <div class="profile-rank-name" id="profileRankName">Ember</div>
-      <div class="profile-rank-label">Current Rank</div>
+      <div class="profile-frequency-label">Current Frequency</div>
     </div>
-    <div class="xp-track"><div class="xp-fill" id="profileXpFill" style="width:10%"></div></div>
-    <div class="xp-label"><span id="profileXpCurrent">50</span> / <span id="profileXpNext">500</span> XP · Next: <span id="profileNextRank">Spark</span></div>
+    <div class="cinders-track"><div class="cinders-fill" id="profileCindersFill" style="width:10%"></div></div>
+    <div class="cinders-label"><span id="profileCindersCurrent">50</span> / <span id="profileCindersNext">500</span> Cinders · Next: <span id="profileNextRank">Spark</span></div>
   </div>
 
   <!-- Stats -->
@@ -749,15 +754,31 @@
         <span>Current Plan</span>
         Free — 29 affirmations remaining
       </div>
-      <button class="profile-sub-badge" onclick="openUpgrade()">Upgrade</button>
+      <button class="profile-sub-badge" onclick="openUpgrade()" style="padding:6px 16px;border:1px solid var(--gold);background:none;color:var(--gold);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Upgrade</button>
     </div>
   </div>
 
   <!-- Links -->
   <div class="profile-links">
-    <button class="profile-link">Terms of Service</button>
-    <button class="profile-link">Privacy Policy</button>
-    <button class="profile-link">Contact Us</button>
+    <button class="profile-link" onclick="alert('Terms of Service coming before launch.')">Terms of Service</button>
+    <button class="profile-link" onclick="alert('Privacy Policy coming before launch.')">Privacy Policy</button>
+    <button class="profile-link" onclick="alert('Email: support@alreadymine.com')">Contact Us</button>
+  </div>
+
+  <!-- Feedback -->
+  <div class="profile-section" style="animation-delay:.52s;padding-bottom:24px">
+    <div class="profile-section-title">Share Your Thoughts</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <select id="feedbackType" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.15);color:var(--soft);font-family:'Jost',sans-serif;font-size:14px;font-weight:300;padding:12px 16px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;">
+        <option value="" style="background:var(--deep)">What kind of feedback?</option>
+        <option value="bug" style="background:var(--deep)">Bug Report</option>
+        <option value="feature" style="background:var(--deep)">Feature Request</option>
+        <option value="general" style="background:var(--deep)">General Feedback</option>
+        <option value="love" style="background:var(--deep)">I love the app ✦</option>
+      </select>
+      <textarea id="feedbackText" style="background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.12);color:var(--cream);font-family:'Jost',sans-serif;font-weight:300;font-size:14px;line-height:1.7;padding:14px 16px;resize:none;outline:none;transition:border-color .3s;" rows="4" placeholder="Tell us what's on your mind..."></textarea>
+      <button onclick="submitFeedback()" style="padding:14px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Submit Feedback</button>
+    </div>
   </div>
 </div>
 
@@ -846,7 +867,7 @@ function goToHome(){buildHome();showScreen('home');setTabByName('today');}
 function buildHome(){
   const h=new Date().getHours();
   document.getElementById('greetingTime').textContent=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
-  document.getElementById('greetingName').textContent=(userNickname||userRealName)+'.' ;
+  document.getElementById('greetingName').textContent=userNickname||userRealName ;
   document.getElementById('homeAffirmationText').textContent=todayAffirmation;
   document.getElementById('homeAffirmationCat').textContent='✦  '+todayCategory;
   buildLibrary();
@@ -1039,7 +1060,7 @@ function toRoman(n) {
   return result;
 }
 
-let currentXP = 50;
+let currentCinders = 50;
 
 function openBadges() {
   buildBadgeScreen();
@@ -1048,12 +1069,12 @@ function openBadges() {
 }
 
 function buildBadgeScreen() {
-  const info = getLevelInfo(currentXP);
+  const info = getLevelInfo(currentCinders);
   document.getElementById('levelName').textContent = info.name;
   document.getElementById('levelNum').textContent = info.pos + 1 + (info.prestige * 6);
-  document.getElementById('xpFill').style.width = info.pct + '%';
-  document.getElementById('xpCurrent').textContent = currentXP;
-  document.getElementById('xpNext').textContent = info.currentMax;
+  document.getElementById('cindersFill').style.width = info.pct + '%';
+  document.getElementById('cindersCurrent').textContent = currentCinders;
+  document.getElementById('cindersNext').textContent = info.currentMax;
   document.getElementById('nextLevelName').textContent = info.nextName;
 
   // Count earned
@@ -1115,11 +1136,11 @@ function buildProfile() {
   document.getElementById('profileMemberDate').textContent = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
 
   // Rank
-  const info = getLevelInfo(currentXP);
+  const info = getLevelInfo(currentCinders);
   document.getElementById('profileRankName').textContent = info.name;
-  document.getElementById('profileXpFill').style.width = info.pct + '%';
-  document.getElementById('profileXpCurrent').textContent = currentXP;
-  document.getElementById('profileXpNext').textContent = info.currentMax;
+  document.getElementById('profileCindersFill').style.width = info.pct + '%';
+  document.getElementById('profileCindersCurrent').textContent = currentCinders;
+  document.getElementById('profileCindersNext').textContent = info.currentMax;
   document.getElementById('profileNextRank').textContent = info.nextName;
 
   // Preferences from onboarding
@@ -1132,22 +1153,52 @@ function buildProfile() {
 
   // Saved affirmation
   if(saved && todayAffirmation) {
-    document.getElementById('profileFavAffirmation').textContent = todayAffirmation;
+    const favEl = document.getElementById('profileFavAffirmation');
+    favEl.textContent = todayAffirmation;
+    favEl.style.cursor = 'pointer';
+    favEl.onclick = () => openModal('Saved Affirmation', todayAffirmation, todayCategory);
   }
 
-  // Recent badges
+  // Recent badges — clickable
   const earnedBadges = badgeCategories.flatMap(c=>c.badges).filter(b=>b.earned);
   const recentWrap = document.getElementById('profileRecentBadges');
   recentWrap.innerHTML = earnedBadges.length === 0
     ? '<div style="font-size:13px;font-weight:300;color:var(--muted);font-style:italic">Your earned badges will appear here.</div>'
     : earnedBadges.slice(0,4).map(b=>`
-        <div class="profile-badge-pill">
+        <div class="profile-badge-pill" onclick="openBadgeModal('${b.id}')" style="cursor:pointer">
           <div class="profile-badge-icon">${b.icon}</div>
           <div class="profile-badge-info">
             <div class="profile-badge-name">${b.name}</div>
             <div class="profile-badge-tier">${b.tier}</div>
           </div>
         </div>`).join('');
+}
+
+function handleProfilePic(input) {
+  if(!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const avatar = document.getElementById('profileInitial');
+    avatar.innerHTML = `<img src="${e.target.result}" alt="Profile"><div class="profile-avatar-overlay">Change</div>`;
+    avatar.onclick = () => document.getElementById('profilePicInput').click();
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function submitFeedback() {
+  const type = document.getElementById('feedbackType').value;
+  const text = document.getElementById('feedbackText').value.trim();
+  if(!type) { alert('Please select a feedback type.'); return; }
+  if(!text) { alert('Please write your feedback before submitting.'); return; }
+  // In the real app this sends to your support email
+  document.getElementById('feedbackType').value = '';
+  document.getElementById('feedbackText').value = '';
+  const section = document.querySelector('#profile .profile-section:last-of-type');
+  const btn = section.querySelector('button');
+  btn.textContent = '✦ Thank you — received';
+  btn.style.color = 'var(--gold)';
+  btn.style.borderColor = 'var(--gold)';
+  setTimeout(() => { btn.textContent = 'Submit Feedback'; }, 3000);
 }
 
 function toggleNicknameEdit() {
@@ -1168,7 +1219,12 @@ function toggleNicknameEdit() {
     display.style.display = 'block';
     input.style.display = 'none';
     btn.textContent = '✎ Edit nickname';
-    document.getElementById('profileInitial').textContent = newName.charAt(0).toUpperCase();
+    // Only update initial if no profile pic uploaded
+    const avatar = document.getElementById('profileInitial');
+    if(!avatar.querySelector('img')) {
+      avatar.innerHTML = `${newName.charAt(0).toUpperCase()}<div class="profile-avatar-overlay">Change</div>`;
+      avatar.onclick = () => document.getElementById('profilePicInput').click();
+    }
   }
 }
 
