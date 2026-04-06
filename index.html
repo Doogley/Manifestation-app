@@ -725,13 +725,13 @@
       </div>
     </div>
     <input type="file" id="profilePicInput" accept="image/*" style="display:none" onchange="handleProfilePic(this)">
-    <div class="profile-real-name" id="profileRealName">Douglas</div>
-    <div class="profile-nickname" id="profileNicknameDisplay">Dougy</div>
-    <input class="profile-nickname-input" id="profileNicknameInput" type="text" placeholder="Your nickname..." maxlength="20">
+    <div class="profile-real-name" id="profileRealName" style="display:none">Douglas</div>
+    <div class="profile-nickname" id="profileNicknameDisplay">Douglas</div>
+    <input class="profile-nickname-input" id="profileNicknameInput" type="text" placeholder="Add a nickname..." maxlength="20">
     <div class="profile-nickname-edit">
-      <button class="profile-edit-btn" id="profileEditBtn" onclick="toggleNicknameEdit()">✎ Edit nickname</button>
+      <button class="profile-edit-btn" id="profileEditBtn" onclick="toggleNicknameEdit()">✎ Add nickname</button>
     </div>
-    <div class="profile-member-since">Member since Day 1 · <span id="profileMemberDate"></span></div>
+    <div class="profile-member-since">Journey began <span id="profileMemberDate"></span></div>
   </div>
 
   <!-- Rank -->
@@ -832,13 +832,6 @@
     </div>
   </div>
 
-  <!-- Links -->
-  <div class="profile-links">
-    <button class="profile-link" onclick="alert('Terms of Service coming before launch.')">Terms of Service</button>
-    <button class="profile-link" onclick="alert('Privacy Policy coming before launch.')">Privacy Policy</button>
-    <button class="profile-link" onclick="alert('Email: support@alreadymine.com')">Contact Us</button>
-  </div>
-
   <!-- Feedback -->
   <div class="profile-section" style="animation-delay:.52s;padding-bottom:24px">
     <div class="profile-section-title">Share Your Thoughts</div>
@@ -853,6 +846,13 @@
       <textarea id="feedbackText" style="background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.12);color:var(--cream);font-family:'Jost',sans-serif;font-weight:300;font-size:14px;line-height:1.7;padding:14px 16px;resize:none;outline:none;transition:border-color .3s;" rows="4" placeholder="Tell us what's on your mind..."></textarea>
       <button onclick="submitFeedback()" style="padding:14px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Submit Feedback</button>
     </div>
+  </div>
+
+  <!-- Links — footer -->
+  <div class="profile-links" style="padding-bottom:32px;border-top:1px solid rgba(201,169,110,.06);padding-top:24px;margin-top:8px">
+    <button class="profile-link" onclick="alert('Terms of Service coming before launch.')">Terms of Service</button>
+    <button class="profile-link" onclick="alert('Privacy Policy coming before launch.')">Privacy Policy</button>
+    <button class="profile-link" onclick="alert('Email: support@alreadymine.com')">Contact Us</button>
   </div>
 </div>
 
@@ -1056,7 +1056,7 @@ function goToHome(){buildHome();showScreen('home');setTabByName('today');}
 function buildHome(){
   const h=new Date().getHours();
   document.getElementById('greetingTime').textContent=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
-  document.getElementById('greetingName').textContent=userNickname||userRealName ;
+  document.getElementById('greetingName').textContent = userNickname || userRealName;
   document.getElementById('homeAffirmationText').textContent=todayAffirmation;
   document.getElementById('homeAffirmationCat').textContent='✦  '+todayCategory;
   buildLibrary();
@@ -1427,7 +1427,7 @@ function setPref(type, value, label) {
     btn.classList.toggle('active', btn.textContent === label);
   });
 }
-let userNickname = 'Dougy';
+let userNickname = '';
 let userRealName = 'Douglas';
 let editingNickname = false;
 
@@ -1438,10 +1438,12 @@ function openProfile() {
 }
 
 function buildProfile() {
-  // Avatar initial
-  document.getElementById('profileInitial').textContent = (userNickname || userRealName).charAt(0).toUpperCase();
-  document.getElementById('profileRealName').textContent = userRealName;
-  document.getElementById('profileNicknameDisplay').textContent = userNickname || userRealName;
+  // Name display — show nickname if set, otherwise real name
+  const displayName = userNickname || userRealName;
+  document.getElementById('profileInitial').textContent = displayName.charAt(0).toUpperCase();
+  document.getElementById('profileRealName').style.display = 'none';
+  document.getElementById('profileNicknameDisplay').textContent = displayName;
+  document.getElementById('profileEditBtn').textContent = userNickname ? '✎ Edit nickname' : '✎ Add nickname';
 
   // Member since
   const now = new Date();
@@ -1527,18 +1529,23 @@ function toggleNicknameEdit() {
     input.focus();
     btn.textContent = '✓ Save';
   } else {
-    const newName = input.value.trim() || userNickname;
-    userNickname = newName;
-    display.textContent = newName;
+    const newName = input.value.trim();
+    if(newName) userNickname = newName;
+    const displayName = userNickname || userRealName;
+    display.textContent = displayName;
     display.style.display = 'block';
     input.style.display = 'none';
-    btn.textContent = '✎ Edit nickname';
-    // Only update initial if no profile pic uploaded
+    btn.textContent = userNickname ? '✎ Edit nickname' : '✎ Add nickname';
+    // Update avatar
     const avatar = document.getElementById('profileInitial');
     if(!avatar.querySelector('img')) {
-      avatar.innerHTML = `${newName.charAt(0).toUpperCase()}<div class="profile-avatar-overlay">Change</div>`;
-      avatar.onclick = () => document.getElementById('profilePicInput').click();
+      avatar.innerHTML = `${displayName.charAt(0).toUpperCase()}<div class="avatar-camera-btn" onclick="document.getElementById('profilePicInput').click()" style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:var(--deep2);border:1px solid rgba(201,169,110,.25);display:flex;align-items:center;justify-content:center;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;
     }
+    // Update home greeting
+    document.getElementById('greetingName').textContent = displayName;
+    // Update nav avatar initial if no pic
+    const navAvatar = document.getElementById('navAvatar');
+    if(!navAvatar.querySelector('img')) navAvatar.textContent = displayName.charAt(0).toUpperCase();
   }
 }
 
