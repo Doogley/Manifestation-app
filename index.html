@@ -154,6 +154,55 @@
   .nav-tab svg { width:18px; height:18px; stroke:currentColor; transition:stroke .3s; }
   .nav-tab-label { font-size:10px; letter-spacing:.1em; text-transform:uppercase; }
 
+  /* ── MONTHLY SUMMARY ── */
+  #monthlySummary { align-items:center; justify-content:flex-start; padding-bottom:90px; overflow-y:auto; }
+  .summary-header { position:relative; z-index:1; width:100%; padding:28px 32px 20px; border-bottom:1px solid rgba(201,169,110,.08); display:flex; align-items:center; justify-content:space-between; }
+  .summary-month { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--cream); letter-spacing:.05em; }
+  .summary-close { background:none; border:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:color .3s; }
+  .summary-close:hover { color:var(--cream); }
+
+  .summary-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:80px 40px; position:relative; z-index:1; }
+  .summary-loading-orb { width:60px; height:60px; margin:0 auto 24px; position:relative; }
+  .summary-loading-ring { position:absolute; inset:0; border-radius:50%; border:1px solid rgba(201,169,110,.3); animation:pulseRing 2s ease-in-out infinite; }
+  .summary-loading-ring:nth-child(2) { inset:8px; border-color:rgba(201,169,110,.2); animation-delay:.4s; }
+  .summary-loading-core { position:absolute; inset:16px; border-radius:50%; background:radial-gradient(circle,rgba(201,169,110,.3) 0%,transparent 100%); }
+  .summary-loading-text { font-size:13px; font-weight:300; color:var(--muted); letter-spacing:.1em; text-align:center; line-height:1.8; }
+
+  .summary-content { position:relative; z-index:1; width:100%; padding:0 32px; }
+  .summary-stat-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; padding:24px 0; border-bottom:1px solid rgba(201,169,110,.08); }
+  .summary-stat { text-align:center; padding:16px 8px; border:1px solid rgba(201,169,110,.1); background:rgba(201,169,110,.03); }
+  .summary-stat-num { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--gold); line-height:1; margin-bottom:4px; }
+  .summary-stat-label { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); line-height:1.3; }
+
+  .summary-narrative { padding:28px 0; border-bottom:1px solid rgba(201,169,110,.08); }
+  .summary-narrative-label { font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; display:flex; align-items:center; gap:12px; }
+  .summary-narrative-label::after { content:''; flex:1; height:1px; background:rgba(201,169,110,.15); }
+  .summary-narrative-text { font-family:'Jost',sans-serif; font-size:15px; font-weight:300; color:var(--soft); line-height:1.9; }
+
+  .summary-mood-section { padding:28px 0; border-bottom:1px solid rgba(201,169,110,.08); }
+  .summary-mood-label { font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; display:flex; align-items:center; gap:12px; }
+  .summary-mood-label::after { content:''; flex:1; height:1px; background:rgba(201,169,110,.15); }
+  .summary-mood-bar-wrap { display:flex; flex-direction:column; gap:8px; }
+  .summary-mood-row { display:flex; align-items:center; gap:12px; }
+  .summary-mood-name { font-size:12px; font-weight:300; color:var(--muted); width:70px; letter-spacing:.05em; }
+  .summary-mood-bar { flex:1; height:4px; background:rgba(201,169,110,.1); border-radius:2px; overflow:hidden; }
+  .summary-mood-fill { height:100%; background:var(--gold); border-radius:2px; transition:width 1s ease; }
+  .summary-mood-count { font-size:11px; color:var(--muted); width:20px; text-align:right; }
+
+  .summary-intentions-section { padding:28px 0; }
+  .summary-intentions-label { font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; display:flex; align-items:center; gap:12px; }
+  .summary-intentions-label::after { content:''; flex:1; height:1px; background:rgba(201,169,110,.15); }
+  .summary-intention-item { padding:12px 16px; border:1px solid rgba(201,169,110,.12); background:rgba(201,169,110,.03); margin-bottom:8px; display:flex; align-items:center; gap:10px; }
+  .summary-intention-check { color:var(--gold); font-size:12px; }
+  .summary-intention-text { font-size:13px; font-weight:300; color:var(--soft); line-height:1.5; }
+
+  .summary-note { padding:20px 0 0; text-align:center; }
+  .summary-note p { font-size:11px; font-weight:300; color:var(--muted); line-height:1.7; font-style:italic; }
+
+  @media(max-width:480px){
+    .summary-header,.summary-content{padding-left:20px;padding-right:20px}
+  }
+
   /* Modal */
   .modal-overlay { display:none; position:fixed; inset:0; background:rgba(10,8,5,.85); z-index:200; align-items:center; justify-content:center; padding:40px; backdrop-filter:blur(8px); }
   .modal-overlay.open { display:flex; }
@@ -885,6 +934,20 @@
     </div>
   </div>
 
+  <!-- What This Month Held -->
+  <div class="profile-section" style="animation-delay:.48s">
+    <div class="profile-section-title">Monthly Reflection</div>
+    <div style="position:relative;padding:24px;background:linear-gradient(135deg,rgba(201,169,110,.06) 0%,rgba(201,169,110,.02) 100%);border:1px solid rgba(201,169,110,.15);">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:var(--cream);margin-bottom:8px;">What This Month Held</div>
+      <div style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.7;margin-bottom:16px;">A personalized reflection on your journey this month — your moods, your intentions, your growth. Generated just for you.</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:rgba(201,169,110,.05);border:1px solid rgba(201,169,110,.1);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Members only · 1 per month</span>
+      </div>
+      <button onclick="adminMode ? openMonthlySummary() : openUpgrade()" style="width:100%;padding:14px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;" id="monthlyReflectionBtn">Unlock with Membership</button>
+    </div>
+  </div>
+
   <!-- Feedback -->
   <div class="profile-section" style="animation-delay:.52s;padding-bottom:24px">
     <div class="profile-section-title">Share Your Thoughts</div>
@@ -906,6 +969,71 @@
     <button class="profile-link" onclick="alert('Terms of Service coming before launch.')">Terms of Service</button>
     <button class="profile-link" onclick="alert('Privacy Policy coming before launch.')">Privacy Policy</button>
     <button class="profile-link" onclick="alert('Email: support@alreadymine.com')">Contact Us</button>
+  </div>
+</div>
+
+<!-- MONTHLY SUMMARY -->
+<div id="monthlySummary" class="screen">
+  <div class="summary-header">
+    <div class="summary-month" id="summaryMonthTitle">April's Reflection</div>
+    <button class="summary-close" onclick="showScreen('profile');setTabByName('profile')">✕ Close</button>
+  </div>
+
+  <!-- Loading state -->
+  <div class="summary-loading" id="summaryLoading">
+    <div class="summary-loading-orb">
+      <div class="summary-loading-ring"></div>
+      <div class="summary-loading-ring"></div>
+      <div class="summary-loading-core"></div>
+    </div>
+    <div class="summary-loading-text">
+      Reflecting on your month...<br>
+      <span style="font-size:11px;opacity:.6">This may take a moment</span>
+    </div>
+  </div>
+
+  <!-- Content (shown after loading) -->
+  <div class="summary-content" id="summaryContent" style="display:none">
+
+    <!-- Stats -->
+    <div class="summary-stat-row">
+      <div class="summary-stat">
+        <div class="summary-stat-num" id="summaryDays">30</div>
+        <div class="summary-stat-label">Days Active</div>
+      </div>
+      <div class="summary-stat">
+        <div class="summary-stat-num" id="summaryAffirmations">30</div>
+        <div class="summary-stat-label">Affirmations Unlocked</div>
+      </div>
+      <div class="summary-stat">
+        <div class="summary-stat-num" id="summaryEntries">12</div>
+        <div class="summary-stat-label">Journal Entries</div>
+      </div>
+    </div>
+
+    <!-- Narrative -->
+    <div class="summary-narrative">
+      <div class="summary-narrative-label">Your Month in Words</div>
+      <div class="summary-narrative-text" id="summaryNarrative"></div>
+    </div>
+
+    <!-- Mood breakdown -->
+    <div class="summary-mood-section">
+      <div class="summary-mood-label">How You Felt</div>
+      <div class="summary-mood-bar-wrap" id="summaryMoodBars"></div>
+    </div>
+
+    <!-- Intentions -->
+    <div class="summary-intentions-section">
+      <div class="summary-intentions-label">Intentions This Month</div>
+      <div id="summaryIntentionsList"></div>
+    </div>
+
+    <!-- Note -->
+    <div class="summary-note">
+      <p>This reflection is generated from your journal entries and mood check-ins.<br>It refreshes at the start of each new month.</p>
+    </div>
+
   </div>
 </div>
 
@@ -1056,7 +1184,7 @@ const affirmationLibrary = [
 
 let currentQuestion=0,answers={},selectedOption=null,todayAffirmation='',todayCategory='',saved=false;
 
-const noNavScreens = ['splash','onboarding','reveal','grace'];
+const noNavScreens = ['splash','onboarding','reveal','grace','monthlySummary'];
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -1592,6 +1720,18 @@ function buildProfile() {
     favEl.onclick = () => openModal('Saved Affirmation', todayAffirmation, todayCategory);
   }
 
+  // Monthly reflection button
+  const reflBtn = document.getElementById('monthlyReflectionBtn');
+  if(reflBtn) {
+    if(adminMode) {
+      reflBtn.textContent = summaryGenerated ? 'Read This Month\'s Reflection' : 'What This Month Held';
+      reflBtn.onclick = openMonthlySummary;
+    } else {
+      reflBtn.textContent = 'Unlock with Membership';
+      reflBtn.onclick = openUpgrade;
+    }
+  }
+
   // Recent badges — clickable
   const earnedBadges = badgeCategories.flatMap(c=>c.badges).filter(b=>b.earned);
   const recentWrap = document.getElementById('profileRecentBadges');
@@ -1666,6 +1806,75 @@ function toggleNicknameEdit() {
     const navAvatar = document.getElementById('navAvatar');
     if(!navAvatar.querySelector('img')) navAvatar.textContent = displayName.charAt(0).toUpperCase();
   }
+}
+
+// ── MONTHLY SUMMARY ──
+let summaryGenerated = false;
+
+function openMonthlySummary() {
+  const now = new Date();
+  const monthName = now.toLocaleDateString('en-US', {month:'long'});
+  document.getElementById('summaryMonthTitle').textContent = `${monthName}'s Reflection`;
+
+  // Show loading, hide content
+  document.getElementById('summaryLoading').style.display = 'flex';
+  document.getElementById('summaryContent').style.display = 'none';
+
+  showScreen('monthlySummary');
+
+  // Simulate API call with a 2.5 second loading state
+  setTimeout(() => {
+    generateSummary();
+  }, 2500);
+}
+
+function generateSummary() {
+  // Placeholder narrative — in production this comes from Claude API
+  const intent = answers.intention || 'abundance';
+  const narratives = {
+    abundance: "You began this month in a place of quiet readiness — and something shifted. Midway through, your journal entries grew longer, more certain. The word 'enough' appeared less. By the final week, your mood check-ins reflected something that can only be described as alignment. You didn't chase abundance this month. You simply began to believe you already had it.",
+    love: "This month held tenderness. Your early entries were cautious, but as the days passed, something in your writing opened. You used the word 'worthy' for the first time in week two — and you meant it. Your mood trended upward in the final stretch, quieter and more settled. Love, it seems, started with how you spoke to yourself.",
+    confidence: "You walked into this month uncertain and walked out of it differently. Your journal shows a woman finding her footing — slowly, then all at once. The affirmations around confidence seemed to land in week three, when your check-ins shifted from 'anxious' to 'aligned.' Whatever you were doubting at the start, you seem to have answered it.",
+    health: "This month you chose yourself, quietly and consistently. Your gratitude entries were full of small things — sleep, movement, a meal that felt good. Your mood tracked steadily upward. There were harder days woven in, but your journal held them gently. Your body seems to be responding to the attention you are finally giving it.",
+    peace: "Peace was the word that threaded through your month. Not the absence of difficulty — your journal was honest about that — but something steadier underneath. Your mood check-ins moved from 'heavy' in the first week to 'peaceful' and 'grateful' by the end. You released something this month. It shows.",
+    career: "This month you showed up with intention. Your journal entries were purposeful, goal-oriented, alive with possibility. Something clicked in week two — your affirmations around purpose seemed to land, and your mood followed. By month's end, your writing carried a quiet confidence that wasn't there at the start. You are building something real."
+  };
+
+  const narrative = narratives[intent] || narratives.abundance;
+  document.getElementById('summaryNarrative').textContent = narrative;
+
+  // Mood bars (placeholder data)
+  const moods = [
+    { name:'Aligned', count:8 },
+    { name:'Grateful', count:7 },
+    { name:'Peaceful', count:6 },
+    { name:'Hopeful', count:5 },
+    { name:'Anxious', count:3 },
+    { name:'Tired', count:2 },
+  ];
+  const maxCount = Math.max(...moods.map(m=>m.count));
+  document.getElementById('summaryMoodBars').innerHTML = moods.map(m=>`
+    <div class="summary-mood-row">
+      <div class="summary-mood-name">${m.name}</div>
+      <div class="summary-mood-bar"><div class="summary-mood-fill" style="width:${Math.round((m.count/maxCount)*100)}%"></div></div>
+      <div class="summary-mood-count">${m.count}</div>
+    </div>`).join('');
+
+  // Intentions (pull from active intentions or placeholder)
+  const intentionItems = intentions.length > 0 ? intentions : [
+    { text:'I am calling in financial freedom and ease.', received:true },
+    { text:'I am calling in deep, meaningful connection.', received:false },
+  ];
+  document.getElementById('summaryIntentionsList').innerHTML = intentionItems.map(i=>`
+    <div class="summary-intention-item">
+      <div class="summary-intention-check">${i.received ? '✦' : '◌'}</div>
+      <div class="summary-intention-text" style="${i.received?'text-decoration:line-through;color:var(--muted)':''}">${i.text}${i.received?' — Manifested':''}</div>
+    </div>`).join('');
+
+  // Show content, hide loading
+  document.getElementById('summaryLoading').style.display = 'none';
+  document.getElementById('summaryContent').style.display = 'block';
+  summaryGenerated = true;
 }
 
 function closeModal(e){if(e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('open');}
