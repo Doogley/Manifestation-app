@@ -590,14 +590,23 @@
   </div>
   <div class="todays-card-wrap">
     <div class="section-label">Today's Affirmation</div>
-    <div class="todays-card">
+    <div class="todays-card" id="todaysCard">
       <div class="card-day-num"><span class="card-day-dot"></span> Day <span id="homeDayCount">1</span> of your journey</div>
-      <div class="card-affirmation" id="homeAffirmationText"></div>
-      <div class="card-category" id="homeAffirmationCat"></div>
-      <div class="card-actions">
-        <button class="card-action-btn" id="saveBtn" onclick="toggleSave()">♡ &nbsp;Save</button>
-        <button class="card-action-btn" onclick="shareAffirmation()">↑ &nbsp;Share</button>
-        <button class="card-action-btn" onclick="openJournal()">✎ &nbsp;Journal</button>
+      <!-- Locked state -->
+      <div id="affirmationLocked" style="display:none;text-align:center;padding:20px 0">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:var(--soft);margin-bottom:8px;line-height:1.4;">Your affirmation for today<br>is ready for you.</div>
+        <div style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:24px;">✦ +10 Cinders upon reveal</div>
+        <button onclick="unlockTodaysAffirmation()" style="padding:14px 36px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .4s;">Reveal Today's Affirmation</button>
+      </div>
+      <!-- Unlocked state -->
+      <div id="affirmationUnlocked">
+        <div class="card-affirmation" id="homeAffirmationText"></div>
+        <div class="card-category" id="homeAffirmationCat"></div>
+        <div class="card-actions">
+          <button class="card-action-btn" id="saveBtn" onclick="toggleSave()">♡ &nbsp;Save</button>
+          <button class="card-action-btn" onclick="shareAffirmation()">↑ &nbsp;Share</button>
+          <button class="card-action-btn" onclick="openJournal()">✎ &nbsp;Journal</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1412,11 +1421,40 @@ function buildHome(){
   document.getElementById('greetingName').textContent = userNickname || userRealName;
   const rankInfo = getLevelInfo(currentCinders);
   document.getElementById('greetingRank').textContent = rankInfo.name;
-  document.getElementById('homeAffirmationText').textContent=todayAffirmation;
-  document.getElementById('homeAffirmationCat').textContent='✦  '+todayCategory;
+
+  // Award daily login Cinders
+  if(!dailyActions.loginClaimed) {
+    dailyActions.loginClaimed = true;
+    awardCinders(5, 'Daily login');
+  }
+
+  // Show locked or unlocked affirmation
+  const lockedEl = document.getElementById('affirmationLocked');
+  const unlockedEl = document.getElementById('affirmationUnlocked');
+  if(dailyActions.affirmationUnlocked) {
+    lockedEl.style.display = 'none';
+    unlockedEl.style.display = 'block';
+    document.getElementById('homeAffirmationText').textContent = todayAffirmation;
+    document.getElementById('homeAffirmationCat').textContent = '✦  ' + todayCategory;
+  } else {
+    lockedEl.style.display = 'block';
+    unlockedEl.style.display = 'none';
+  }
+
   buildLibrary();
   updateCountdown();
   setInterval(updateCountdown,1000);
+}
+
+function unlockTodaysAffirmation() {
+  dailyActions.affirmationUnlocked = true;
+  document.getElementById('affirmationLocked').style.display = 'none';
+  const unlockedEl = document.getElementById('affirmationUnlocked');
+  unlockedEl.style.display = 'block';
+  unlockedEl.style.animation = 'fadeIn .5s ease forwards';
+  document.getElementById('homeAffirmationText').textContent = todayAffirmation;
+  document.getElementById('homeAffirmationCat').textContent = '✦  ' + todayCategory;
+  awardCinders(10, 'Affirmation unlocked');
 }
 
 function buildLibrary(){
@@ -1461,10 +1499,6 @@ function toggleSave(){
   const b=document.getElementById('saveBtn');
   b.textContent=saved?'♥  Saved':'♡  Save';
   b.classList.toggle('active',saved);
-  if(saved && !savedCindersAwarded) {
-    awardCinders(5, 'Affirmation saved');
-    savedCindersAwarded = true;
-  }
 }
 function shareAffirmation(){if(navigator.share){navigator.share({title:'Already Mine',text:todayAffirmation,url:window.location.href});}else{navigator.clipboard.writeText(todayAffirmation).then(()=>alert('Copied to clipboard!'));}}
 function setTab(el){document.querySelectorAll('#globalBottomNav .nav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
@@ -1503,7 +1537,10 @@ function saveJournal(){
   // Show confirmation
   const wrap=document.querySelector('.journal-save-wrap');
   wrap.innerHTML=`<div style="text-align:center;padding:20px 0"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:var(--cream);margin-bottom:8px">Entry saved.</div><div style="font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)">✦ Day ${unlockedCount} complete</div></div>`;
-  awardCinders(20, 'Journal entry saved');
+  if(!dailyActions.journalSaved) {
+    dailyActions.journalSaved = true;
+    awardCinders(20, 'Journal entry saved');
+  }
 }
 function openModal(day,text,cat){document.getElementById('modalDay').textContent=day;document.getElementById('modalText').textContent=text;document.getElementById('modalCat').textContent=cat;document.getElementById('modalOverlay').classList.add('open');}
 // ── UPGRADE ──
@@ -1627,6 +1664,15 @@ function toRoman(n) {
 
 let currentCinders = 50;
 
+// ── DAILY TRACKING (resets each session — backend will use real dates) ──
+const dailyActions = {
+  loginClaimed: false,
+  affirmationUnlocked: false,
+  journalSaved: false,
+  moodCheckedIn: false,
+  mantraSetThisWeek: false,
+};
+
 function openBadges() {
   buildBadgeScreen();
   showScreen('badges');
@@ -1661,7 +1707,6 @@ function addIntention() {
   intentions.push({ text, received: false, id: Date.now() });
   input.value = '';
   renderIntentions();
-  awardCinders(10, 'Intention set');
 }
 
 function useExampleIntention(btn) {
@@ -1672,7 +1717,6 @@ function useExampleIntention(btn) {
   }
   intentions.push({ text, received: false, id: Date.now() });
   renderIntentions();
-  awardCinders(10, 'Intention set');
   // Briefly highlight the button
   btn.style.borderColor = 'var(--gold)';
   btn.style.color = 'var(--gold)';
@@ -1699,7 +1743,6 @@ function renderIntentions() {
 function markReceived(i) {
   intentions[i].received = true;
   renderIntentions();
-  awardCinders(25, 'Intention manifested');
 }
 
 function removeIntention(i) {
@@ -2149,7 +2192,10 @@ function saveMantra() {
   display.classList.remove('empty');
   document.getElementById('mantraInputWrap').style.display = 'none';
   updateJournalMantra();
-  awardCinders(10, 'Weekly mantra set');
+  if(!dailyActions.mantraSetThisWeek) {
+    dailyActions.mantraSetThisWeek = true;
+    awardCinders(10, 'Weekly mantra set');
+  }
 }
 
 function updateJournalMantra() {
