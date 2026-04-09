@@ -711,6 +711,18 @@
   <div class="journal-section" style="animation-delay:.42s">
     <div class="journal-section-title">My Intentions</div>
     <div class="journal-section-sub">What are you calling into your life?</div>
+    <div style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.7;margin-bottom:14px;padding:12px 16px;background:rgba(201,169,110,.03);border-left:2px solid rgba(201,169,110,.2);">
+      An intention is something you believe is already on its way to you. Write it as if it's coming — not as a wish, but as a truth you're stepping into.
+    </div>
+    <div style="margin-bottom:14px">
+      <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Examples — tap to use:</div>
+      <div style="display:flex;flex-direction:column;gap:6px" id="intentionExamples">
+        <button onclick="useExampleIntention(this)" style="text-align:left;padding:9px 14px;background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.1);color:var(--muted);font-family:'Jost',sans-serif;font-size:13px;cursor:pointer;transition:all .3s;letter-spacing:.02em;">I am calling in financial freedom and abundance</button>
+        <button onclick="useExampleIntention(this)" style="text-align:left;padding:9px 14px;background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.1);color:var(--muted);font-family:'Jost',sans-serif;font-size:13px;cursor:pointer;transition:all .3s;letter-spacing:.02em;">I am calling in a loving, healthy relationship</button>
+        <button onclick="useExampleIntention(this)" style="text-align:left;padding:9px 14px;background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.1);color:var(--muted);font-family:'Jost',sans-serif;font-size:13px;cursor:pointer;transition:all .3s;letter-spacing:.02em;">I am calling in clarity about my purpose and direction</button>
+        <button onclick="useExampleIntention(this)" style="text-align:left;padding:9px 14px;background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.1);color:var(--muted);font-family:'Jost',sans-serif;font-size:13px;cursor:pointer;transition:all .3s;letter-spacing:.02em;">I am calling in vibrant health and lasting energy</button>
+      </div>
+    </div>
     <div id="intentionsList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px"></div>
     <div style="display:flex;gap:10px;align-items:center">
       <input id="newIntentionInput" class="gratitude-input" type="text" placeholder="I am calling in..." style="flex:1;border:1px solid rgba(201,169,110,.12);padding:12px 14px;">
@@ -1632,6 +1644,20 @@ function addIntention() {
   intentions.push({ text, received: false, id: Date.now() });
   input.value = '';
   renderIntentions();
+}
+
+function useExampleIntention(btn) {
+  const text = btn.textContent.trim();
+  if(intentions.length >= MAX_FREE_INTENTIONS) {
+    if(confirm('You\'ve reached your 3 intention limit on the free plan. Upgrade for unlimited intentions?')) openUpgrade();
+    return;
+  }
+  intentions.push({ text, received: false, id: Date.now() });
+  renderIntentions();
+  // Briefly highlight the button
+  btn.style.borderColor = 'var(--gold)';
+  btn.style.color = 'var(--gold)';
+  setTimeout(() => { btn.style.borderColor = 'rgba(201,169,110,.1)'; btn.style.color = 'var(--muted)'; }, 800);
 }
 
 function renderIntentions() {
