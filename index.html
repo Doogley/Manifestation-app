@@ -204,6 +204,11 @@
     .summary-header,.summary-content{padding-left:20px;padding-right:20px}
   }
 
+  /* ── CINDERS TOAST ── */
+  .cinders-toast { position:fixed; top:24px; left:50%; transform:translateX(-50%) translateY(-80px); background:rgba(26,22,16,.95); border:1px solid rgba(201,169,110,.3); color:var(--gold); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; padding:10px 20px; z-index:999; white-space:nowrap; backdrop-filter:blur(8px); transition:transform .4s cubic-bezier(.34,1.56,.64,1), opacity .4s ease; opacity:0; pointer-events:none; }
+  .cinders-toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+  .cinders-toast.hide { transform:translateX(-50%) translateY(-80px); opacity:0; }
+
   /* ── WEEKLY MANTRA ── */
   .mantra-card-wrap { position:relative; z-index:1; padding:16px 32px 0; opacity:0; animation:fadeUp .7s .25s ease forwards; }
   .mantra-card { position:relative; padding:24px 28px; border:1px solid rgba(201,169,110,.15); background:rgba(201,169,110,.03); }
@@ -524,6 +529,7 @@
 </head>
 <body>
 <div class="bg-texture"></div>
+<div class="cinders-toast" id="cindersToast"></div>
 
 <!-- SPLASH -->
 <div id="splash" class="screen active">
@@ -1449,7 +1455,13 @@ function updateCountdown(){
   if(el)el.textContent=`${h}:${m}:${s}`;
 }
 
-function toggleSave(){saved=!saved;const b=document.getElementById('saveBtn');b.textContent=saved?'♥  Saved':'♡  Save';b.classList.toggle('active',saved);}
+function toggleSave(){
+  saved=!saved;
+  const b=document.getElementById('saveBtn');
+  b.textContent=saved?'♥  Saved':'♡  Save';
+  b.classList.toggle('active',saved);
+  if(saved) awardCinders(5, 'Affirmation saved');
+}
 function shareAffirmation(){if(navigator.share){navigator.share({title:'Already Mine',text:todayAffirmation,url:window.location.href});}else{navigator.clipboard.writeText(todayAffirmation).then(()=>alert('Copied to clipboard!'));}}
 function setTab(el){document.querySelectorAll('#globalBottomNav .nav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
 function setTabByName(name){document.querySelectorAll('#globalBottomNav .nav-tab').forEach((t,i)=>{const labels=['today','library','journal','badges','profile'];if(labels[i]===name)t.classList.add('active');else t.classList.remove('active');});}
@@ -1486,7 +1498,8 @@ function saveJournal(){
   if(!textarea.value&&!mood&&gratitude.length===0){alert('Add at least one entry before saving.');return;}
   // Show confirmation
   const wrap=document.querySelector('.journal-save-wrap');
-  wrap.innerHTML=`<div style="text-align:center;padding:20px 0"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:var(--cream);margin-bottom:8px">Entry saved.</div><div style="font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)">✦ Day 1 complete</div></div>`;
+  wrap.innerHTML=`<div style="text-align:center;padding:20px 0"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:var(--cream);margin-bottom:8px">Entry saved.</div><div style="font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)">✦ Day ${unlockedCount} complete</div></div>`;
+  awardCinders(20, 'Journal entry saved');
 }
 function openModal(day,text,cat){document.getElementById('modalDay').textContent=day;document.getElementById('modalText').textContent=text;document.getElementById('modalCat').textContent=cat;document.getElementById('modalOverlay').classList.add('open');}
 // ── UPGRADE ──
@@ -1644,7 +1657,7 @@ function addIntention() {
   intentions.push({ text, received: false, id: Date.now() });
   input.value = '';
   renderIntentions();
-}
+  awardCinders(10, 'Intention set');
 
 function useExampleIntention(btn) {
   const text = btn.textContent.trim();
@@ -1654,6 +1667,7 @@ function useExampleIntention(btn) {
   }
   intentions.push({ text, received: false, id: Date.now() });
   renderIntentions();
+  awardCinders(10, 'Intention set');
   // Briefly highlight the button
   btn.style.borderColor = 'var(--gold)';
   btn.style.color = 'var(--gold)';
@@ -1680,8 +1694,7 @@ function renderIntentions() {
 function markReceived(i) {
   intentions[i].received = true;
   renderIntentions();
-  // Award Cinders
-  currentCinders += 25;
+  awardCinders(25, 'Intention manifested');
 }
 
 function removeIntention(i) {
@@ -2085,6 +2098,26 @@ function generateSummary() {
   summaryGenerated = true;
 }
 
+// ── CINDERS TOAST ──
+let toastTimer = null;
+function showCindersToast(amount, reason) {
+  const toast = document.getElementById('cindersToast');
+  if(!toast) return;
+  toast.textContent = `✦ +${amount} Cinders · ${reason}`;
+  toast.classList.remove('hide');
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+  }, 2500);
+}
+
+function awardCinders(amount, reason) {
+  currentCinders += amount;
+  showCindersToast(amount, reason);
+}
+
 // ── WEEKLY MANTRA ──
 let weeklyMantra = '';
 
@@ -2111,6 +2144,7 @@ function saveMantra() {
   display.classList.remove('empty');
   document.getElementById('mantraInputWrap').style.display = 'none';
   updateJournalMantra();
+  awardCinders(10, 'Weekly mantra set');
 }
 
 function updateJournalMantra() {
