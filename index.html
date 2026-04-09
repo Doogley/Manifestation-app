@@ -1455,12 +1455,16 @@ function updateCountdown(){
   if(el)el.textContent=`${h}:${m}:${s}`;
 }
 
+let savedCindersAwarded = false;
 function toggleSave(){
   saved=!saved;
   const b=document.getElementById('saveBtn');
   b.textContent=saved?'♥  Saved':'♡  Save';
   b.classList.toggle('active',saved);
-  if(saved) awardCinders(5, 'Affirmation saved');
+  if(saved && !savedCindersAwarded) {
+    awardCinders(5, 'Affirmation saved');
+    savedCindersAwarded = true;
+  }
 }
 function shareAffirmation(){if(navigator.share){navigator.share({title:'Already Mine',text:todayAffirmation,url:window.location.href});}else{navigator.clipboard.writeText(todayAffirmation).then(()=>alert('Copied to clipboard!'));}}
 function setTab(el){document.querySelectorAll('#globalBottomNav .nav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
