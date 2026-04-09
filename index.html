@@ -203,6 +203,34 @@
     .summary-header,.summary-content{padding-left:20px;padding-right:20px}
   }
 
+  /* ── WEEKLY MANTRA ── */
+  .mantra-card-wrap { position:relative; z-index:1; padding:16px 32px 0; opacity:0; animation:fadeUp .7s .25s ease forwards; }
+  .mantra-card { position:relative; padding:24px 28px; border:1px solid rgba(201,169,110,.15); background:rgba(201,169,110,.03); }
+  .mantra-card-label { font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); opacity:.7; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; }
+  .mantra-edit-btn { background:none; border:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:10px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:color .3s; padding:0; }
+  .mantra-edit-btn:hover { color:var(--gold); }
+  .mantra-text { font-family:'Jost',sans-serif; font-size:15px; font-weight:300; color:var(--soft); line-height:1.7; font-style:italic; }
+  .mantra-text.empty { color:var(--muted); font-style:normal; font-size:13px; }
+  .mantra-input-wrap { display:none; margin-top:12px; }
+  .mantra-textarea { width:100%; background:rgba(201,169,110,.04); border:1px solid rgba(201,169,110,.2); color:var(--cream); font-family:'Jost',sans-serif; font-weight:300; font-size:14px; line-height:1.7; padding:12px 14px; resize:none; outline:none; transition:border-color .3s; font-style:italic; }
+  .mantra-textarea:focus { border-color:rgba(201,169,110,.4); }
+  .mantra-save-btn { margin-top:8px; padding:10px 24px; background:none; border:1px solid rgba(201,169,110,.3); color:var(--gold); font-family:'Jost',sans-serif; font-size:11px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:all .3s; }
+
+  /* ── EXPANDED MOOD ── */
+  .mood-category { margin-bottom:8px; }
+  .mood-category-btn { width:100%; padding:12px 16px; background:rgba(201,169,110,.03); border:1px solid rgba(201,169,110,.12); color:var(--muted); font-family:'Jost',sans-serif; font-size:13px; cursor:pointer; transition:all .3s; letter-spacing:.05em; text-align:left; display:flex; align-items:center; justify-content:space-between; }
+  .mood-category-btn:hover { border-color:rgba(201,169,110,.3); color:var(--soft); }
+  .mood-category-btn.selected { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.08); }
+  .mood-category-btn.expanded { border-color:rgba(201,169,110,.25); color:var(--soft); background:rgba(201,169,110,.05); border-bottom:none; }
+  .mood-chevron { font-size:10px; transition:transform .3s; opacity:.5; }
+  .mood-category-btn.expanded .mood-chevron { transform:rotate(180deg); }
+  .mood-sub-grid { display:none; flex-wrap:wrap; gap:6px; padding:12px 16px; background:rgba(201,169,110,.04); border:1px solid rgba(201,169,110,.25); border-top:none; margin-bottom:0; }
+  .mood-sub-grid.open { display:flex; }
+  .mood-sub-btn { padding:7px 14px; background:rgba(201,169,110,.03); border:1px solid rgba(201,169,110,.1); color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; cursor:pointer; transition:all .3s; letter-spacing:.04em; }
+  .mood-sub-btn:hover { border-color:rgba(201,169,110,.3); color:var(--soft); }
+  .mood-sub-btn.selected { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.1); }
+  .mood-selected-display { margin-top:10px; font-size:12px; font-weight:300; color:var(--gold); letter-spacing:.08em; min-height:18px; }
+
   /* Modal */
   .modal-overlay { display:none; position:fixed; inset:0; background:rgba(10,8,5,.85); z-index:200; align-items:center; justify-content:center; padding:40px; backdrop-filter:blur(8px); }
   .modal-overlay.open { display:flex; }
@@ -467,7 +495,7 @@
     .badge-name{font-size:9px}
   }
     .question-container,.onboarding-header{padding-left:24px;padding-right:24px}
-    .home-nav,.home-greeting,.todays-card-wrap,.next-unlock-wrap,.library-wrap{padding-left:20px;padding-right:20px}
+    .home-nav,.home-greeting,.todays-card-wrap,.next-unlock-wrap,.library-wrap,.mantra-card-wrap{padding-left:20px;padding-right:20px}
     .upgrade-teaser{margin-left:20px;margin-right:20px}
     .journal-header,.journal-section,.journal-save-wrap{padding-left:20px;padding-right:20px}
     .journal-affirmation-ref{margin-left:20px;margin-right:20px}
@@ -572,6 +600,22 @@
       <div class="next-unlock-time" id="countdownTimer">--:--:--</div>
     </div>
   </div>
+
+  <!-- Weekly Mantra -->
+  <div class="mantra-card-wrap">
+    <div class="section-label">My Weekly Mantra</div>
+    <div class="mantra-card">
+      <div class="mantra-card-label">
+        <span>This week I declare</span>
+        <button class="mantra-edit-btn" onclick="toggleMantraEdit()">✎ Edit</button>
+      </div>
+      <div class="mantra-text empty" id="mantraDisplay">Tap edit to write your mantra for this week...</div>
+      <div class="mantra-input-wrap" id="mantraInputWrap">
+        <textarea class="mantra-textarea" id="mantraInput" rows="3" placeholder="I am strong, I am focused, I am already becoming..."></textarea>
+        <button class="mantra-save-btn" onclick="saveMantra()">✦ Save Mantra</button>
+      </div>
+    </div>
+  </div>
   <div class="library-wrap">
     <div class="section-label">Your Library</div>
     <div class="library-header"><div class="library-count" id="libraryCount">1 of 30 unlocked · 800+ with membership</div></div>
@@ -630,6 +674,12 @@
     <div class="journal-affirmation-ref-text" id="journalAffirmationRef"></div>
   </div>
 
+  <!-- Weekly Mantra reference -->
+  <div class="journal-affirmation-ref" id="journalMantraRef" style="border-left-color:rgba(201,169,110,.4);display:none">
+    <div class="journal-affirmation-ref-label" style="opacity:.6">My Weekly Mantra</div>
+    <div class="journal-affirmation-ref-text" id="journalMantraText" style="font-style:italic;opacity:.8"></div>
+  </div>
+
   <!-- Reflection prompt -->
   <div class="journal-section" style="animation-delay:.15s">
     <div class="journal-section-title">Reflection</div>
@@ -637,20 +687,12 @@
     <textarea class="journal-textarea" rows="5" placeholder="Write freely — this space is only for you..."></textarea>
   </div>
 
-  <!-- Mood check-in -->
+  <!-- Mood check-in — expanded -->
   <div class="journal-section" style="animation-delay:.25s">
     <div class="journal-section-title">Mood Check-in</div>
     <div class="journal-section-sub">How are you feeling right now?</div>
-    <div class="mood-grid">
-      <button class="mood-btn" onclick="selectMood(this)">Peaceful</button>
-      <button class="mood-btn" onclick="selectMood(this)">Hopeful</button>
-      <button class="mood-btn" onclick="selectMood(this)">Grateful</button>
-      <button class="mood-btn" onclick="selectMood(this)">Anxious</button>
-      <button class="mood-btn" onclick="selectMood(this)">Tired</button>
-      <button class="mood-btn" onclick="selectMood(this)">Excited</button>
-      <button class="mood-btn" onclick="selectMood(this)">Heavy</button>
-      <button class="mood-btn" onclick="selectMood(this)">Aligned</button>
-    </div>
+    <div id="moodExpandedGrid"></div>
+    <div class="mood-selected-display" id="moodSelectedDisplay"></div>
   </div>
 
   <!-- Gratitude -->
@@ -1300,6 +1342,8 @@ function openJournal(){
   showScreen('journal');
   setTabByName('journal');
   renderIntentions();
+  buildMoodGrid();
+  updateJournalMantra();
 }
 
 function selectMood(el){document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
@@ -1875,6 +1919,99 @@ function generateSummary() {
   document.getElementById('summaryLoading').style.display = 'none';
   document.getElementById('summaryContent').style.display = 'block';
   summaryGenerated = true;
+}
+
+// ── WEEKLY MANTRA ──
+let weeklyMantra = '';
+
+function toggleMantraEdit() {
+  const wrap = document.getElementById('mantraInputWrap');
+  const input = document.getElementById('mantraInput');
+  const isOpen = wrap.style.display === 'block';
+  if(!isOpen) {
+    wrap.style.display = 'block';
+    input.value = weeklyMantra;
+    input.focus();
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function saveMantra() {
+  const input = document.getElementById('mantraInput');
+  const text = input.value.trim();
+  if(!text) return;
+  weeklyMantra = text;
+  const display = document.getElementById('mantraDisplay');
+  display.textContent = text;
+  display.classList.remove('empty');
+  document.getElementById('mantraInputWrap').style.display = 'none';
+  updateJournalMantra();
+}
+
+function updateJournalMantra() {
+  const ref = document.getElementById('journalMantraRef');
+  const txt = document.getElementById('journalMantraText');
+  if(weeklyMantra && ref && txt) {
+    ref.style.display = 'block';
+    txt.textContent = weeklyMantra;
+  } else if(ref) {
+    ref.style.display = 'none';
+  }
+}
+
+// ── EXPANDED MOOD CHECK-IN ──
+const moodCategories = [
+  { name:'Peaceful', sub:['Calm','Serene','Content','Grounded','Still','Rested'] },
+  { name:'Hopeful', sub:['Optimistic','Excited','Expectant','Inspired','Motivated','Curious'] },
+  { name:'Grateful', sub:['Appreciative','Blessed','Touched','Fulfilled','Joyful','Warm'] },
+  { name:'Anxious', sub:['Worried','Overwhelmed','Restless','Uncertain','Tense','Scattered'] },
+  { name:'Tired', sub:['Drained','Sluggish','Foggy','Burned out','Low energy','Heavy'] },
+  { name:'Excited', sub:['Energized','Alive','Bold','Confident','On fire','Expansive'] },
+  { name:'Heavy', sub:['Sad','Grieving','Stuck','Numb','Lost','Disconnected'] },
+  { name:'Aligned', sub:['Focused','Clear','Purposeful','Magnetic','In flow','Whole'] },
+];
+
+let selectedMoodCategory = null;
+let selectedMoodSub = null;
+
+function buildMoodGrid() {
+  const grid = document.getElementById('moodExpandedGrid');
+  if(!grid) return;
+  grid.innerHTML = moodCategories.map((cat,i) => `
+    <div class="mood-category" id="moodCat_${i}">
+      <button class="mood-category-btn" onclick="toggleMoodCategory(${i})">
+        <span>${cat.name}</span><span class="mood-chevron">▾</span>
+      </button>
+      <div class="mood-sub-grid" id="moodSub_${i}">
+        ${cat.sub.map(s=>`<button class="mood-sub-btn" onclick="selectSubMood('${cat.name}','${s}',this)">${s}</button>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function toggleMoodCategory(index) {
+  const btn = document.querySelector(`#moodCat_${index} .mood-category-btn`);
+  const sub = document.getElementById(`moodSub_${index}`);
+  const isOpen = sub.classList.contains('open');
+  document.querySelectorAll('.mood-category-btn').forEach(b => b.classList.remove('expanded'));
+  document.querySelectorAll('.mood-sub-grid').forEach(s => s.classList.remove('open'));
+  if(!isOpen) { btn.classList.add('expanded'); sub.classList.add('open'); }
+  if(selectedMoodCategory !== moodCategories[index].name) {
+    selectedMoodSub = null;
+    document.querySelectorAll('.mood-sub-btn').forEach(b => b.classList.remove('selected'));
+  }
+}
+
+function selectSubMood(category, sub, el) {
+  selectedMoodCategory = category;
+  selectedMoodSub = sub;
+  document.querySelectorAll('.mood-category-btn').forEach(b => b.classList.remove('selected'));
+  const catIndex = moodCategories.findIndex(c => c.name === category);
+  if(catIndex >= 0) document.querySelector(`#moodCat_${catIndex} .mood-category-btn`).classList.add('selected');
+  document.querySelectorAll('.mood-sub-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  const display = document.getElementById('moodSelectedDisplay');
+  if(display) display.textContent = `✦ Feeling ${sub} (${category})`;
 }
 
 function closeModal(e){if(e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('open');}
