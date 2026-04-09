@@ -27,11 +27,12 @@
       radial-gradient(ellipse 40% 60% at 10% 60%,rgba(201,169,110,.04) 0%,transparent 50%);
   }
   @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
   @keyframes pulseRing { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.04);opacity:.7} }
   @keyframes shimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
   @keyframes glowPulse { 0%,100%{box-shadow:0 0 20px rgba(201,169,110,.1)} 50%{box-shadow:0 0 40px rgba(201,169,110,.2)} }
-
-  /* BUTTONS */
+  .screen { display:none; min-height:100vh; flex-direction:column; }
+  .screen.active { display:flex; animation:fadeIn .3s ease forwards; }
   .btn-primary {
     display:inline-block; padding:16px 48px; background:transparent;
     border:1px solid var(--gold); color:var(--gold);
@@ -584,7 +585,7 @@
   <div class="todays-card-wrap">
     <div class="section-label">Today's Affirmation</div>
     <div class="todays-card">
-      <div class="card-day-num"><span class="card-day-dot"></span> Day 1 of your journey</div>
+      <div class="card-day-num"><span class="card-day-dot"></span> Day <span id="homeDayCount">1</span> of your journey</div>
       <div class="card-affirmation" id="homeAffirmationText"></div>
       <div class="card-category" id="homeAffirmationCat"></div>
       <div class="card-actions">
@@ -1222,6 +1223,117 @@ const affirmationLibrary = [
   // GENERAL
   {id:99,text:"I am exactly where I need to be, and I trust the journey completely.",cat:"Growth"},
   {id:100,text:"The best version of me is not a destination — it is who I am right now, still becoming.",cat:"Growth"},
+  // ABUNDANCE continued
+  {id:101,text:"I am open to receiving more than I have ever allowed myself to imagine.",cat:"Abundance"},
+  {id:102,text:"Wealth is a tool, and I am learning to use it with wisdom and grace.",cat:"Abundance"},
+  {id:103,text:"I do not compete. I create. My abundance does not diminish anyone else's.",cat:"Abundance"},
+  {id:104,text:"Opportunities are attracted to me because I show up with intention every day.",cat:"Abundance"},
+  {id:105,text:"I am becoming someone who attracts exactly what they need at exactly the right time.",cat:"Abundance"},
+  {id:106,text:"Money is energy and I welcome its flow into every area of my life.",cat:"Abundance"},
+  {id:107,text:"I release the story that I am not meant for financial ease.",cat:"Abundance"},
+  {id:108,text:"I am worthy of receiving without guilt and giving without depletion.",cat:"Abundance"},
+  // LOVE continued
+  {id:109,text:"I do not chase love. I become the kind of person love cannot help but find.",cat:"Love"},
+  {id:110,text:"The love I give myself teaches the world how to love me.",cat:"Love"},
+  {id:111,text:"I attract people who reflect the best of who I am becoming.",cat:"Love"},
+  {id:112,text:"My relationships are built on honesty, depth, and mutual growth.",cat:"Love"},
+  {id:113,text:"I am learning to receive love without flinching.",cat:"Love"},
+  {id:114,text:"The people who are meant for me will stay.",cat:"Love"},
+  {id:115,text:"I release every relationship that was teaching me what I don't want — it did its job.",cat:"Love"},
+  {id:116,text:"Love is not something I earn. It is something I allow.",cat:"Love"},
+  // CONFIDENCE continued
+  {id:117,text:"I am not too much. I am exactly enough for the right places and people.",cat:"Confidence"},
+  {id:118,text:"My past does not determine my potential. I decide that.",cat:"Confidence"},
+  {id:119,text:"I show up even when I am afraid — that is the whole point.",cat:"Confidence"},
+  {id:120,text:"I am becoming someone I would have looked up to.",cat:"Confidence"},
+  {id:121,text:"I no longer wait for confidence to arrive before I begin.",cat:"Confidence"},
+  {id:122,text:"Every time I do the hard thing, I become harder to stop.",cat:"Confidence"},
+  {id:123,text:"I trust my instincts. They have never truly led me wrong.",cat:"Confidence"},
+  {id:124,text:"I am allowed to take up space in every room I enter.",cat:"Confidence"},
+  // HEALTH continued
+  {id:125,text:"I am not punishing my body. I am partnering with it.",cat:"Health"},
+  {id:126,text:"Every small act of care I give my body is an act of self-respect.",cat:"Health"},
+  {id:127,text:"My body carries me through every beautiful moment of this life. I am grateful.",cat:"Health"},
+  {id:128,text:"I release the need to look a certain way and embrace how good I feel.",cat:"Health"},
+  {id:129,text:"I am building habits that will carry me into the life I am calling in.",cat:"Health"},
+  {id:130,text:"Sleep, water, movement, stillness — I give my body what it asks for.",cat:"Health"},
+  {id:131,text:"My health is the foundation everything else is built on. I protect it.",cat:"Health"},
+  {id:132,text:"I am not behind. I am beginning exactly when I was meant to.",cat:"Health"},
+  // PEACE continued
+  {id:133,text:"I am not responsible for other people's storms. I tend to my own sky.",cat:"Peace"},
+  {id:134,text:"Silence is not emptiness. It is where I hear myself most clearly.",cat:"Peace"},
+  {id:135,text:"I give myself permission to slow down without calling it failure.",cat:"Peace"},
+  {id:136,text:"The present moment is the only place my life actually happens.",cat:"Peace"},
+  {id:137,text:"I am learning to sit with uncertainty without being swallowed by it.",cat:"Peace"},
+  {id:138,text:"My nervous system is allowed to rest. I am safe.",cat:"Peace"},
+  {id:139,text:"I release the need to have everything figured out before I can feel okay.",cat:"Peace"},
+  {id:140,text:"Peace is not the absence of problems. It is the presence of perspective.",cat:"Peace"},
+  // CAREER continued
+  {id:141,text:"I am not waiting to be discovered. I am making myself undeniable.",cat:"Career"},
+  {id:142,text:"The work I do matters even when no one is watching.",cat:"Career"},
+  {id:143,text:"I am building something that will outlast my doubt.",cat:"Career"},
+  {id:144,text:"Every skill I develop is an investment that compounds over time.",cat:"Career"},
+  {id:145,text:"I release perfectionism and embrace progress. Done is better than perfect.",cat:"Career"},
+  {id:146,text:"I am exactly the person this moment has been preparing.",cat:"Career"},
+  {id:147,text:"My consistency is my competitive advantage.",cat:"Career"},
+  {id:148,text:"The path is being laid down as I walk it. I trust the direction.",cat:"Career"},
+  // HEALING continued
+  {id:149,text:"I am not broken. I am in the process of becoming whole.",cat:"Healing"},
+  {id:150,text:"Crying is not weakness. It is the body releasing what the mind has been carrying.",cat:"Healing"},
+  {id:151,text:"I allow myself to grieve without attaching a timeline to it.",cat:"Healing"},
+  {id:152,text:"The version of me who needed that pain to grow is grateful. The new me is free.",cat:"Healing"},
+  {id:153,text:"I am no longer available for the same lessons dressed in different circumstances.",cat:"Healing"},
+  {id:154,text:"My healing does not have to be pretty to be real.",cat:"Healing"},
+  {id:155,text:"I chose to stay and I am proud of myself for that every single day.",cat:"Healing"},
+  {id:156,text:"Something in me always knew I would make it here.",cat:"Healing"},
+  // COURAGE continued
+  {id:157,text:"The life I want is on the other side of the conversation I keep avoiding.",cat:"Courage"},
+  {id:158,text:"I am not waiting for the fear to go away. I am learning to walk with it.",cat:"Courage"},
+  {id:159,text:"Courage is a decision I make before I feel ready.",cat:"Courage"},
+  {id:160,text:"I have already survived things I thought would break me. I can do this too.",cat:"Courage"},
+  {id:161,text:"The risk of staying the same is greater than the risk of change.",cat:"Courage"},
+  {id:162,text:"I give myself permission to try and fail and try again.",cat:"Courage"},
+  {id:163,text:"Something extraordinary is waiting for me just beyond my comfort zone.",cat:"Courage"},
+  {id:164,text:"I am not too late. I am right on time for the life I am choosing now.",cat:"Courage"},
+  // NEW BEGINNINGS continued
+  {id:165,text:"I release the old version of my life with love and step into the new with expectation.",cat:"New Beginnings"},
+  {id:166,text:"Not knowing what comes next is terrifying and also the most exciting thing imaginable.",cat:"New Beginnings"},
+  {id:167,text:"I am planting seeds today that my future self will harvest.",cat:"New Beginnings"},
+  {id:168,text:"The blank page is not intimidating. It is an invitation.",cat:"New Beginnings"},
+  {id:169,text:"Everything I release is making room for something more aligned.",cat:"New Beginnings"},
+  {id:170,text:"I do not need to have a plan. I need to have a direction.",cat:"New Beginnings"},
+  {id:171,text:"Every morning is a small new beginning. I take it one morning at a time.",cat:"New Beginnings"},
+  {id:172,text:"The hardest part of starting is starting. I have already done the hardest part.",cat:"New Beginnings"},
+  // FAMILY continued
+  {id:173,text:"I am breaking cycles that were never meant to reach the next generation.",cat:"Family"},
+  {id:174,text:"The love I give my family comes back to me in ways I cannot always see.",cat:"Family"},
+  {id:175,text:"I am present for the ordinary moments because those become the extraordinary memories.",cat:"Family"},
+  {id:176,text:"My home is a sanctuary I am intentionally building.",cat:"Family"},
+  {id:177,text:"I parent myself with the patience I wish I had always been given.",cat:"Family"},
+  // GROWTH continued
+  {id:178,text:"I am not the same person I was a year ago and that is everything.",cat:"Growth"},
+  {id:179,text:"Growth is uncomfortable and I welcome the discomfort as proof I am changing.",cat:"Growth"},
+  {id:180,text:"I celebrate small wins because they are the foundation of big ones.",cat:"Growth"},
+  {id:181,text:"I learn from every outcome — the good ones and especially the hard ones.",cat:"Growth"},
+  {id:182,text:"The person I am becoming is worth every uncomfortable step it takes to get there.",cat:"Growth"},
+  {id:183,text:"I am curious about my limitations because that is where my growth lives.",cat:"Growth"},
+  {id:184,text:"Every version of me has been doing their best. I honor all of them.",cat:"Growth"},
+  {id:185,text:"I am not competing with anyone but the person I was yesterday.",cat:"Growth"},
+  {id:186,text:"My story is not finished. The best chapters are still being written.",cat:"Growth"},
+  {id:187,text:"I invest in myself because I am the best investment there is.",cat:"Growth"},
+  {id:188,text:"Progress over perfection — always and in everything.",cat:"Growth"},
+  {id:189,text:"I give myself grace on the hard days because showing up imperfectly still counts.",cat:"Growth"},
+  {id:190,text:"I am worthy of the dreams that keep finding their way back to me.",cat:"Growth"},
+  {id:191,text:"Something in the universe is conspiring in my favor right now.",cat:"Growth"},
+  {id:192,text:"I am not who I was. I am who I am choosing to become.",cat:"Growth"},
+  {id:193,text:"My potential is not a fixed thing. It expands every time I choose to show up.",cat:"Growth"},
+  {id:194,text:"The life I am building is worth every moment of discomfort it requires.",cat:"Growth"},
+  {id:195,text:"I release comparison. My path was never meant to look like someone else's.",cat:"Growth"},
+  {id:196,text:"I am becoming more myself every single day.",cat:"Growth"},
+  {id:197,text:"The universe rewards consistency. I show up again.",cat:"Growth"},
+  {id:198,text:"I trust the process even when I cannot see the progress.",cat:"Growth"},
+  {id:199,text:"My dream is valid. My timing is perfect. My effort is enough.",cat:"Growth"},
+  {id:200,text:"I am already everything I need to be. I am also still becoming more.",cat:"Growth"},
 ];
 
 let currentQuestion=0,answers={},selectedOption=null,todayAffirmation='',todayCategory='',saved=false;
@@ -1292,17 +1404,24 @@ function buildHome(){
 function buildLibrary(){
   const grid=document.getElementById('libraryGrid');
   grid.innerHTML='';
+  // Update day counter
+  const dayCountEl = document.getElementById('homeDayCount');
+  if(dayCountEl) dayCountEl.textContent = unlockedCount;
   // Today (full width)
   const t=document.createElement('div');
   t.className='lib-tile today';
-  t.innerHTML=`<div class="lib-tile-day">✦ Day 1 · Today</div><div class="lib-tile-text">${todayAffirmation}</div><div class="lib-tile-cat">${todayCategory}</div>`;
-  t.onclick=()=>openModal('Day 1 · Today',todayAffirmation,todayCategory);
+  t.innerHTML=`<div class="lib-tile-day">✦ Day ${unlockedCount} · Today</div><div class="lib-tile-text">${todayAffirmation}</div><div class="lib-tile-cat">${todayCategory}</div>`;
+  t.onclick=()=>openModal(`Day ${unlockedCount} · Today`,todayAffirmation,todayCategory);
   grid.appendChild(t);
-  // Locked days
-  for(let d=2;d<=14;d++){
+  // Locked days — clicking opens library
+  for(let d=unlockedCount+1;d<=unlockedCount+13;d++){
+    const aff = affirmationLibrary[d-1];
     const tile=document.createElement('div');
     tile.className='lib-tile locked';
-    tile.innerHTML=`<div class="locked-blur-text">${lockedTexts[(d-2)%lockedTexts.length]}</div><div class="locked-overlay"><div class="lock-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div><div class="lock-day-label">Day ${d}</div></div>`;
+    tile.style.cursor='pointer';
+    tile.title='View your full library';
+    tile.innerHTML=`<div class="locked-blur-text">${aff?aff.text:lockedTexts[(d-2)%lockedTexts.length]}</div><div class="locked-overlay"><div class="lock-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div><div class="lock-day-label">Day ${d}</div></div>`;
+    tile.onclick=()=>{openLibrary();setTabByName('library');};
     grid.appendChild(tile);
   }
 }
@@ -1755,6 +1874,25 @@ function buildProfile() {
   document.getElementById('prefIntention').textContent = intentMap[answers.intention] || 'Abundance';
   document.getElementById('prefTone').textContent = toneMap[answers.tone] || 'Gentle';
   document.getElementById('prefTiming').textContent = timingMap[answers.timing] || 'Morning';
+
+  // Current Intention — pull from journal intentions
+  const intentionEl = document.getElementById('profileIntention');
+  const activeIntentions = intentions.filter(i => !i.received);
+  if(intentionEl) {
+    if(activeIntentions.length > 0) {
+      intentionEl.textContent = activeIntentions[0].text;
+      intentionEl.style.fontStyle = 'italic';
+      intentionEl.style.color = 'var(--soft)';
+    } else if(intentions.length > 0) {
+      intentionEl.textContent = 'All intentions manifested. Set a new one in your journal.';
+      intentionEl.style.fontStyle = 'normal';
+      intentionEl.style.color = 'var(--muted)';
+    } else {
+      intentionEl.textContent = 'No intentions set yet. Open your journal to add one.';
+      intentionEl.style.fontStyle = 'normal';
+      intentionEl.style.color = 'var(--muted)';
+    }
+  }
 
   // Saved affirmation
   if(saved && todayAffirmation) {
