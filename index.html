@@ -690,7 +690,7 @@
   <!-- Mood check-in — expanded -->
   <div class="journal-section" style="animation-delay:.25s">
     <div class="journal-section-title">Mood Check-in</div>
-    <div class="journal-section-sub">How are you feeling right now?</div>
+    <div class="journal-section-sub">Start broad, then narrow it down.</div>
     <div id="moodExpandedGrid"></div>
     <div class="mood-selected-display" id="moodSelectedDisplay"></div>
   </div>
@@ -1961,16 +1961,11 @@ function updateJournalMantra() {
 }
 
 // ── EXPANDED MOOD CHECK-IN ──
-const moodCategories = [
-  { name:'Peaceful', sub:['Calm','Serene','Content','Grounded','Still','Rested'] },
-  { name:'Hopeful', sub:['Optimistic','Excited','Expectant','Inspired','Motivated','Curious'] },
-  { name:'Grateful', sub:['Appreciative','Blessed','Touched','Fulfilled','Joyful','Warm'] },
-  { name:'Anxious', sub:['Worried','Overwhelmed','Restless','Uncertain','Tense','Scattered'] },
-  { name:'Tired', sub:['Drained','Sluggish','Foggy','Burned out','Low energy','Heavy'] },
-  { name:'Excited', sub:['Energized','Alive','Bold','Confident','On fire','Expansive'] },
-  { name:'Heavy', sub:['Sad','Grieving','Stuck','Numb','Lost','Disconnected'] },
-  { name:'Aligned', sub:['Focused','Clear','Purposeful','Magnetic','In flow','Whole'] },
-];
+const moodMap = {
+  Positive: ['Grateful','Aligned','Joyful','Inspired','Peaceful','Excited','Hopeful','Energized','Content','Bold','Warm','Clear','Motivated','Confident','Radiant'],
+  Neutral: ['Okay','Steady','Reflective','Tired','Distracted','Uncertain','Calm','Processing','Searching','Detached','Pensive','Reserved','Adjusting','Flat','Transitioning'],
+  Negative: ['Anxious','Heavy','Overwhelmed','Sad','Frustrated','Lost','Stuck','Numb','Restless','Drained','Grieving','Disconnected','Tense','Scattered','Defeated'],
+};
 
 let selectedMoodCategory = null;
 let selectedMoodSub = null;
@@ -1978,40 +1973,37 @@ let selectedMoodSub = null;
 function buildMoodGrid() {
   const grid = document.getElementById('moodExpandedGrid');
   if(!grid) return;
-  grid.innerHTML = moodCategories.map((cat,i) => `
-    <div class="mood-category" id="moodCat_${i}">
-      <button class="mood-category-btn" onclick="toggleMoodCategory(${i})">
-        <span>${cat.name}</span><span class="mood-chevron">▾</span>
-      </button>
-      <div class="mood-sub-grid" id="moodSub_${i}">
-        ${cat.sub.map(s=>`<button class="mood-sub-btn" onclick="selectSubMood('${cat.name}','${s}',this)">${s}</button>`).join('')}
-      </div>
-    </div>`).join('');
+  grid.innerHTML = `
+    <div style="display:flex;gap:10px;margin-bottom:12px">
+      <button class="mood-category-btn" style="flex:1;justify-content:center" onclick="selectMoodBase('Positive',this)">Positive</button>
+      <button class="mood-category-btn" style="flex:1;justify-content:center" onclick="selectMoodBase('Neutral',this)">Neutral</button>
+      <button class="mood-category-btn" style="flex:1;justify-content:center" onclick="selectMoodBase('Negative',this)">Negative</button>
+    </div>
+    <div class="mood-sub-grid" id="moodSubGrid" style="display:none;flex-wrap:wrap;gap:8px;padding:16px;background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.15)"></div>
+    <div class="mood-selected-display" id="moodSelectedDisplay"></div>
+  `;
 }
 
-function toggleMoodCategory(index) {
-  const btn = document.querySelector(`#moodCat_${index} .mood-category-btn`);
-  const sub = document.getElementById(`moodSub_${index}`);
-  const isOpen = sub.classList.contains('open');
-  document.querySelectorAll('.mood-category-btn').forEach(b => b.classList.remove('expanded'));
-  document.querySelectorAll('.mood-sub-grid').forEach(s => s.classList.remove('open'));
-  if(!isOpen) { btn.classList.add('expanded'); sub.classList.add('open'); }
-  if(selectedMoodCategory !== moodCategories[index].name) {
-    selectedMoodSub = null;
-    document.querySelectorAll('.mood-sub-btn').forEach(b => b.classList.remove('selected'));
-  }
+function selectMoodBase(base, el) {
+  selectedMoodCategory = base;
+  selectedMoodSub = null;
+  document.querySelectorAll('.mood-category-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  const subGrid = document.getElementById('moodSubGrid');
+  subGrid.style.display = 'flex';
+  subGrid.innerHTML = moodMap[base].map(s =>
+    `<button class="mood-sub-btn" onclick="selectSubMood('${base}','${s}',this)">${s}</button>`
+  ).join('');
+  document.getElementById('moodSelectedDisplay').textContent = '';
 }
 
 function selectSubMood(category, sub, el) {
   selectedMoodCategory = category;
   selectedMoodSub = sub;
-  document.querySelectorAll('.mood-category-btn').forEach(b => b.classList.remove('selected'));
-  const catIndex = moodCategories.findIndex(c => c.name === category);
-  if(catIndex >= 0) document.querySelector(`#moodCat_${catIndex} .mood-category-btn`).classList.add('selected');
   document.querySelectorAll('.mood-sub-btn').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
   const display = document.getElementById('moodSelectedDisplay');
-  if(display) display.textContent = `✦ Feeling ${sub} (${category})`;
+  if(display) display.textContent = `✦ Feeling ${sub}`;
 }
 
 function closeModal(e){if(e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('open');}
