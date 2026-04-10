@@ -931,7 +931,7 @@
     <div class="profile-section-title">Current Intention</div>
     <div class="profile-intention">
       <div class="profile-intention-label">What I am calling in</div>
-      <div class="profile-intention-text" id="profileIntention">I am calling in abundance, clarity, and the confidence to walk toward what is already mine.</div>
+      <div class="profile-intention-text" id="profileIntention"></div>
     </div>
   </div>
 
@@ -1414,7 +1414,12 @@ function showReveal(){
   showScreen('reveal');
 }
 
-function goToHome(){buildHome();showScreen('home');setTabByName('today');}
+function goToHome(){
+  dailyActions.affirmationUnlocked = true;
+  buildHome();
+  showScreen('home');
+  setTabByName('today');
+}
 function buildHome(){
   const h=new Date().getHours();
   document.getElementById('greetingTime').textContent=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
@@ -1867,21 +1872,30 @@ function handleLogoTap() {
     logoTapCount = 0;
     adminMode = !adminMode;
     if(adminMode) {
-      // Unlock everything
       currentCinders = 18500;
       unlockedCount = 100;
       badgeCategories.forEach(cat => cat.badges.forEach(b => b.earned = true));
-      // Unlock all library tiles
-      document.querySelectorAll('.lib-tile.locked').forEach(t => {
-        t.classList.remove('locked');
-        t.classList.add('lib-tile');
-        t.innerHTML = `<div class="lib-tile-day">✦ Unlocked</div><div class="lib-tile-text">Admin mode — all affirmations visible</div>`;
-      });
+      // Auto-unlock affirmation card
+      dailyActions.affirmationUnlocked = true;
+      // Rebuild library with real affirmations
+      buildLibrary();
+      // Show affirmation card unlocked
+      const lockedEl = document.getElementById('affirmationLocked');
+      const unlockedEl = document.getElementById('affirmationUnlocked');
+      if(lockedEl) lockedEl.style.display = 'none';
+      if(unlockedEl) {
+        unlockedEl.style.display = 'block';
+        document.getElementById('homeAffirmationText').textContent = todayAffirmation;
+        document.getElementById('homeAffirmationCat').textContent = '✦  ' + todayCategory;
+      }
       showAdminBanner(true);
     } else {
       currentCinders = 50;
       unlockedCount = 1;
+      dailyActions.affirmationUnlocked = false;
       badgeCategories.forEach((cat,ci) => cat.badges.forEach((b,bi) => b.earned = (ci===0&&bi===0)||(ci===1&&bi===0)||(ci===2&&bi===0)));
+      buildLibrary();
+      buildHome();
       showAdminBanner(false);
     }
   }
