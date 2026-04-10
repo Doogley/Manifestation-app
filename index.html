@@ -1467,22 +1467,27 @@ function buildLibrary(){
   grid.innerHTML='';
   // Update day counter
   const dayCountEl = document.getElementById('homeDayCount');
-  if(dayCountEl) dayCountEl.textContent = unlockedCount;
+  if(dayCountEl) dayCountEl.textContent = adminMode ? unlockedCount : 1;
   // Today (full width)
   const t=document.createElement('div');
   t.className='lib-tile today';
-  t.innerHTML=`<div class="lib-tile-day">✦ Day ${unlockedCount} · Today</div><div class="lib-tile-text">${todayAffirmation}</div><div class="lib-tile-cat">${todayCategory}</div>`;
-  t.onclick=()=>openModal(`Day ${unlockedCount} · Today`,todayAffirmation,todayCategory);
+  t.innerHTML=`<div class="lib-tile-day">✦ Day 1 · Today</div><div class="lib-tile-text">${todayAffirmation}</div><div class="lib-tile-cat">${todayCategory}</div>`;
+  t.onclick=()=>openModal('Day 1 · Today',todayAffirmation,todayCategory);
   grid.appendChild(t);
-  // Locked days — clicking opens library
-  for(let d=unlockedCount+1;d<=unlockedCount+13;d++){
+  // In admin mode show real unlocked tiles, otherwise show locked
+  for(let d=2;d<=14;d++){
     const aff = affirmationLibrary[d-1];
     const tile=document.createElement('div');
-    tile.className='lib-tile locked';
-    tile.style.cursor='pointer';
-    tile.title='View your full library';
-    tile.innerHTML=`<div class="locked-blur-text">${aff?aff.text:lockedTexts[(d-2)%lockedTexts.length]}</div><div class="locked-overlay"><div class="lock-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div><div class="lock-day-label">Day ${d}</div></div>`;
-    tile.onclick=()=>{openLibrary();setTabByName('library');};
+    if(adminMode) {
+      tile.className='lib-tile';
+      tile.innerHTML=`<div class="lib-tile-day">Day ${d}</div><div class="lib-tile-text">${aff?aff.text:''}</div><div class="lib-tile-cat">${aff?aff.cat:''}</div>`;
+      tile.onclick=()=>openModal(`Day ${d}`, aff.text, aff.cat);
+    } else {
+      tile.className='lib-tile locked';
+      tile.style.cursor='pointer';
+      tile.innerHTML=`<div class="locked-blur-text">${aff?aff.text:lockedTexts[(d-2)%lockedTexts.length]}</div><div class="locked-overlay"><div class="lock-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div><div class="lock-day-label">Day ${d}</div></div>`;
+      tile.onclick=()=>{openLibrary();setTabByName('library');};
+    }
     grid.appendChild(tile);
   }
 }
