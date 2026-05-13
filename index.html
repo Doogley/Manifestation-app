@@ -1163,6 +1163,91 @@ const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
+// ── AUTH FUNCTIONS ──
+function switchAuthTab(tab) {
+  const loginForm = document.getElementById('loginForm');
+  const signupForm = document.getElementById('signupForm');
+  const loginTab = document.getElementById('authTabLogin');
+  const signupTab = document.getElementById('authTabSignup');
+  if(tab === 'login') {
+    loginForm.style.display = 'flex';
+    signupForm.style.display = 'none';
+    loginTab.style.background = 'rgba(201,169,110,.12)';
+    loginTab.style.color = 'var(--gold)';
+    signupTab.style.background = 'none';
+    signupTab.style.color = 'var(--muted)';
+  } else {
+    loginForm.style.display = 'none';
+    signupForm.style.display = 'flex';
+    signupTab.style.background = 'rgba(201,169,110,.12)';
+    signupTab.style.color = 'var(--gold)';
+    loginTab.style.background = 'none';
+    loginTab.style.color = 'var(--muted)';
+  }
+}
+
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errorEl = document.getElementById('loginError');
+  errorEl.textContent = '';
+  if(!email || !password) { errorEl.textContent = 'Please fill in both fields.'; return; }
+  const { data, error } = await db.auth.signInWithPassword({ email, password });
+  if(error) { errorEl.textContent = error.message; return; }
+  currentUser = data.user;
+  await loadUserProfile();
+}
+
+async function handleSignup() {
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const errorEl = document.getElementById('signupError');
+  errorEl.textContent = '';
+  if(!name || !email || !password) { errorEl.textContent = 'Please fill in all fields.'; return; }
+  if(password.length < 6) { errorEl.textContent = 'Password must be at least 6 characters.'; return; }
+  const { data, error } = await db.auth.signUp({ email, password });
+  if(error) { errorEl.textContent = error.message; return; }
+  currentUser = data.user;
+  // Create their profile in the database
+  await db.from('profiles').insert({
+    id: currentUser.id,
+    real_name: name,
+    cinders: 50,
+    streak: 0,
+  });
+  userRealName = name;
+  // New user goes to onboarding
+  showScreen('onboarding');
+  renderQuestion(0);
+}
+
+async function loadUserProfile() {
+  const { data, error } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
+  if(error || !data) { showScreen('onboarding'); renderQuestion(0); return; }
+  // Load their saved data into our variables
+  userRealName = data.real_name || 'Friend';
+  userNickname = data.nickname || '';
+  currentCinders = data.cinders || 50;
+  answers.intention = data.intention || 'abundance';
+  answers.tone = data.tone || 'gentle';
+  answers.timing = data.timing || 'morning';
+  // Returning user goes straight to home
+  todayAffirmation = affirmations[answers.intention][answers.tone];
+  todayCategory = catLabels[answers.intention];
+  buildHome();
+  showScreen('home');
+  setTabByName('today');
+}
+
+// Check if user is already logged in when app loads
+window.addEventListener('load', async () => {
+  const { data } = await db.auth.getSession();
+  if(data.session) {
+    currentUser = data.session.user;
+    await loadUserProfile();
+  }
+});
 const questions=[
   {id:'lifeStage',number:'One',text:'Which best describes where you are in life right now?',options:[{label:'Building something of my own',value:'entrepreneur'},{label:'Focused on my career',value:'career'},{label:'Navigating a major life transition',value:'transition'},{label:'Raising a family',value:'parent'},{label:'Growing into who I want to be',value:'growth'}]},
   {id:'intention',number:'Two',text:'What do you most want to call into your life?',options:[{label:'Abundance and financial freedom',value:'abundance'},{label:'Love and deep connection',value:'love'},{label:'Confidence and inner strength',value:'confidence'},{label:'Health and vitality',value:'health'},{label:'Peace and clarity',value:'peace'},{label:'Career success and purpose',value:'career'}]},
