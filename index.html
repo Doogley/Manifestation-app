@@ -1603,6 +1603,11 @@ async function buildHome(){
     unlockedEl.style.display = 'block';
     document.getElementById('homeAffirmationText').textContent = todayAffirmation;
     document.getElementById('homeAffirmationCat').textContent = '✦  ' + todayCategory;
+    const saveBtn = document.getElementById('saveBtn');
+    if(saveBtn) {
+      saveBtn.textContent = saved ? '♥  Saved' : '♡  Save';
+      saveBtn.classList.toggle('active', saved);
+    }
   } else {
     lockedEl.style.display = 'block';
     unlockedEl.style.display = 'none';
