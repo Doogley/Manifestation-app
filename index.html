@@ -1598,7 +1598,19 @@ async function buildHome(){
   setInterval(updateCountdown,1000);
 }
 
-function unlockTodaysAffirmation() {
+async function unlockTodaysAffirmation() {
+  const today = new Date().toISOString().split('T')[0];
+  if(currentUser) {
+    const { data } = await db.from('profiles')
+      .select('last_affirmation_date')
+      .eq('id', currentUser.id)
+      .single();
+    if(data?.last_affirmation_date === today) return; // already unlocked today
+    await db.from('profiles')
+      .update({ last_affirmation_date: today })
+      .eq('id', currentUser.id);
+    awardCinders(10, 'Affirmation unlocked');
+  }
   dailyActions.affirmationUnlocked = true;
   document.getElementById('affirmationLocked').style.display = 'none';
   const unlockedEl = document.getElementById('affirmationUnlocked');
@@ -1606,7 +1618,6 @@ function unlockTodaysAffirmation() {
   unlockedEl.style.animation = 'fadeIn .5s ease forwards';
   document.getElementById('homeAffirmationText').textContent = todayAffirmation;
   document.getElementById('homeAffirmationCat').textContent = '✦  ' + todayCategory;
-  awardCinders(10, 'Affirmation unlocked');
 }
 
 function buildLibrary(){
