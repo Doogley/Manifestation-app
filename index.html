@@ -1558,7 +1558,7 @@ async function goToHome(){
   showScreen('home');
   setTabByName('today');
 }
-function buildHome(){
+async function buildHome(){
   const h=new Date().getHours();
   document.getElementById('greetingTime').textContent=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
   document.getElementById('greetingName').textContent = userNickname || userRealName;
