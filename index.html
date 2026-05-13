@@ -1565,16 +1565,20 @@ async function buildHome(){
   const rankInfo = getLevelInfo(currentCinders);
   document.getElementById('greetingRank').textContent = rankInfo.name;
 
-  // Award daily login Cinders — only once per day
+ // Award daily login Cinders — only once per day
   if(currentUser) {
     const today = new Date().toISOString().split('T')[0];
-    db.from('profiles').select('last_visit_date').eq('id', currentUser.id).single().then(({ data }) => {
-      if(data?.last_visit_date !== today) {
-        db.from('profiles').update({ last_visit_date: today }).eq('id', currentUser.id);
-        awardCinders(5, 'Daily login');
-      }
-    });
-  }
+    const { data: visitData } = await db.from('profiles')
+      .select('last_visit_date')
+      .eq('id', currentUser.id)
+      .single();
+    if(visitData?.last_visit_date !== today) {
+      await db.from('profiles')
+        .update({ last_visit_date: today })
+        .eq('id', currentUser.id);
+      awardCinders(5, 'Daily login');
+    }
+  } 
 
   // Show locked or unlocked affirmation
   const lockedEl = document.getElementById('affirmationLocked');
