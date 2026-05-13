@@ -1243,12 +1243,12 @@ async function loadUserProfile() {
     saved = true;
     todayAffirmation = data.saved_affirmation_text;
     todayCategory = data.saved_affirmation_cat;
-    console.log('saved affirmation loaded:', saved, todayAffirmation);
+    
   } else {
     saved = false;
     todayAffirmation = affirmations[answers.intention][answers.tone];
     todayCategory = catLabels[answers.intention];
-    console.log('no saved affirmation found');
+    
   }
   buildHome();
   showScreen('home');
@@ -1639,7 +1639,7 @@ async function unlockTodaysAffirmation() {
   document.getElementById('homeAffirmationText').textContent = todayAffirmation;
   document.getElementById('homeAffirmationCat').textContent = '✦  ' + todayCategory;
   const saveBtn = document.getElementById('saveBtn');
-  console.log('saveBtn found:', saveBtn, 'saved:', saved);
+  
   if(saveBtn) {
     saveBtn.textContent = saved ? '♥  Saved' : '♡  Save';
     saveBtn.classList.toggle('active', saved);
