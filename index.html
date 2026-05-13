@@ -1237,6 +1237,8 @@ async function loadUserProfile() {
     saved = true;
     todayAffirmation = data.saved_affirmation_text;
     todayCategory = data.saved_affirmation_cat;
+  } else {
+    saved = false;
   }
  // Check if user already unlocked today's affirmation
   const today = new Date().toISOString().split('T')[0];
@@ -1629,7 +1631,11 @@ async function unlockTodaysAffirmation() {
   unlockedEl.style.animation = 'fadeIn .5s ease forwards';
   document.getElementById('homeAffirmationText').textContent = todayAffirmation;
   document.getElementById('homeAffirmationCat').textContent = '✦  ' + todayCategory;
-}
+  const saveBtn = document.getElementById('saveBtn');
+  if(saveBtn) {
+    saveBtn.textContent = saved ? '♥  Saved' : '♡  Save';
+    saveBtn.classList.toggle('active', saved);
+  }
 
 function buildLibrary(){
   const grid=document.getElementById('libraryGrid');
