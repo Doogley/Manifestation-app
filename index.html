@@ -1232,12 +1232,17 @@ async function loadUserProfile() {
   answers.intention = data.intention || 'abundance';
   answers.tone = data.tone || 'gentle';
   answers.timing = data.timing || 'morning';
+ // Check if user already unlocked today's affirmation
+  const today = new Date().toISOString().split('T')[0];
+  if(data.last_affirmation_date === today) {
+    dailyActions.affirmationUnlocked = true;
+  }
   // Returning user goes straight to home
   todayAffirmation = affirmations[answers.intention][answers.tone];
   todayCategory = catLabels[answers.intention];
   buildHome();
   showScreen('home');
-  setTabByName('today');
+  setTabByName('today'); 
 }
 
 // Check if user is already logged in when app loads
