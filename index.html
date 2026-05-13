@@ -1226,12 +1226,18 @@ async function loadUserProfile() {
   const { data, error } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
   if(error || !data) { showScreen('onboarding'); renderQuestion(0); return; }
   // Load their saved data into our variables
-  userRealName = data.real_name || 'Friend';
+ userRealName = data.real_name || 'Friend';
   userNickname = data.nickname || '';
   currentCinders = data.cinders || 50;
   answers.intention = data.intention || 'abundance';
   answers.tone = data.tone || 'gentle';
   answers.timing = data.timing || 'morning';
+  // Load saved affirmation
+  if(data.saved_affirmation_text) {
+    saved = true;
+    todayAffirmation = data.saved_affirmation_text;
+    todayCategory = data.saved_affirmation_cat;
+  }
  // Check if user already unlocked today's affirmation
   const today = new Date().toISOString().split('T')[0];
   if(data.last_affirmation_date === today) {
@@ -1667,11 +1673,24 @@ function updateCountdown(){
 }
 
 let savedCindersAwarded = false;
-function toggleSave(){
+async function toggleSave(){
   saved=!saved;
   const b=document.getElementById('saveBtn');
   b.textContent=saved?'♥  Saved':'♡  Save';
   b.classList.toggle('active',saved);
+  if(currentUser) {
+    if(saved) {
+      await db.from('profiles').update({
+        saved_affirmation_text: todayAffirmation,
+        saved_affirmation_cat: todayCategory,
+      }).eq('id', currentUser.id);
+    } else {
+      await db.from('profiles').update({
+        saved_affirmation_text: null,
+        saved_affirmation_cat: null,
+      }).eq('id', currentUser.id);
+    }
+  }
 }
 function shareAffirmation(){if(navigator.share){navigator.share({title:'Already Mine',text:todayAffirmation,url:window.location.href});}else{navigator.clipboard.writeText(todayAffirmation).then(()=>alert('Copied to clipboard!'));}}
 function setTab(el){document.querySelectorAll('#globalBottomNav .nav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
@@ -2240,20 +2259,22 @@ function toggleNicknameEdit() {
     btn.textContent = '✓ Save';
   } else {
     const newName = input.value.trim();
-    if(newName) userNickname = newName;
+    if(newName) {
+      userNickname = newName;
+      if(currentUser) {
+        db.from('profiles').update({ nickname: userNickname }).eq('id', currentUser.id);
+      }
+    }
     const displayName = userNickname || userRealName;
     display.textContent = displayName;
     display.style.display = 'block';
     input.style.display = 'none';
     btn.textContent = userNickname ? '✎ Edit nickname' : '✎ Add nickname';
-    // Update avatar
     const avatar = document.getElementById('profileInitial');
     if(!avatar.querySelector('img')) {
       avatar.innerHTML = `${displayName.charAt(0).toUpperCase()}<div class="avatar-camera-btn" onclick="document.getElementById('profilePicInput').click()" style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:var(--deep2);border:1px solid rgba(201,169,110,.25);display:flex;align-items:center;justify-content:center;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;
     }
-    // Update home greeting
     document.getElementById('greetingName').textContent = displayName;
-    // Update nav avatar initial if no pic
     const navAvatar = document.getElementById('navAvatar');
     if(!navAvatar.querySelector('img')) navAvatar.textContent = displayName.charAt(0).toUpperCase();
   }
@@ -2343,9 +2364,12 @@ function showCindersToast(amount, reason) {
   }, 2500);
 }
 
-function awardCinders(amount, reason) {
+async function awardCinders(amount, reason) {
   currentCinders += amount;
   showCindersToast(amount, reason);
+  if(currentUser) {
+    await db.from('profiles').update({ cinders: currentCinders }).eq('id', currentUser.id);
+  }
 }
 
 // ── WEEKLY MANTRA ──
