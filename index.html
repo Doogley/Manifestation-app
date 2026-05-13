@@ -1634,6 +1634,7 @@ async function unlockTodaysAffirmation() {
   document.getElementById('homeAffirmationText').textContent = todayAffirmation;
   document.getElementById('homeAffirmationCat').textContent = '✦  ' + todayCategory;
   const saveBtn = document.getElementById('saveBtn');
+  console.log('saveBtn found:', saveBtn, 'saved:', saved);
   if(saveBtn) {
     saveBtn.textContent = saved ? '♥  Saved' : '♡  Save';
     saveBtn.classList.toggle('active', saved);
