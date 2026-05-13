@@ -1232,22 +1232,22 @@ async function loadUserProfile() {
   answers.intention = data.intention || 'abundance';
   answers.tone = data.tone || 'gentle';
   answers.timing = data.timing || 'morning';
-  // Load saved affirmation
+ 
+ // Check if user already unlocked today's affirmation
+  const today = new Date().toISOString().split('T')[0];
+  if(data.last_affirmation_date === today) {
+    dailyActions.affirmationUnlocked = true;
+  }
+  // Load saved affirmation first before building home
   if(data.saved_affirmation_text) {
     saved = true;
     todayAffirmation = data.saved_affirmation_text;
     todayCategory = data.saved_affirmation_cat;
   } else {
     saved = false;
+    todayAffirmation = affirmations[answers.intention][answers.tone];
+    todayCategory = catLabels[answers.intention];
   }
- // Check if user already unlocked today's affirmation
-  const today = new Date().toISOString().split('T')[0];
-  if(data.last_affirmation_date === today) {
-    dailyActions.affirmationUnlocked = true;
-  }
-  // Returning user goes straight to home
-  todayAffirmation = affirmations[answers.intention][answers.tone];
-  todayCategory = catLabels[answers.intention];
   buildHome();
   showScreen('home');
   setTabByName('today'); 
