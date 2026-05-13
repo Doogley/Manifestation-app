@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Already Mine</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -1118,6 +1119,13 @@
 </div>
 
 <script>
+// ── SUPABASE SETUP ──
+const SUPABASE_URL = 'https://cvplifgpmhqonfoggwhj.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2cGxpZmdwbWhxb25mb2dnd2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODU2OTIsImV4cCI6MjA5NDI2MTY5Mn0.nZ4NMFvA8xuWhpgBuWvosxyxq9zGry5K4maqqxgqjaQ';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
 const questions=[
   {id:'lifeStage',number:'One',text:'Which best describes where you are in life right now?',options:[{label:'Building something of my own',value:'entrepreneur'},{label:'Focused on my career',value:'career'},{label:'Navigating a major life transition',value:'transition'},{label:'Raising a family',value:'parent'},{label:'Growing into who I want to be',value:'growth'}]},
   {id:'intention',number:'Two',text:'What do you most want to call into your life?',options:[{label:'Abundance and financial freedom',value:'abundance'},{label:'Love and deep connection',value:'love'},{label:'Confidence and inner strength',value:'confidence'},{label:'Health and vitality',value:'health'},{label:'Peace and clarity',value:'peace'},{label:'Career success and purpose',value:'career'}]},
