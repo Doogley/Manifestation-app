@@ -2543,7 +2543,7 @@ function toggleMantraEdit() {
   }
 }
 
-function saveMantra() {
+async function saveMantra() {
   const input = document.getElementById('mantraInput');
   const text = input.value.trim();
   if(!text) return;
@@ -2553,6 +2553,9 @@ function saveMantra() {
   display.classList.remove('empty');
   document.getElementById('mantraInputWrap').style.display = 'none';
   updateJournalMantra();
+  if(currentUser) {
+    await db.from('profiles').update({ mantra: text }).eq('id', currentUser.id);
+  }
   if(!dailyActions.mantraSetThisWeek) {
     dailyActions.mantraSetThisWeek = true;
     awardCinders(10, 'Weekly mantra set');
