@@ -1806,6 +1806,13 @@ async function openJournal(){
       if(data.gratitude_1) document.querySelectorAll('.gratitude-input')[0].value = data.gratitude_1;
       if(data.gratitude_2) document.querySelectorAll('.gratitude-input')[1].value = data.gratitude_2;
       if(data.gratitude_3) document.querySelectorAll('.gratitude-input')[2].value = data.gratitude_3;
+      // Restore mood selection
+      if(data.mood_category) {
+        selectedMoodCategory = data.mood_category;
+        selectedMoodSub = data.mood_sub;
+        const display = document.getElementById('moodSelectedDisplay');
+        if(display && data.mood_sub) display.textContent = `✦ Feeling ${data.mood_sub}`;
+      }
       // Update save button text
       const saveBtn = document.querySelector('.journal-save-wrap .btn-primary');
       if(saveBtn) saveBtn.textContent = 'Update Today\'s Entry';
