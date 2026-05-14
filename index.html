@@ -1233,6 +1233,7 @@ async function loadUserProfile() {
   answers.intention = data.intention || 'abundance';
   answers.tone = data.tone || 'gentle';
   answers.timing = data.timing || 'morning';
+  unlockedCount = data.unlocked_count || 1;
  
  // Check if user already unlocked today's affirmation
   const today = new Date().toISOString().split('T')[0];
@@ -1658,8 +1659,12 @@ async function unlockTodaysAffirmation() {
       .eq('id', currentUser.id)
       .single();
     if(data?.last_affirmation_date === today) return; // already unlocked today
+    unlockedCount = unlockedCount + 1;
     await db.from('profiles')
-      .update({ last_affirmation_date: today })
+      .update({ 
+        last_affirmation_date: today,
+        unlocked_count: unlockedCount
+      })
       .eq('id', currentUser.id);
     awardCinders(10, 'Affirmation unlocked');
   }
@@ -2040,7 +2045,7 @@ function buildBadgeScreen() {
 
 // ── LIBRARY ──
 let currentLibraryFilter = 'all';
-let unlockedCount = 1; // Day 1 — will grow with backend
+let unlockedCount = 1; // will be overridden by Supabase
 
 function openLibrary() {
   buildLibraryScreen();
