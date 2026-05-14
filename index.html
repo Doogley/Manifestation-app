@@ -1234,6 +1234,20 @@ async function loadUserProfile() {
   answers.tone = data.tone || 'gentle';
   answers.timing = data.timing || 'morning';
   unlockedCount = data.unlocked_count || 1;
+  // Load intentions from Supabase
+  if(currentUser) {
+    const { data: intentionsData } = await db.from('intentions')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: true });
+    if(intentionsData) {
+      intentions = intentionsData.map(i => ({
+        id: i.id,
+        text: i.text,
+        received: i.is_received
+      }));
+    }
+  }
  
  // Check if user already unlocked today's affirmation
   const today = new Date().toISOString().split('T')[0];
@@ -2055,12 +2069,22 @@ function renderIntentions() {
   if(count) count.textContent = `${intentions.length} of ${MAX_FREE_INTENTIONS} intentions used (free plan)`;
 }
 
-function markReceived(i) {
+async function markReceived(i) {
   intentions[i].received = true;
+  if(currentUser) {
+    await db.from('intentions')
+      .update({ is_received: true })
+      .eq('id', intentions[i].id);
+  }
   renderIntentions();
 }
 
-function removeIntention(i) {
+async function removeIntention(i) {
+  if(currentUser) {
+    await db.from('intentions')
+      .delete()
+      .eq('id', intentions[i].id);
+  }
   intentions.splice(i, 1);
   renderIntentions();
 }
