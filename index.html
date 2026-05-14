@@ -2002,7 +2002,7 @@ function openBadgeModal(badgeId) {
 let intentions = [];
 const MAX_FREE_INTENTIONS = 3;
 
-function addIntention() {
+async function addIntention() {
   const input = document.getElementById('newIntentionInput');
   const text = input.value.trim();
   if(!text) return;
@@ -2010,7 +2010,16 @@ function addIntention() {
     if(confirm('You\'ve reached your 3 intention limit on the free plan. Upgrade for unlimited intentions?')) openUpgrade();
     return;
   }
-  intentions.push({ text, received: false, id: Date.now() });
+  const newIntention = { text, received: false, id: Date.now() };
+  if(currentUser) {
+    const { data } = await db.from('intentions').insert({
+      user_id: currentUser.id,
+      text: text,
+      is_received: false
+    }).select().single();
+    if(data) newIntention.id = data.id;
+  }
+  intentions.push(newIntention);
   input.value = '';
   renderIntentions();
 }
