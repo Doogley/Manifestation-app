@@ -1229,6 +1229,13 @@ function resetUserState() {
   dailyActions.journalSaved = false;
   dailyActions.moodCheckedIn = false;
   dailyActions.mantraSetThisWeek = false;
+  const mantraDisplay = document.getElementById('mantraDisplay');
+  if(mantraDisplay) {
+    mantraDisplay.textContent = 'Tap edit to write your mantra for this week...';
+    mantraDisplay.classList.add('empty');
+  }
+  const mantraInput = document.getElementById('mantraInput');
+  if(mantraInput) mantraInput.value = '';
 }
 
 async function handleSignup() {
