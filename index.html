@@ -1621,13 +1621,16 @@ function showReveal(){
 
 async function goToHome(){
   dailyActions.affirmationUnlocked = true;
-  // Save onboarding answers to database
   if(currentUser) {
+    const today = new Date().toISOString().split('T')[0];
     await db.from('profiles').update({
       intention: answers.intention || 'abundance',
       tone: answers.tone || 'gentle',
       timing: answers.timing || 'morning',
+      last_affirmation_date: today,
+      unlocked_count: 1,
     }).eq('id', currentUser.id);
+    awardCinders(10, 'Affirmation unlocked');
   }
   buildHome();
   showScreen('home');
@@ -1825,7 +1828,6 @@ const journalPrompts={
 };
 
 function clearJournalFields() {
-  console.log('clearing journal fields');
   const textarea = document.querySelector('#journal .journal-textarea');
   if(textarea) textarea.value = '';
   document.querySelectorAll('.gratitude-input').forEach(i => i.value = '');
@@ -1833,7 +1835,6 @@ function clearJournalFields() {
   if(moodDisplay) moodDisplay.textContent = '';
   selectedMoodCategory = null;
   selectedMoodSub = null;
-  console.log('journal textarea value after clear:', document.querySelector('#journal .journal-textarea')?.value);
 }
 
 async function openJournal(){
