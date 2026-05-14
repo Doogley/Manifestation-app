@@ -1163,6 +1163,7 @@ const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
+let streakCount = 0;
 // ── AUTH FUNCTIONS ──
 function switchAuthTab(tab) {
   const loginForm = document.getElementById('loginForm');
@@ -1579,6 +1580,37 @@ async function buildHome(){
   document.getElementById('greetingName').textContent = userNickname || userRealName;
   const rankInfo = getLevelInfo(currentCinders);
   document.getElementById('greetingRank').textContent = rankInfo.name;
+
+  // Update streak
+  if(currentUser) {
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    const { data: streakData } = await db.from('profiles')
+      .select('streak_count, last_streak_date')
+      .eq('id', currentUser.id)
+      .single();
+    if(streakData) {
+      if(streakData.last_streak_date === today) {
+        // Already counted today
+        streakCount = streakData.streak_count;
+      } else if(streakData.last_streak_date === yesterday) {
+        // Consecutive day — increment
+        streakCount = (streakData.streak_count || 0) + 1;
+        await db.from('profiles').update({
+          streak_count: streakCount,
+          last_streak_date: today
+        }).eq('id', currentUser.id);
+      } else {
+        // Missed a day — reset
+        streakCount = 1;
+        await db.from('profiles').update({
+          streak_count: 1,
+          last_streak_date: today
+        }).eq('id', currentUser.id);
+      }
+      document.getElementById('streakCount').textContent = streakCount;
+    }
+  }
 
  // Award daily login Cinders — only once per day
   if(currentUser) {
