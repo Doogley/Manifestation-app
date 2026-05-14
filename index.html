@@ -2038,15 +2038,23 @@ async function addIntention() {
   renderIntentions();
 }
 
-function useExampleIntention(btn) {
+async function useExampleIntention(btn) {
   const text = btn.textContent.trim();
   if(intentions.length >= MAX_FREE_INTENTIONS) {
     if(confirm('You\'ve reached your 3 intention limit on the free plan. Upgrade for unlimited intentions?')) openUpgrade();
     return;
   }
-  intentions.push({ text, received: false, id: Date.now() });
+  const newIntention = { text, received: false, id: Date.now() };
+  if(currentUser) {
+    const { data } = await db.from('intentions').insert({
+      user_id: currentUser.id,
+      text: text,
+      is_received: false
+    }).select().single();
+    if(data) newIntention.id = data.id;
+  }
+  intentions.push(newIntention);
   renderIntentions();
-  // Briefly highlight the button
   btn.style.borderColor = 'var(--gold)';
   btn.style.color = 'var(--gold)';
   setTimeout(() => { btn.style.borderColor = 'rgba(201,169,110,.1)'; btn.style.color = 'var(--muted)'; }, 800);
