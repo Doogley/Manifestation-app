@@ -1234,6 +1234,7 @@ async function loadUserProfile() {
   answers.tone = data.tone || 'gentle';
   answers.timing = data.timing || 'morning';
   unlockedCount = data.unlocked_count || 1;
+  weeklyMantra = data.mantra || '';
   // Load intentions from Supabase
   if(currentUser) {
     const { data: intentionsData } = await db.from('intentions')
