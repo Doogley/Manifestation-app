@@ -1756,7 +1756,7 @@ const journalPrompts={
   career:"What does your most purposeful, fulfilled work life look like? What's one step toward it?"
 };
 
-function openJournal(){
+async function openJournal(){
   const intent=answers.intention||'abundance';
   const now=new Date();
   const dateStr=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
@@ -1768,6 +1768,26 @@ function openJournal(){
   renderIntentions();
   buildMoodGrid();
   updateJournalMantra();
+
+  // Load today's existing entry if there is one
+  if(currentUser) {
+    const today = new Date().toISOString().split('T')[0];
+    const { data } = await db.from('journal_entries')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .eq('entry_date', today)
+      .single();
+    if(data) {
+      const textarea = document.querySelector('#journal .journal-textarea');
+      if(textarea && data.reflection) textarea.value = data.reflection;
+      if(data.gratitude_1) document.querySelectorAll('.gratitude-input')[0].value = data.gratitude_1;
+      if(data.gratitude_2) document.querySelectorAll('.gratitude-input')[1].value = data.gratitude_2;
+      if(data.gratitude_3) document.querySelectorAll('.gratitude-input')[2].value = data.gratitude_3;
+      // Update save button text
+      const saveBtn = document.querySelector('.journal-save-wrap .btn-primary');
+      if(saveBtn) saveBtn.textContent = 'Update Today\'s Entry';
+    }
+  }
 }
 
 function selectMood(el){document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
