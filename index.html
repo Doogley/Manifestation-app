@@ -1772,14 +1772,43 @@ function openJournal(){
 
 function selectMood(el){document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
 
-function saveJournal(){
-  const textarea=document.querySelector('#journal .journal-textarea');
-  const mood=document.querySelector('.mood-btn.selected');
-  const gratitude=[...document.querySelectorAll('.gratitude-input')].map(i=>i.value).filter(Boolean);
-  if(!textarea.value&&!mood&&gratitude.length===0){alert('Add at least one entry before saving.');return;}
+async function saveJournal(){
+  const textarea = document.querySelector('#journal .journal-textarea');
+  const gratitude = [...document.querySelectorAll('.gratitude-input')].map(i=>i.value).filter(Boolean);
+  if(!textarea.value && !selectedMoodSub && gratitude.length===0){ alert('Add at least one entry before saving.'); return; }
+  
+  if(currentUser) {
+    const today = new Date().toISOString().split('T')[0];
+    // Check if entry exists for today
+    const { data: existing } = await db.from('journal_entries')
+      .select('id')
+      .eq('user_id', currentUser.id)
+      .eq('entry_date', today)
+      .single();
+
+    const entryData = {
+      user_id: currentUser.id,
+      entry_date: today,
+      reflection: textarea.value || null,
+      mood_category: selectedMoodCategory || null,
+      mood_sub: selectedMoodSub || null,
+      gratitude_1: gratitude[0] || null,
+      gratitude_2: gratitude[1] || null,
+      gratitude_3: gratitude[2] || null,
+      mantra: weeklyMantra || null,
+    };
+
+    if(existing) {
+      await db.from('journal_entries').update(entryData).eq('id', existing.id);
+    } else {
+      await db.from('journal_entries').insert(entryData);
+    }
+  }
+
   // Show confirmation
-  const wrap=document.querySelector('.journal-save-wrap');
+  const wrap = document.querySelector('.journal-save-wrap');
   wrap.innerHTML=`<div style="text-align:center;padding:20px 0"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:var(--cream);margin-bottom:8px">Entry saved.</div><div style="font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)">✦ Day ${unlockedCount} complete</div></div>`;
+  
   if(!dailyActions.journalSaved) {
     dailyActions.journalSaved = true;
     awardCinders(20, 'Journal entry saved');
