@@ -2565,9 +2565,19 @@ async function saveMantra() {
   if(currentUser) {
     await db.from('profiles').update({ mantra: text }).eq('id', currentUser.id);
   }
-  if(!dailyActions.mantraSetThisWeek) {
-    dailyActions.mantraSetThisWeek = true;
-    awardCinders(10, 'Weekly mantra set');
+  if(currentUser) {
+    const today = new Date().toISOString().split('T')[0];
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    const weekStartStr = weekStart.toISOString().split('T')[0];
+    const { data: mantraCheck } = await db.from('profiles')
+      .select('last_mantra_date')
+      .eq('id', currentUser.id)
+      .single();
+    if(!mantraCheck?.last_mantra_date || mantraCheck.last_mantra_date < weekStartStr) {
+      await db.from('profiles').update({ last_mantra_date: today }).eq('id', currentUser.id);
+      awardCinders(10, 'Weekly mantra set');
+    }
   }
 }
 
