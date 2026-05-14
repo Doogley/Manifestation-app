@@ -1204,7 +1204,35 @@ async function handleLogin() {
   await loadUserProfile();
 }
 
+function resetUserState() {
+  currentQuestion = 0;
+  answers = {};
+  selectedOption = null;
+  todayAffirmation = '';
+  todayCategory = '';
+  saved = false;
+  intentions = [];
+  weeklyMantra = '';
+  currentCinders = 50;
+  streakCount = 0;
+  unlockedCount = 1;
+  userNickname = '';
+  userRealName = '';
+  summaryGenerated = false;
+  adminMode = false;
+  selectedMoodCategory = null;
+  selectedMoodSub = null;
+  dailyLoginChecked = false;
+  savedCindersAwarded = false;
+  dailyActions.loginClaimed = false;
+  dailyActions.affirmationUnlocked = false;
+  dailyActions.journalSaved = false;
+  dailyActions.moodCheckedIn = false;
+  dailyActions.mantraSetThisWeek = false;
+}
+
 async function handleSignup() {
+  resetUserState();
   const name = document.getElementById('signupName').value.trim();
   const email = document.getElementById('signupEmail').value.trim();
   const password = document.getElementById('signupPassword').value;
@@ -1233,7 +1261,7 @@ async function handleSignup() {
 async function handleLogout() {
   await db.auth.signOut();
   currentUser = null;
-  dailyLoginChecked = false;
+  resetUserState();
   showScreen('auth');
 }
 
