@@ -1077,6 +1077,7 @@
     <button class="profile-link" onclick="alert('Terms of Service coming before launch.')">Terms of Service</button>
     <button class="profile-link" onclick="alert('Privacy Policy coming before launch.')">Privacy Policy</button>
     <button class="profile-link" onclick="alert('Email: support@alreadymine.com')">Contact Us</button>
+    <button class="profile-link" onclick="handleLogout()">Log Out</button>
   </div>
 </div>
 
@@ -1221,6 +1222,11 @@ async function handleSignup() {
   // New user goes to onboarding
   showScreen('onboarding');
   renderQuestion(0);
+}
+
+async function handleLogout() {
+  await db.auth.signOut();
+  showScreen('auth');
 }
 
 async function loadUserProfile() {
