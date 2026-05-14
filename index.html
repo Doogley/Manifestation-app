@@ -1213,7 +1213,7 @@ function resetUserState() {
   saved = false;
   intentions = [];
   weeklyMantra = '';
-  currentCinders = 50;
+  currentCinders = 0;
   streakCount = 0;
   unlockedCount = 1;
   userNickname = '';
@@ -1255,7 +1255,7 @@ async function handleSignup() {
   await db.from('profiles').insert({
     id: currentUser.id,
     real_name: name,
-    cinders: 50,
+    cinders: 0,
     streak: 0,
     referral_code: referralCode || null,
   });
