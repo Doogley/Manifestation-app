@@ -1229,11 +1229,6 @@ function resetUserState() {
   dailyActions.journalSaved = false;
   dailyActions.moodCheckedIn = false;
   dailyActions.mantraSetThisWeek = false;
-  const journalTextarea = document.querySelector('#journal .journal-textarea');
-  if(journalTextarea) journalTextarea.value = '';
-  document.querySelectorAll('.gratitude-input').forEach(i => i.value = '');
-  const moodDisplay = document.getElementById('moodSelectedDisplay');
-  if(moodDisplay) moodDisplay.textContent = '';
 }
 
 async function handleSignup() {
@@ -1829,7 +1824,18 @@ const journalPrompts={
   career:"What does your most purposeful, fulfilled work life look like? What's one step toward it?"
 };
 
+function clearJournalFields() {
+  const textarea = document.querySelector('#journal .journal-textarea');
+  if(textarea) textarea.value = '';
+  document.querySelectorAll('.gratitude-input').forEach(i => i.value = '');
+  const moodDisplay = document.getElementById('moodSelectedDisplay');
+  if(moodDisplay) moodDisplay.textContent = '';
+  selectedMoodCategory = null;
+  selectedMoodSub = null;
+}
+
 async function openJournal(){
+  clearJournalFields();
   const intent=answers.intention||'abundance';
   const now=new Date();
   const dateStr=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
@@ -1840,16 +1846,7 @@ async function openJournal(){
   setTabByName('journal');
   renderIntentions();
   updateJournalMantra();
-
-  // Clear all fields so journal always opens clean
-  const journalTextarea = document.querySelector('#journal .journal-textarea');
-  if(journalTextarea) journalTextarea.value = '';
-  document.querySelectorAll('.gratitude-input').forEach(i => i.value = '');
-  selectedMoodCategory = null;
-  selectedMoodSub = null;
   buildMoodGrid();
-  const moodDisplay = document.getElementById('moodSelectedDisplay');
-  if(moodDisplay) moodDisplay.textContent = '';
 
   // Load today's existing entry if there is one
   if(currentUser) {
