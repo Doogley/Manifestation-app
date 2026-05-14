@@ -1229,6 +1229,11 @@ function resetUserState() {
   dailyActions.journalSaved = false;
   dailyActions.moodCheckedIn = false;
   dailyActions.mantraSetThisWeek = false;
+  const journalTextarea = document.querySelector('#journal .journal-textarea');
+  if(journalTextarea) journalTextarea.value = '';
+  document.querySelectorAll('.gratitude-input').forEach(i => i.value = '');
+  const moodDisplay = document.getElementById('moodSelectedDisplay');
+  if(moodDisplay) moodDisplay.textContent = '';
 }
 
 async function handleSignup() {
