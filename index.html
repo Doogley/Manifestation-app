@@ -156,6 +156,8 @@
   .nav-tab svg { width:18px; height:18px; stroke:currentColor; transition:stroke .3s; }
   .nav-tab-label { font-size:10px; letter-spacing:.1em; text-transform:uppercase; }
 
+  #auth { overflow-y:auto; }
+
   /* ── MONTHLY SUMMARY ── */
   #monthlySummary { align-items:center; justify-content:flex-start; padding-bottom:90px; overflow-y:auto; }
   .summary-header { position:relative; z-index:1; width:100%; padding:28px 32px 20px; border-bottom:1px solid rgba(201,169,110,.08); display:flex; align-items:center; justify-content:space-between; }
@@ -1537,8 +1539,9 @@ const affirmationLibrary = [
 
 let currentQuestion=0,answers={},selectedOption=null,todayAffirmation='',todayCategory='',saved=false;
 
-const noNavScreens = ['splash','onboarding','reveal','grace','monthlySummary'];
+const noNavScreens = ['auth','splash','onboarding','reveal','grace','monthlySummary'];
 function showScreen(id){
+  if(id !== 'auth' && !currentUser){ id = 'auth'; }
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
