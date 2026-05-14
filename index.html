@@ -1825,10 +1825,11 @@ async function saveJournal(){
     }
   }
 
-  // Show confirmation
+ // Show confirmation briefly then restore button
   const wrap = document.querySelector('.journal-save-wrap');
+  const originalBtn = wrap.innerHTML;
   wrap.innerHTML=`<div style="text-align:center;padding:20px 0"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:var(--cream);margin-bottom:8px">Entry saved.</div><div style="font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)">✦ Day ${unlockedCount} complete</div></div>`;
-  
+  setTimeout(() => { wrap.innerHTML = originalBtn; }, 2500);
   const today = new Date().toISOString().split('T')[0];
   const { data: existingCheck } = await db.from('journal_entries')
     .select('id')
