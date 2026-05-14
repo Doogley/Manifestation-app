@@ -1309,9 +1309,11 @@ async function loadUserProfile() {
     todayCategory = catLabels[answers.intention];
     
   }
-  buildHome();
-  showScreen('home');
-  setTabByName('today'); 
+  setTimeout(() => {
+    buildHome();
+    showScreen('home');
+    setTabByName('today');
+  }, 500);
 }
 
 // Check if user is already logged in when app loads
