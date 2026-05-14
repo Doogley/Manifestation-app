@@ -1915,30 +1915,22 @@ async function saveJournal(){
       await db.from('journal_entries').update(entryData).eq('id', existing.id);
     } else {
       await db.from('journal_entries').insert(entryData);
+      awardCinders(20, 'Journal entry saved');
     }
   }
 
-// Flash confirmation on button
+  // Flash confirmation on button
   const saveBtn = document.querySelector('.journal-save-wrap .btn-primary');
   if(saveBtn) {
     const originalText = saveBtn.textContent;
     saveBtn.textContent = '✓ Saved Successfully';
     saveBtn.style.borderColor = 'var(--gold)';
     saveBtn.style.color = 'var(--gold)';
-    setTimeout(() => { 
+    setTimeout(() => {
       saveBtn.textContent = originalText;
       saveBtn.style.borderColor = '';
       saveBtn.style.color = '';
     }, 2000);
-  }
-  const today = new Date().toISOString().split('T')[0];
-  const { data: existingCheck } = await db.from('journal_entries')
-    .select('id')
-    .eq('user_id', currentUser.id)
-    .eq('entry_date', today)
-    .single();
-  if(!existingCheck) {
-    awardCinders(20, 'Journal entry saved');
   }
 }
 function openModal(day,text,cat){document.getElementById('modalDay').textContent=day;document.getElementById('modalText').textContent=text;document.getElementById('modalCat').textContent=cat;document.getElementById('modalOverlay').classList.add('open');}
