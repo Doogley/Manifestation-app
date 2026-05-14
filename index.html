@@ -1810,8 +1810,16 @@ async function openJournal(){
       if(data.mood_category) {
         selectedMoodCategory = data.mood_category;
         selectedMoodSub = data.mood_sub;
-        const display = document.getElementById('moodSelectedDisplay');
-        if(display && data.mood_sub) display.textContent = `✦ Feeling ${data.mood_sub}`;
+        // Rebuild mood grid with saved selection highlighted
+        buildMoodGrid();
+        if(data.mood_sub) {
+          const display = document.getElementById('moodSelectedDisplay');
+          if(display) display.textContent = `✦ Feeling ${data.mood_sub}`;
+          // Highlight the category button
+          document.querySelectorAll('.mood-category-btn').forEach(btn => {
+            if(btn.textContent === data.mood_category) btn.classList.add('selected');
+          });
+        }
       }
       // Update save button text
       const saveBtn = document.querySelector('.journal-save-wrap .btn-primary');
