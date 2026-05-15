@@ -315,7 +315,7 @@
   .mood-btn:hover { border-color:rgba(201,169,110,.3); color:var(--soft); }
   .mood-btn.selected { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.08); }
 
-  .journal-save-wrap { position:sticky; bottom:0; z-index:10; padding:16px 32px 20px; background:rgba(11,10,8,.85); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-top:1px solid rgba(201,169,110,.08); }
+  .journal-save-wrap { position:sticky; bottom:0; z-index:10; padding:16px 32px 90px; background:rgb(11,10,8); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-top:1px solid rgba(201,169,110,.08); }
 
   /* ── BADGES ── */
   #badges { padding-bottom:90px; }
@@ -2107,7 +2107,7 @@ function selectMood(el){document.querySelectorAll('.mood-btn').forEach(b=>b.clas
 async function saveJournal(isAutoSave = false){
   const textarea = document.querySelector('#journal .journal-textarea');
   const gratitude = [...document.querySelectorAll('.gratitude-input')].map(i=>i.value).filter(Boolean);
-  if(!textarea.value && !selectedMoodSub && gratitude.length===0){ if(!isAutoSave) alert('Add at least one entry before saving.'); return; }
+  if(!textarea.value && !selectedMoodSub && gratitude.length===0){ return; }
   
   if(currentUser) {
     const today = getLocalDateString();
