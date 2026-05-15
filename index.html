@@ -2020,10 +2020,21 @@ function clearJournalFields() {
 }
 
 function closeJournal() {
-  if(journalAutoSaveTimer) { clearInterval(journalAutoSaveTimer); journalAutoSaveTimer = null; }
-  showScreen('home');
-  setTabByName('today');
-  buildHome();
+  if(journalHasChanges) {
+    const action = confirm('You have unsaved changes. Save before leaving?');
+    if(action) {
+      saveJournal().then(() => { journalHasChanges = false; showScreen('home'); setTabByName('today'); buildHome(); });
+    } else {
+      journalHasChanges = false;
+      showScreen('home');
+      setTabByName('today');
+      buildHome();
+    }
+  } else {
+    showScreen('home');
+    setTabByName('today');
+    buildHome();
+  }
 }
 
 function updateLastSavedTime() {
@@ -2036,14 +2047,12 @@ function updateLastSavedTime() {
 
 async function openJournal(){
   clearJournalFields();
+  journalHasChanges = false;
   document.getElementById('journalLastSaved').textContent = '';
-  if(journalAutoSaveTimer) clearInterval(journalAutoSaveTimer);
-  journalAutoSaveTimer = setInterval(async () => {
-    const saveBtn = document.getElementById('journalSaveBtn');
-    if(saveBtn) saveBtn.textContent = 'Saving...';
-    await saveJournal(true);
-    if(saveBtn) saveBtn.textContent = 'Save Entry';
-  }, 30000);
+  // Track unsaved changes
+  const textarea = document.querySelector('#journal .journal-textarea');
+  if(textarea) textarea.oninput = () => { journalHasChanges = true; };
+  document.querySelectorAll('.gratitude-input').forEach(el => { el.oninput = () => { journalHasChanges = true; }; });
   const intent=answers.intention||'abundance';
   const now=new Date();
   const dateStr=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
@@ -2104,7 +2113,7 @@ async function openJournal(){
 
 function selectMood(el){document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
 
-async function saveJournal(isAutoSave = false){
+async function saveJournal(){
   const textarea = document.querySelector('#journal .journal-textarea');
   const gratitude = [...document.querySelectorAll('.gratitude-input')].map(i=>i.value).filter(Boolean);
   if(!textarea.value && !selectedMoodSub && gratitude.length===0){ return; }
@@ -2141,6 +2150,7 @@ async function saveJournal(isAutoSave = false){
     updateDailyPractice();
   }
 
+  journalHasChanges = false;
   // Flash confirmation on button and update last saved time
   updateLastSavedTime();
   const saveBtn = document.getElementById('journalSaveBtn');
@@ -2279,7 +2289,7 @@ function toRoman(n) {
 let currentCinders = 50;
 let dailyLoginChecked = false;
 let countdownInterval = null;
-let journalAutoSaveTimer = null;
+let journalHasChanges = false;
 
 // ── DAILY TRACKING (resets each session — backend will use real dates) ──
 const dailyActions = {
@@ -3016,6 +3026,7 @@ function buildMoodGrid() {
 }
 
 function selectMoodBase(base, el) {
+  journalHasChanges = true;
   selectedMoodCategory = base;
   selectedMoodSub = null;
   document.querySelectorAll('.mood-category-btn').forEach(b => b.classList.remove('selected'));
@@ -3029,6 +3040,7 @@ function selectMoodBase(base, el) {
 }
 
 function selectSubMood(category, sub, el) {
+  journalHasChanges = true;
   selectedMoodCategory = category;
   selectedMoodSub = sub;
   document.querySelectorAll('.mood-sub-btn').forEach(b => b.classList.remove('selected'));
