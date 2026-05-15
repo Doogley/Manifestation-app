@@ -1662,13 +1662,24 @@ let currentQuestion=0,answers={},selectedOption=null,todayAffirmation='',todayCa
 let savedAffirmationText='',savedAffirmationCat='';
 
 const noNavScreens = ['auth','splash','onboarding','reveal','grace','monthlySummary'];
-function showScreen(id){
-  if(id !== 'auth' && !currentUser){ id = 'auth'; }
+function _navigateToScreen(id){
+  currentScreen = id;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
   const nav = document.getElementById('globalBottomNav');
   nav.style.display = noNavScreens.includes(id) ? 'none' : 'flex';
+}
+function showScreen(id){
+  if(id !== 'auth' && !currentUser){ id = 'auth'; }
+  if(currentScreen === 'journal' && id !== 'journal' && journalHasChanges) {
+    const save = confirm('You have unsaved changes. Save before leaving?');
+    if(save) {
+      saveJournal().then(() => { journalHasChanges = false; _navigateToScreen(id); });
+    }
+    return;
+  }
+  _navigateToScreen(id);
 }
 function startOnboarding(){showScreen('onboarding');renderQuestion(0);}
 function skipToHome(){todayAffirmation=affirmations.abundance.gentle;todayCategory=catLabels.abundance;buildHome();showScreen('home');setTabByName('today');}
@@ -2020,20 +2031,14 @@ function clearJournalFields() {
 }
 
 function closeJournal() {
+  const goHome = () => { _navigateToScreen('home'); setTabByName('today'); buildHome(); };
   if(journalHasChanges) {
-    const action = confirm('You have unsaved changes. Save before leaving?');
-    if(action) {
-      saveJournal().then(() => { journalHasChanges = false; showScreen('home'); setTabByName('today'); buildHome(); });
-    } else {
-      journalHasChanges = false;
-      showScreen('home');
-      setTabByName('today');
-      buildHome();
+    const save = confirm('You have unsaved changes. Save before leaving?');
+    if(save) {
+      saveJournal().then(() => { journalHasChanges = false; goHome(); });
     }
   } else {
-    showScreen('home');
-    setTabByName('today');
-    buildHome();
+    goHome();
   }
 }
 
@@ -2290,6 +2295,7 @@ let currentCinders = 50;
 let dailyLoginChecked = false;
 let countdownInterval = null;
 let journalHasChanges = false;
+let currentScreen = 'auth';
 
 // ── DAILY TRACKING (resets each session — backend will use real dates) ──
 const dailyActions = {
