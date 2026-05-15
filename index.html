@@ -2254,7 +2254,7 @@ async function addIntention() {
   const input = document.getElementById('newIntentionInput');
   const text = input.value.trim();
   if(!text) return;
-  if(intentions.length >= MAX_FREE_INTENTIONS) {
+  if(intentions.filter(i => !i.received).length >= MAX_FREE_INTENTIONS) {
     if(confirm('You\'ve reached your 3 intention limit on the free plan. Upgrade for unlimited intentions?')) openUpgrade();
     return;
   }
@@ -2274,7 +2274,7 @@ async function addIntention() {
 
 async function useExampleIntention(btn) {
   const text = btn.textContent.trim();
-  if(intentions.length >= MAX_FREE_INTENTIONS) {
+  if(intentions.filter(i => !i.received).length >= MAX_FREE_INTENTIONS) {
     if(confirm('You\'ve reached your 3 intention limit on the free plan. Upgrade for unlimited intentions?')) openUpgrade();
     return;
   }
@@ -2308,7 +2308,7 @@ function renderIntentions() {
           <button onclick="removeIntention(${i})" style="padding:4px 8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .3s" title="Remove">×</button>
         </div>
       </div>`).join('');
-  if(count) count.textContent = `${intentions.length} of ${MAX_FREE_INTENTIONS} intentions used (free plan)`;
+  if(count) count.textContent = `${intentions.filter(i => !i.received).length} of ${MAX_FREE_INTENTIONS} intentions used (free plan)`;
 }
 
 async function markReceived(i) {
