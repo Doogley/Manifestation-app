@@ -2559,7 +2559,10 @@ async function buildProfile() {
   // Membership status
   console.log('membership calc:', unlockedCount, 30 - unlockedCount);
   const membershipEl = document.getElementById('profileMembershipStatus');
-  if(membershipEl) membershipEl.textContent = 'Free — ' + Math.max(0, 30 - unlockedCount) + ' affirmations remaining';
+  if(membershipEl) {
+    membershipEl.textContent = 'Free — ' + Math.max(0, 30 - unlockedCount) + ' affirmations remaining';
+    console.log('membershipEl text set to:', membershipEl.textContent);
+  }
 
   // Rank
   const info = getLevelInfo(currentCinders);
