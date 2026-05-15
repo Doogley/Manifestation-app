@@ -1217,6 +1217,8 @@ function resetUserState() {
   todayAffirmation = '';
   todayCategory = '';
   saved = false;
+  savedAffirmationText = '';
+  savedAffirmationCat = '';
   intentions = [];
   weeklyMantra = '';
   currentCinders = 0;
@@ -1305,29 +1307,20 @@ async function loadUserProfile() {
     }
   }
  
- // Check if user already unlocked today's affirmation
+  // Check if user already unlocked today's affirmation
   const today = getLocalDateString();
   console.log('last_affirmation_date from DB:', data.last_affirmation_date, 'today:', today);
   if(data.last_affirmation_date === today) {
     dailyActions.affirmationUnlocked = true;
-    const unlockedEntry = affirmationLibrary[unlockedCount - 1];
-    if(unlockedEntry) {
-      todayAffirmation = unlockedEntry.text;
-      todayCategory = unlockedEntry.cat;
-    }
   }
-  // Load saved affirmation first before building home
-  if(data.saved_affirmation_text) {
-    saved = true;
-    todayAffirmation = data.saved_affirmation_text;
-    todayCategory = data.saved_affirmation_cat;
-    
-  } else {
-    saved = false;
-    const libEntry = affirmationLibrary[unlockedCount - 1];
-    todayAffirmation = libEntry ? libEntry.text : affirmations[answers.intention][answers.tone];
-    todayCategory = libEntry ? libEntry.cat : catLabels[answers.intention];
-  }
+  // Saved affirmation is for profile display only — never overwrites today's affirmation
+  savedAffirmationText = data.saved_affirmation_text || '';
+  savedAffirmationCat = data.saved_affirmation_cat || '';
+  saved = !!data.saved_affirmation_text;
+  // Today's affirmation always comes from the library based on unlocked day count
+  const libEntry = affirmationLibrary[unlockedCount - 1];
+  todayAffirmation = libEntry ? libEntry.text : affirmations[answers.intention][answers.tone];
+  todayCategory = libEntry ? libEntry.cat : catLabels[answers.intention];
   setTimeout(() => {
     console.log('affirmationUnlocked before buildHome:', dailyActions.affirmationUnlocked);
     console.trace('buildHome: loadUserProfile setTimeout');
@@ -1591,6 +1584,7 @@ const affirmationLibrary = [
 ];
 
 let currentQuestion=0,answers={},selectedOption=null,todayAffirmation='',todayCategory='',saved=false;
+let savedAffirmationText='',savedAffirmationCat='';
 
 const noNavScreens = ['auth','splash','onboarding','reveal','grace','monthlySummary'];
 function showScreen(id){
@@ -2475,11 +2469,11 @@ async function buildProfile() {
   }
 
   // Saved affirmation
-  if(saved && todayAffirmation) {
+  if(savedAffirmationText) {
     const favEl = document.getElementById('profileFavAffirmation');
-    favEl.textContent = todayAffirmation;
+    favEl.textContent = savedAffirmationText;
     favEl.style.cursor = 'pointer';
-    favEl.onclick = () => openModal('Saved Affirmation', todayAffirmation, todayCategory);
+    favEl.onclick = () => openModal('Saved Affirmation', savedAffirmationText, savedAffirmationCat);
   }
 
   // Monthly reflection button
