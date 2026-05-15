@@ -1632,6 +1632,11 @@ async function goToHome(){
   dailyActions.affirmationUnlocked = true;
   if(currentUser) {
     const today = new Date().toISOString().split('T')[0];
+    const { data: affCheck } = await db.from('profiles')
+      .select('last_affirmation_date')
+      .eq('id', currentUser.id)
+      .single();
+    const alreadyUnlockedToday = affCheck?.last_affirmation_date === today;
     await db.from('profiles').update({
       intention: answers.intention || 'abundance',
       tone: answers.tone || 'gentle',
@@ -1639,7 +1644,7 @@ async function goToHome(){
       last_affirmation_date: today,
       unlocked_count: 1,
     }).eq('id', currentUser.id);
-    awardCinders(10, 'Affirmation unlocked');
+    if(!alreadyUnlockedToday) awardCinders(10, 'Affirmation unlocked');
   }
   buildHome();
   showScreen('home');
@@ -1699,13 +1704,12 @@ async function buildHome(){
       .select('last_visit_date')
       .eq('id', currentUser.id)
       .single();
-    if(visitData?.last_visit_date !== today) {
-      const isReturning = visitData?.last_visit_date != null;
-      await db.from('profiles')
-        .update({ last_visit_date: today })
-        .eq('id', currentUser.id);
-      if(isReturning) awardCinders(5, 'Daily login');
-    }
+    const isNewDay = visitData?.last_visit_date !== today;
+    const isReturning = visitData?.last_visit_date != null;
+    await db.from('profiles')
+      .update({ last_visit_date: today })
+      .eq('id', currentUser.id);
+    if(isNewDay && isReturning) awardCinders(5, 'Daily login');
   } 
 
   // Show locked or unlocked affirmation
