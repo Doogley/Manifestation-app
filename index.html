@@ -1205,7 +1205,7 @@
     <div class="modal-day" id="modalDay"></div>
     <div class="modal-text" id="modalText"></div>
     <div class="modal-cat" id="modalCat"></div>
-    <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('open')">Close</button>
+    <button class="modal-close" onclick="dismissModal()">Close</button>
   </div>
 </div>
 
@@ -2036,8 +2036,8 @@ function showUnsavedChangesModal(onSave, onLeave) {
   document.getElementById('modalText').textContent = 'You have unsaved reflections. Would you like to save before leaving?';
   document.getElementById('modalCat').innerHTML = `
     <div style="display:flex;gap:12px;justify-content:center;margin-top:4px;">
-      <button onclick="saveJournal().then(()=>{document.getElementById('modalOverlay').classList.remove('open');window._unsavedOnSave&&window._unsavedOnSave();})" style="padding:11px 22px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Save &amp; Leave</button>
-      <button onclick="document.getElementById('modalOverlay').classList.remove('open');window._unsavedOnLeave&&window._unsavedOnLeave();" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.15);color:var(--muted);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Leave Anyway</button>
+      <button onclick="saveJournal().then(()=>{dismissModal();window._unsavedOnSave&&window._unsavedOnSave();})" style="padding:11px 22px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Save &amp; Leave</button>
+      <button onclick="dismissModal();window._unsavedOnLeave&&window._unsavedOnLeave();" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.15);color:var(--muted);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Leave Anyway</button>
     </div>`;
   window._unsavedOnSave = onSave;
   window._unsavedOnLeave = onLeave;
@@ -2333,8 +2333,8 @@ function openBadgeModal(badgeId) {
   document.getElementById('modalText').innerHTML = `<div class="badge-modal-name">${badge.name}</div><div class="badge-modal-desc">${badge.desc}</div>`;
   document.getElementById('modalCat').innerHTML = `
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <button onclick="document.getElementById('modalOverlay').classList.remove('open');openBadges();" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s">View All Badges</button>
-      <button onclick="document.getElementById('modalOverlay').classList.remove('open');openJournal();" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.15);color:var(--muted);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s">Open Journal</button>
+      <button onclick="dismissModal();openBadges();" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s">View All Badges</button>
+      <button onclick="dismissModal();openJournal();" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.15);color:var(--muted);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s">Open Journal</button>
     </div>`;
   document.getElementById('modalOverlay').classList.add('open');
 }
@@ -2342,6 +2342,7 @@ function openBadgeModal(badgeId) {
 // ── INTENTIONS ──
 let intentions = [];
 const MAX_FREE_INTENTIONS = 3;
+const pendingDeletions = {};
 
 async function addIntention() {
   const input = document.getElementById('newIntentionInput');
@@ -2446,6 +2447,9 @@ function deletePastIntention(intentionId) {
   const intent = intentions.find(i => i.id === intentionId);
   if(!intent) return;
 
+  // Cancel any existing pending deletion for this id
+  if(pendingDeletions[intentionId]) clearTimeout(pendingDeletions[intentionId]);
+
   // Show deleting state
   row.style.opacity = '0.4';
   const textEl = row.querySelector('div > div:first-child');
@@ -2457,12 +2461,10 @@ function deletePastIntention(intentionId) {
   const undoWrap = document.createElement('div');
   undoWrap.style.cssText = 'font-size:11px;letter-spacing:.08em;color:var(--gold);cursor:pointer;flex-shrink:0;padding:4px 0;';
   undoWrap.textContent = 'Undo';
-  let undone = false;
   row.appendChild(undoWrap);
 
-  const timer = setTimeout(async () => {
-    if(undone) return;
-    // Permanent delete
+  pendingDeletions[intentionId] = setTimeout(async () => {
+    delete pendingDeletions[intentionId];
     if(currentUser) {
       await db.from('intentions').delete().eq('id', intentionId);
     }
@@ -2470,11 +2472,11 @@ function deletePastIntention(intentionId) {
     if(idx !== -1) intentions.splice(idx, 1);
     renderPastIntentionsModal();
     renderIntentions();
-  }, 5000);
+  }, 8000);
 
   undoWrap.onclick = () => {
-    undone = true;
-    clearTimeout(timer);
+    clearTimeout(pendingDeletions[intentionId]);
+    delete pendingDeletions[intentionId];
     row.style.opacity = '';
     if(textEl) textEl.style.textDecoration = '';
     if(deleteBtn) deleteBtn.style.display = '';
@@ -3119,7 +3121,12 @@ function selectSubMood(category, sub, el) {
   if(display) display.textContent = `✦ Feeling ${sub}`;
 }
 
-function closeModal(e){if(e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('open');}
+function dismissModal() {
+  // Cancel any pending intention deletions — closing modal = implicit undo
+  Object.keys(pendingDeletions).forEach(id => { clearTimeout(pendingDeletions[id]); delete pendingDeletions[id]; });
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+function closeModal(e){ if(e.target===document.getElementById('modalOverlay')) dismissModal(); }
 </script>
 </body>
 </html>
