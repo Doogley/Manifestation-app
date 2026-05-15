@@ -127,8 +127,10 @@
   .practice-card { border:1px solid rgba(201,169,110,.12); background:rgba(201,169,110,.02); padding:20px 24px; }
   .practice-progress { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
   .practice-progress-count { color:var(--gold); }
-  .practice-item { display:flex; align-items:center; gap:14px; padding:10px 0; border-bottom:1px solid rgba(201,169,110,.07); }
+  .practice-item { display:flex; align-items:center; gap:14px; padding:10px 0; border-bottom:1px solid rgba(201,169,110,.07); transition:opacity .2s; }
   .practice-item:last-child { border-bottom:none; padding-bottom:0; }
+  .practice-item.clickable { cursor:pointer; }
+  .practice-item.clickable:hover .practice-item-text { color:var(--gold); }
   .practice-check { font-size:14px; color:var(--muted); flex-shrink:0; transition:color .3s; }
   .practice-check.done { color:var(--gold); }
   .practice-item-text { flex:1; font-size:13px; font-weight:300; color:var(--soft); transition:color .3s; }
@@ -789,7 +791,7 @@
   </div>
 
   <!-- Mood check-in — expanded -->
-  <div class="journal-section" style="animation-delay:.25s">
+  <div class="journal-section" id="moodSection" style="animation-delay:.25s">
     <div class="journal-section-title">Mood Check-in</div>
     <div class="journal-section-sub">Start broad, then narrow it down.</div>
     <div id="moodExpandedGrid"></div>
@@ -1740,16 +1742,32 @@ function updateDailyPractice() {
     dailyActions.moodCheckedIn,
     dailyActions.mantraSetThisWeek,
   ];
+  const actions = [
+    () => { document.getElementById('todaysCard')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); },
+    () => { openJournal(); },
+    () => { openJournal(); setTimeout(() => document.getElementById('moodSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 350); },
+    () => { document.querySelector('.mantra-card-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); toggleMantraEdit(); },
+  ];
   const count = states.filter(Boolean).length;
   const countEl = document.getElementById('practiceCount');
   if(countEl) countEl.textContent = count;
   states.forEach((done, i) => {
+    const item = document.getElementById('practiceCheck' + i)?.closest('.practice-item');
     const check = document.getElementById('practiceCheck' + i);
     const text = document.getElementById('practiceText' + i);
     const cinders = document.getElementById('practiceCinders' + i);
     if(check) { check.textContent = done ? '✦' : '◇'; check.classList.toggle('done', done); }
     if(text) text.classList.toggle('done', done);
     if(cinders) cinders.classList.toggle('done', done);
+    if(item) {
+      if(done) {
+        item.classList.remove('clickable');
+        item.onclick = null;
+      } else {
+        item.classList.add('clickable');
+        item.onclick = actions[i];
+      }
+    }
   });
 }
 
