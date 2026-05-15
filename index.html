@@ -2041,7 +2041,7 @@ async function openJournal(){
   journalAutoSaveTimer = setInterval(async () => {
     const saveBtn = document.getElementById('journalSaveBtn');
     if(saveBtn) saveBtn.textContent = 'Saving...';
-    await saveJournal();
+    await saveJournal(true);
     if(saveBtn) saveBtn.textContent = 'Save Entry';
   }, 30000);
   const intent=answers.intention||'abundance';
@@ -2104,10 +2104,10 @@ async function openJournal(){
 
 function selectMood(el){document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
 
-async function saveJournal(){
+async function saveJournal(isAutoSave = false){
   const textarea = document.querySelector('#journal .journal-textarea');
   const gratitude = [...document.querySelectorAll('.gratitude-input')].map(i=>i.value).filter(Boolean);
-  if(!textarea.value && !selectedMoodSub && gratitude.length===0){ alert('Add at least one entry before saving.'); return; }
+  if(!textarea.value && !selectedMoodSub && gratitude.length===0){ if(!isAutoSave) alert('Add at least one entry before saving.'); return; }
   
   if(currentUser) {
     const today = getLocalDateString();
