@@ -214,7 +214,8 @@
 
   /* ── WEEKLY MANTRA ── */
   .mantra-card-wrap { position:relative; z-index:1; padding:16px 32px 0; opacity:0; animation:fadeUp .7s .25s ease forwards; }
-  .mantra-card { position:relative; padding:24px 28px; border:1px solid rgba(201,169,110,.15); background:rgba(201,169,110,.03); }
+  .mantra-card { position:relative; padding:24px 28px; border:1px solid rgba(201,169,110,.15); background:rgba(201,169,110,.03); transition:border-color .4s, box-shadow .4s; }
+  .mantra-card.mantra-monday { border-color:rgba(201,169,110,.45); box-shadow:0 0 18px rgba(201,169,110,.12), inset 0 0 12px rgba(201,169,110,.04); }
   .mantra-card-label { font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); opacity:.7; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; }
   .mantra-edit-btn { background:none; border:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:10px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:color .3s; padding:0; }
   .mantra-edit-btn:hover { color:var(--gold); }
@@ -1173,6 +1174,14 @@ function getLocalDateString() {
   const localDate = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
   return localDate;
 }
+function getThisMonday() {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun, 1=Mon...
+  const diff = (day === 0) ? -6 : 1 - day; // roll back to Monday
+  const mon = new Date(now);
+  mon.setDate(now.getDate() + diff);
+  return mon.getFullYear() + '-' + String(mon.getMonth()+1).padStart(2,'0') + '-' + String(mon.getDate()).padStart(2,'0');
+}
 
 let currentUser = null;
 let streakCount = 0;
@@ -1222,6 +1231,7 @@ function resetUserState() {
   savedAffirmationCat = '';
   intentions = [];
   weeklyMantra = '';
+  lastMantraDate = '';
   currentCinders = 0;
   streakCount = 0;
   unlockedCount = 1;
@@ -1293,6 +1303,7 @@ async function loadUserProfile() {
   answers.timing = data.timing || 'morning';
   unlockedCount = data.unlocked_count || 1;
   weeklyMantra = data.mantra || '';
+  lastMantraDate = data.last_mantra_date || '';
   // Load intentions from Supabase
   if(currentUser) {
     const { data: intentionsData } = await db.from('intentions')
@@ -1665,13 +1676,31 @@ async function buildHome(){
   document.getElementById('greetingName').textContent = userNickname || userRealName;
   const rankInfo = getLevelInfo(currentCinders);
   document.getElementById('greetingRank').textContent = rankInfo.name;
-  // Show mantra if set
-  if(weeklyMantra) {
+  // Mantra card — Monday-aware
+  const thisMonday = getThisMonday();
+  const isMonday = new Date().getDay() === 1;
+  const mantraIsStale = !lastMantraDate || lastMantraDate < thisMonday;
+  const mantraCard = document.querySelector('.mantra-card');
+  const mantraLabel = document.querySelector('.mantra-card-label > span');
+  const mantraInputWrap = document.getElementById('mantraInputWrap');
+  const mantraInputEl = document.getElementById('mantraInput');
+  if(isMonday && mantraIsStale) {
+    // Mantra Monday — no mantra set yet this week
+    if(mantraLabel) mantraLabel.textContent = '✦ Mantra Monday';
+    if(mantraCard) mantraCard.classList.add('mantra-monday');
+    if(mantraInputWrap) mantraInputWrap.style.display = 'block';
+    if(mantraInputEl) { mantraInputEl.placeholder = 'What will you declare for this week?'; mantraInputEl.value = ''; }
+  } else if(isMonday && !mantraIsStale && weeklyMantra) {
+    // Monday but mantra already set this week
+    if(mantraLabel) mantraLabel.textContent = '✦ Mantra Monday';
+    if(mantraCard) mantraCard.classList.add('mantra-monday');
+  } else {
+    if(mantraLabel) mantraLabel.textContent = 'This week I declare';
+    if(mantraCard) mantraCard.classList.remove('mantra-monday');
+  }
+  if(weeklyMantra && !mantraIsStale) {
     const display = document.getElementById('mantraDisplay');
-    if(display) {
-      display.textContent = weeklyMantra;
-      display.classList.remove('empty');
-    }
+    if(display) { display.textContent = weeklyMantra; display.classList.remove('empty'); }
   }
 
   // Update streak
@@ -2705,6 +2734,7 @@ async function awardCinders(amount, reason) {
 
 // ── WEEKLY MANTRA ──
 let weeklyMantra = '';
+let lastMantraDate = '';
 
 function toggleMantraEdit() {
   const wrap = document.getElementById('mantraInputWrap');
@@ -2734,17 +2764,12 @@ async function saveMantra() {
   }
   if(currentUser) {
     const today = getLocalDateString();
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-    const weekStartStr = weekStart.toISOString().split('T')[0];
-    const { data: mantraCheck } = await db.from('profiles')
-      .select('last_mantra_date')
-      .eq('id', currentUser.id)
-      .single();
-    if(!mantraCheck?.last_mantra_date || mantraCheck.last_mantra_date < weekStartStr) {
+    const thisMonday = getThisMonday();
+    if(!lastMantraDate || lastMantraDate < thisMonday) {
       await db.from('profiles').update({ last_mantra_date: today }).eq('id', currentUser.id);
       awardCinders(10, 'Weekly mantra set');
     }
+    lastMantraDate = today;
   }
 }
 
