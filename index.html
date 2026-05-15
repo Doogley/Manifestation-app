@@ -961,9 +961,9 @@
   <div class="profile-section">
     <div class="profile-section-title">Your Journey</div>
     <div class="profile-stats-grid">
-      <div class="profile-stat"><div class="profile-stat-num">1</div><div class="profile-stat-label">Day Streak</div></div>
-      <div class="profile-stat"><div class="profile-stat-num">1</div><div class="profile-stat-label">Affirmations Unlocked</div></div>
-      <div class="profile-stat"><div class="profile-stat-num">0</div><div class="profile-stat-label">Journal Entries</div></div>
+      <div class="profile-stat"><div class="profile-stat-num" id="profileStatStreak">—</div><div class="profile-stat-label">Day Streak</div></div>
+      <div class="profile-stat"><div class="profile-stat-num" id="profileStatAffirmations">—</div><div class="profile-stat-label">Affirmations Unlocked</div></div>
+      <div class="profile-stat"><div class="profile-stat-num" id="profileStatJournal">—</div><div class="profile-stat-label">Journal Entries</div></div>
     </div>
   </div>
 
@@ -1278,7 +1278,7 @@ async function loadUserProfile() {
   // Load their saved data into our variables
  userRealName = data.real_name || 'Friend';
   userNickname = data.nickname || '';
-  currentCinders = data.cinders || 50;
+  currentCinders = data.cinders ?? 0;
   answers.intention = data.intention || 'abundance';
   answers.tone = data.tone || 'gentle';
   answers.timing = data.timing || 'morning';
@@ -1728,7 +1728,8 @@ async function buildHome(){
 
   buildLibrary();
   updateCountdown();
-  setInterval(updateCountdown,1000);
+  if(countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = setInterval(updateCountdown, 1000);
 }
 
 async function unlockTodaysAffirmation() {
@@ -2078,6 +2079,7 @@ function toRoman(n) {
 
 let currentCinders = 50;
 let dailyLoginChecked = false;
+let countdownInterval = null;
 
 // ── DAILY TRACKING (resets each session — backend will use real dates) ──
 const dailyActions = {
@@ -2381,7 +2383,7 @@ function openProfile() {
   setTabByName('profile');
 }
 
-function buildProfile() {
+async function buildProfile() {
   // Name display — show nickname if set, otherwise real name
   const displayName = userNickname || userRealName;
   document.getElementById('profileInitial').textContent = displayName.charAt(0).toUpperCase();
@@ -2404,6 +2406,18 @@ function buildProfile() {
   document.getElementById('profileCindersCurrent').textContent = currentCinders;
   document.getElementById('profileCindersNext').textContent = info.currentMax;
   document.getElementById('profileNextRank').textContent = info.nextName;
+
+  // Stats
+  document.getElementById('profileStatStreak').textContent = streakCount;
+  document.getElementById('profileStatAffirmations').textContent = unlockedCount;
+  if(currentUser) {
+    const { count } = await db.from('journal_entries')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', currentUser.id);
+    document.getElementById('profileStatJournal').textContent = count ?? 0;
+  } else {
+    document.getElementById('profileStatJournal').textContent = 0;
+  }
 
   // Preferences from onboarding
   const intentMap = {abundance:'Abundance',love:'Love',confidence:'Confidence',health:'Health',peace:'Peace',career:'Career'};
