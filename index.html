@@ -2541,7 +2541,6 @@ async function openProfile() {
 }
 
 async function buildProfile() {
-  console.log('buildProfile called, unlockedCount:', unlockedCount);
   // Name display — show nickname if set, otherwise real name
   const displayName = userNickname || userRealName;
   document.getElementById('profileInitial').textContent = displayName.charAt(0).toUpperCase();
@@ -2558,6 +2557,7 @@ async function buildProfile() {
   document.getElementById('profileMemberDate').textContent = `${month} ${ordinal}, ${year}`;
 
   // Membership status
+  console.log('membership calc:', unlockedCount, 30 - unlockedCount);
   const membershipEl = document.getElementById('profileMembershipStatus');
   if(membershipEl) membershipEl.textContent = 'Free — ' + Math.max(0, 30 - unlockedCount) + ' affirmations remaining';
 
