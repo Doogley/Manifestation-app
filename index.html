@@ -687,7 +687,7 @@
 
 <!-- GLOBAL BOTTOM NAV -->
 <div class="bottom-nav" id="globalBottomNav" style="display:none">
-    <button class="nav-tab active" onclick="setTab(this);showScreen('home');buildHome()">
+    <button class="nav-tab active" onclick="setTab(this);showScreen('home');console.trace('buildHome: Today tab');buildHome()">
       <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg></span>
       <span class="nav-tab-label">Today</span>
     </button>
@@ -1330,6 +1330,7 @@ async function loadUserProfile() {
   }
   setTimeout(() => {
     console.log('affirmationUnlocked before buildHome:', dailyActions.affirmationUnlocked);
+    console.trace('buildHome: loadUserProfile setTimeout');
     buildHome();
     showScreen('home');
     setTabByName('today');
@@ -1601,7 +1602,7 @@ function showScreen(id){
   nav.style.display = noNavScreens.includes(id) ? 'none' : 'flex';
 }
 function startOnboarding(){showScreen('onboarding');renderQuestion(0);}
-function skipToHome(){todayAffirmation=affirmations.abundance.gentle;todayCategory=catLabels.abundance;buildHome();showScreen('home');setTabByName('today');}
+function skipToHome(){todayAffirmation=affirmations.abundance.gentle;todayCategory=catLabels.abundance;console.trace('buildHome: skipToHome');buildHome();showScreen('home');setTabByName('today');}
 
 function prevQ(){
   if(currentQuestion>0){
@@ -1662,6 +1663,7 @@ async function goToHome(){
   const firstEntry = affirmationLibrary[0];
   todayAffirmation = firstEntry ? firstEntry.text : affirmations[answers.intention || 'abundance'][answers.tone || 'gentle'];
   todayCategory = firstEntry ? firstEntry.cat : catLabels[answers.intention || 'abundance'];
+  console.trace('buildHome: goToHome');
   buildHome();
   showScreen('home');
   setTabByName('today');
@@ -2359,6 +2361,7 @@ function handleLogoTap() {
       dailyActions.affirmationUnlocked = false;
       badgeCategories.forEach((cat,ci) => cat.badges.forEach((b,bi) => b.earned = (ci===0&&bi===0)||(ci===1&&bi===0)||(ci===2&&bi===0)));
       buildLibrary();
+      console.trace('buildHome: admin mode off');
       buildHome();
       showAdminBanner(false);
     }
