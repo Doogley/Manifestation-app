@@ -1167,6 +1167,12 @@ const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 const CLAUDE_API_KEY = 'YOUR_CLAUDE_API_KEY';
 
+function getLocalDateString() {
+  const now = new Date();
+  const localDate = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+  return localDate;
+}
+
 let currentUser = null;
 let streakCount = 0;
 // ── AUTH FUNCTIONS ──
@@ -1300,7 +1306,7 @@ async function loadUserProfile() {
   }
  
  // Check if user already unlocked today's affirmation
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   if(data.last_affirmation_date === today) {
     dailyActions.affirmationUnlocked = true;
     const unlockedEntry = affirmationLibrary[unlockedCount - 1];
@@ -1636,7 +1642,7 @@ function showReveal(){
 async function goToHome(){
   dailyActions.affirmationUnlocked = true;
   if(currentUser) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString();
     const { data: affCheck } = await db.from('profiles')
       .select('last_affirmation_date')
       .eq('id', currentUser.id)
@@ -1675,8 +1681,9 @@ async function buildHome(){
 
   // Update streak
   if(currentUser) {
-    const today = new Date().toISOString().split('T')[0];
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    const today = getLocalDateString();
+    const d = new Date(); d.setDate(d.getDate() - 1);
+    const yesterday = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
     const { data: streakData } = await db.from('profiles')
       .select('streak_count, last_streak_date')
       .eq('id', currentUser.id)
@@ -1707,7 +1714,7 @@ async function buildHome(){
  // Award daily login Cinders — only once per session and only for returning users
   if(currentUser && !dailyLoginChecked) {
     dailyLoginChecked = true;
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString();
     const { data: visitData } = await db.from('profiles')
       .select('last_visit_date')
       .eq('id', currentUser.id)
@@ -1745,7 +1752,7 @@ async function buildHome(){
 }
 
 async function unlockTodaysAffirmation() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   if(currentUser) {
     const { data } = await db.from('profiles')
       .select('last_affirmation_date')
@@ -1875,7 +1882,7 @@ async function openJournal(){
 
   // Load today's existing entry if there is one
   if(currentUser) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString();
     const { data } = await db.from('journal_entries')
       .select('*')
       .eq('user_id', currentUser.id)
@@ -1927,7 +1934,7 @@ async function saveJournal(){
   if(!textarea.value && !selectedMoodSub && gratitude.length===0){ alert('Add at least one entry before saving.'); return; }
   
   if(currentUser) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString();
     // Check if entry exists for today
     const { data: existing } = await db.from('journal_entries')
       .select('id')
@@ -2724,7 +2731,7 @@ async function saveMantra() {
     await db.from('profiles').update({ mantra: text }).eq('id', currentUser.id);
   }
   if(currentUser) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString();
     const weekStart = new Date();
     weekStart.setDate(weekStart.getDate() - weekStart.getDay());
     const weekStartStr = weekStart.toISOString().split('T')[0];
