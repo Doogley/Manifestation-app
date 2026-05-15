@@ -1303,6 +1303,11 @@ async function loadUserProfile() {
   const today = new Date().toISOString().split('T')[0];
   if(data.last_affirmation_date === today) {
     dailyActions.affirmationUnlocked = true;
+    const unlockedEntry = affirmationLibrary[unlockedCount - 1];
+    if(unlockedEntry) {
+      todayAffirmation = unlockedEntry.text;
+      todayCategory = unlockedEntry.cat;
+    }
   }
   // Load saved affirmation first before building home
   if(data.saved_affirmation_text) {
@@ -1312,9 +1317,9 @@ async function loadUserProfile() {
     
   } else {
     saved = false;
-    todayAffirmation = affirmations[answers.intention][answers.tone];
-    todayCategory = catLabels[answers.intention];
-    
+    const libEntry = affirmationLibrary[unlockedCount - 1];
+    todayAffirmation = libEntry ? libEntry.text : affirmations[answers.intention][answers.tone];
+    todayCategory = libEntry ? libEntry.cat : catLabels[answers.intention];
   }
   setTimeout(() => {
     buildHome();
@@ -1646,6 +1651,9 @@ async function goToHome(){
     }).eq('id', currentUser.id);
     if(!alreadyUnlockedToday) awardCinders(10, 'Affirmation unlocked');
   }
+  const firstEntry = affirmationLibrary[0];
+  todayAffirmation = firstEntry ? firstEntry.text : affirmations[answers.intention || 'abundance'][answers.tone || 'gentle'];
+  todayCategory = firstEntry ? firstEntry.cat : catLabels[answers.intention || 'abundance'];
   buildHome();
   showScreen('home');
   setTabByName('today');
@@ -1722,7 +1730,7 @@ async function buildHome(){
     document.getElementById('homeAffirmationCat').textContent = '✦  ' + todayCategory;
     const saveBtn = document.getElementById('saveBtn');
     if(saveBtn) {
-      saveBtn.textContent = saved ? '♥  Saved' : '♡  Save';
+      saveBtn.textContent = saved ? '♥︎  Saved' : '♡  Save';
       saveBtn.classList.toggle('active', saved);
     }
   } else {
@@ -1763,7 +1771,7 @@ async function unlockTodaysAffirmation() {
   const saveBtn = document.getElementById('saveBtn');
   
   if(saveBtn) {
-    saveBtn.textContent = saved ? '♥  Saved' : '♡  Save';
+    saveBtn.textContent = saved ? '♥︎  Saved' : '♡  Save';
     saveBtn.classList.toggle('active', saved);
   }
 }
@@ -1812,7 +1820,7 @@ let savedCindersAwarded = false;
 async function toggleSave(){
   saved=!saved;
   const b=document.getElementById('saveBtn');
-  b.textContent=saved?'♥  Saved':'♡  Save';
+  b.textContent=saved?'♥︎  Saved':'♡  Save';
   b.classList.toggle('active',saved);
   if(currentUser) {
     if(saved) {
