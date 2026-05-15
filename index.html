@@ -1329,6 +1329,7 @@ async function loadUserProfile() {
     todayCategory = libEntry ? libEntry.cat : catLabels[answers.intention];
   }
   setTimeout(() => {
+    console.log('affirmationUnlocked before buildHome:', dailyActions.affirmationUnlocked);
     buildHome();
     showScreen('home');
     setTabByName('today');
@@ -1731,6 +1732,7 @@ async function buildHome(){
   // Show locked or unlocked affirmation
   const lockedEl = document.getElementById('affirmationLocked');
   const unlockedEl = document.getElementById('affirmationUnlocked');
+  console.log('building home, affirmationUnlocked:', dailyActions.affirmationUnlocked);
   if(dailyActions.affirmationUnlocked) {
     lockedEl.style.display = 'none';
     unlockedEl.style.display = 'block';
