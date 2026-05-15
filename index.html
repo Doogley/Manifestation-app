@@ -2420,21 +2420,28 @@ function renderIntentions() {
 }
 
 function renderPastIntentionsModal() {
-  const visible = intentions.filter(i => i.received && !pendingIntentionDeletes.has(i.id));
-  if(visible.length === 0) {
+  const received = intentions.filter(i => i.received);
+  if(received.length === 0) {
     document.getElementById('modalText').innerHTML = '<div style="color:var(--muted);font-size:14px;font-weight:300;font-style:italic;">Nothing manifested yet. Mark intentions as received when they arrive.</div>';
   } else {
-    document.getElementById('modalText').innerHTML = visible.map(intent => `
-      <div id="past-intent-${intent.id}" style="display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid rgba(201,169,110,.08);text-align:left;">
+    document.getElementById('modalText').innerHTML = received.map(intent => {
+      const isPending = pendingIntentionDeletes.has(intent.id);
+      return `
+      <div id="past-intent-${intent.id}" style="display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid rgba(201,169,110,.08);text-align:left;transition:opacity .2s;">
         <div style="flex:1;">
-          <div style="font-size:14px;font-weight:300;color:var(--soft);line-height:1.6;margin-bottom:4px;">${intent.text}</div>
-          <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);opacity:.7;">✦ Received</div>
+          <div style="font-size:14px;font-weight:300;color:${isPending ? 'var(--muted)' : 'var(--soft)'};line-height:1.6;margin-bottom:4px;text-decoration:${isPending ? 'line-through' : 'none'};transition:all .2s;">${intent.text}</div>
+          <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);opacity:${isPending ? '.3' : '.7'};">✦ Received</div>
         </div>
-        <button onclick="deletePastIntention('${intent.id}')" style="padding:4px 8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;flex-shrink:0;line-height:1;transition:color .3s;">×</button>
-      </div>`).join('');
+        ${isPending
+          ? `<button onclick="undoPastIntentionDelete('${intent.id}')" style="padding:4px 8px;background:none;border:none;color:var(--gold);cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.08em;flex-shrink:0;line-height:1.8;">Undo</button>`
+          : `<button onclick="deletePastIntention('${intent.id}')" style="padding:4px 8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;flex-shrink:0;line-height:1;transition:color .3s;">×</button>`
+        }
+      </div>`;
+    }).join('');
   }
-  if(pendingIntentionDeletes.size > 0) {
-    document.getElementById('modalCat').innerHTML = `<div style="margin-top:16px;"><button onclick="savePastIntentionChanges()" style="width:100%;padding:12px 20px;background:rgba(201,169,110,.12);border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;">Save Changes</button></div>`;
+  const n = pendingIntentionDeletes.size;
+  if(n > 0) {
+    document.getElementById('modalCat').innerHTML = `<div style="margin-top:16px;"><button onclick="savePastIntentionChanges()" style="width:100%;padding:12px 20px;background:rgba(201,169,110,.12);border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;">Save Changes (${n} deletion${n === 1 ? '' : 's'})</button></div>`;
   } else {
     document.getElementById('modalCat').innerHTML = '';
   }
@@ -2452,6 +2459,11 @@ function openPastIntentions() {
 
 function deletePastIntention(intentionId) {
   pendingIntentionDeletes.add(intentionId);
+  renderPastIntentionsModal();
+}
+
+function undoPastIntentionDelete(intentionId) {
+  pendingIntentionDeletes.delete(intentionId);
   renderPastIntentionsModal();
 }
 
