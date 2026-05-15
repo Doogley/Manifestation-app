@@ -1734,6 +1734,9 @@ async function buildHome(){
   const unlockedEl = document.getElementById('affirmationUnlocked');
   console.log('building home, affirmationUnlocked:', dailyActions.affirmationUnlocked);
   if(dailyActions.affirmationUnlocked) {
+    console.log('todayAffirmation:', todayAffirmation);
+    console.log('lockedEl:', document.getElementById('affirmationLocked'));
+    console.log('unlockedEl:', document.getElementById('affirmationUnlocked'));
     lockedEl.style.display = 'none';
     unlockedEl.style.display = 'block';
     document.getElementById('homeAffirmationText').textContent = todayAffirmation;
