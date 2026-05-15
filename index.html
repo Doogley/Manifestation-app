@@ -2845,10 +2845,13 @@ async function handleProfilePic(input) {
   reader.readAsDataURL(file);
   if(currentUser) {
     const path = `${currentUser.id}/avatar.jpg`;
+    console.log('uploading avatar for user:', currentUser?.id);
     const { error: uploadError } = await db.storage.from('avatars').upload(path, file, { upsert: true, contentType: file.type });
+    console.log('upload result:', uploadError);
     if(!uploadError) {
       const { data: urlData } = db.storage.from('avatars').getPublicUrl(path);
       const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      console.log('public url:', publicUrl);
       await db.from('profiles').update({ avatar_url: publicUrl }).eq('id', currentUser.id);
     }
   }
