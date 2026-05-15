@@ -829,6 +829,9 @@
       <button onclick="addIntention()" style="padding:12px 18px;background:none;border:1px solid rgba(201,169,110,.25);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:all .3s;">+ Add</button>
     </div>
     <div style="font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:.05em" id="intentionsCount">0 of 3 intentions used (free plan)</div>
+    <div id="pastIntentionsLink" style="display:none;margin-top:10px;">
+      <button onclick="openPastIntentions()" style="background:none;border:none;color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;padding:0;opacity:.7;">✦ View past intentions</button>
+    </div>
   </div>
 
   <!-- Save -->
@@ -1695,10 +1698,10 @@ function selectOpt(el,val){document.querySelectorAll('.option-btn').forEach(b=>b
 function nextQ(){if(!selectedOption)return;answers[questions[currentQuestion].id]=selectedOption;if(currentQuestion<questions.length-1){currentQuestion++;renderQuestion(currentQuestion);}else showReveal();}
 
 function showReveal(){
-  const intent=answers.intention||'abundance',tone=answers.tone||'gentle';
   const msgs={tough:"You came here looking for something. This affirmation meets you exactly where you are.",ready:"You're ready for more — and more is ready for you.",good:"From a place of strength, you're calling in even greater things.",fresh:"Every fresh start is a gift. This is yours."};
-  todayAffirmation=(affirmations[intent]&&affirmations[intent][tone])?affirmations[intent][tone]:"Everything I need is already making its way to me.";
-  todayCategory=catLabels[intent]||'Manifestation';
+  const firstEntry = affirmationLibrary[0];
+  todayAffirmation = firstEntry ? firstEntry.text : "Everything I need is already making its way to me.";
+  todayCategory = firstEntry ? firstEntry.cat : 'Manifestation';
   document.getElementById('affirmationText').textContent=todayAffirmation;
   document.getElementById('affirmationCategory').textContent=todayCategory;
   document.getElementById('revealMessage').textContent=(msgs[answers.currentState]||"Your journey begins today.")+" Come back tomorrow to unlock the next affirmation.";
@@ -2297,19 +2300,18 @@ async function useExampleIntention(btn) {
 function renderIntentions() {
   const list = document.getElementById('intentionsList');
   const count = document.getElementById('intentionsCount');
+  const pastLink = document.getElementById('pastIntentionsLink');
   if(!list) return;
 
   const active = intentions.filter(i => !i.received);
   const received = intentions.filter(i => i.received);
 
-  let html = '';
-
   if(active.length === 0 && received.length === 0) {
-    html = `<div class="empty-state" style="padding:20px 0"><div class="empty-state-icon">❋</div><div class="empty-state-title">No intentions yet</div><div class="empty-state-sub">Write what you are calling into your life and watch it unfold.</div></div>`;
+    list.innerHTML = `<div class="empty-state" style="padding:20px 0"><div class="empty-state-icon">❋</div><div class="empty-state-title">No intentions yet</div><div class="empty-state-sub">Write what you are calling into your life and watch it unfold.</div></div>`;
   } else {
-    html += active.map(intent => {
+    list.innerHTML = active.map(intent => {
       const i = intentions.indexOf(intent);
-      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:14px 16px;background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.1);margin-bottom:6px;">
+      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:14px 16px;background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.1);">
         <div style="flex:1;font-size:14px;font-weight:300;color:var(--soft);line-height:1.6;">${intent.text}</div>
         <div style="display:flex;gap:8px;flex-shrink:0">
           <button onclick="markReceived(${i})" style="padding:4px 10px;background:none;border:1px solid rgba(201,169,110,.2);color:var(--muted);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;white-space:nowrap">✦ Received</button>
@@ -2317,28 +2319,27 @@ function renderIntentions() {
         </div>
       </div>`;
     }).join('');
-
-    if(received.length > 0) {
-      html += `<div style="margin-top:12px;">
-        <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'" style="background:none;border:none;color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;padding:0;opacity:.8;">✦ ${received.length} thing${received.length===1?'':'s'} manifested</button>
-        <div style="display:none;margin-top:10px;">
-          ${received.map(intent => {
-            const i = intentions.indexOf(intent);
-            return `<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 16px;background:rgba(201,169,110,.02);border:1px solid rgba(201,169,110,.08);margin-bottom:4px;">
-              <div style="flex:1;font-size:14px;font-weight:300;color:var(--muted);line-height:1.6;text-decoration:line-through;text-decoration-color:rgba(201,169,110,.3);">${intent.text}</div>
-              <div style="display:flex;gap:8px;flex-shrink:0;align-items:center;">
-                <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);opacity:.7;">✦ Received</span>
-                <button onclick="removeIntention(${i})" style="padding:4px 8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .3s">×</button>
-              </div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>`;
-    }
   }
 
-  list.innerHTML = html;
+  if(pastLink) pastLink.style.display = received.length > 0 ? 'block' : 'none';
   if(count) count.textContent = `${active.length} of ${MAX_FREE_INTENTIONS} intentions used (free plan)`;
+}
+
+function openPastIntentions() {
+  const received = intentions.filter(i => i.received);
+  document.getElementById('modalDay').textContent = 'Manifested Intentions';
+  if(received.length === 0) {
+    document.getElementById('modalText').textContent = 'Nothing marked as received yet. When an intention manifests, mark it received and it will appear here.';
+    document.getElementById('modalCat').textContent = '';
+  } else {
+    document.getElementById('modalText').innerHTML = received.map(intent => `
+      <div style="padding:12px 0;border-bottom:1px solid rgba(201,169,110,.08);text-align:left;">
+        <div style="font-size:14px;font-weight:300;color:var(--muted);line-height:1.6;text-decoration:line-through;text-decoration-color:rgba(201,169,110,.3);margin-bottom:4px;">${intent.text}</div>
+        <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);opacity:.7;">✦ Received</div>
+      </div>`).join('');
+    document.getElementById('modalCat').textContent = '';
+  }
+  document.getElementById('modalOverlay').classList.add('open');
 }
 
 async function markReceived(i) {
