@@ -122,6 +122,21 @@
   .next-unlock-left span { display:block; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
   .next-unlock-time { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--gold); letter-spacing:.05em; }
 
+  /* Daily Practice */
+  .practice-wrap { position:relative; z-index:1; padding:16px 32px 0; opacity:0; animation:fadeUp .7s .28s ease forwards; }
+  .practice-card { border:1px solid rgba(201,169,110,.12); background:rgba(201,169,110,.02); padding:20px 24px; }
+  .practice-progress { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
+  .practice-progress-count { color:var(--gold); }
+  .practice-item { display:flex; align-items:center; gap:14px; padding:10px 0; border-bottom:1px solid rgba(201,169,110,.07); }
+  .practice-item:last-child { border-bottom:none; padding-bottom:0; }
+  .practice-check { width:18px; height:18px; border:1px solid rgba(201,169,110,.3); border-radius:2px; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .3s; }
+  .practice-check.done { background:var(--gold); border-color:var(--gold); }
+  .practice-check.done::after { content:'✓'; font-size:10px; color:var(--deep); font-weight:700; }
+  .practice-item-text { flex:1; font-size:13px; font-weight:300; color:var(--soft); transition:color .3s; }
+  .practice-item-text.done { color:var(--muted); text-decoration:line-through; text-decoration-color:rgba(201,169,110,.3); }
+  .practice-item-cinders { font-size:11px; color:var(--gold); opacity:.6; letter-spacing:.04em; transition:opacity .3s; white-space:nowrap; }
+  .practice-item-cinders.done { opacity:.25; }
+
   /* Library */
   .library-wrap { position:relative; z-index:1; padding:32px 32px 0; opacity:0; animation:fadeUp .7s .4s ease forwards; }
   .library-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
@@ -504,7 +519,7 @@
     .badge-name{font-size:9px}
   }
     .question-container,.onboarding-header{padding-left:24px;padding-right:24px}
-    .home-nav,.home-greeting,.todays-card-wrap,.next-unlock-wrap,.library-wrap,.mantra-card-wrap{padding-left:20px;padding-right:20px}
+    .home-nav,.home-greeting,.todays-card-wrap,.next-unlock-wrap,.practice-wrap,.library-wrap,.mantra-card-wrap{padding-left:20px;padding-right:20px}
     .upgrade-teaser{margin-left:20px;margin-right:20px}
     .journal-header,.journal-section,.journal-save-wrap{padding-left:20px;padding-right:20px}
     .journal-affirmation-ref{margin-left:20px;margin-right:20px}
@@ -656,6 +671,34 @@
     <div class="next-unlock">
       <div class="next-unlock-left"><span>Next affirmation unlocks in</span>Tomorrow's is waiting for you</div>
       <div class="next-unlock-time" id="countdownTimer">--:--:--</div>
+    </div>
+  </div>
+
+  <!-- Daily Practice -->
+  <div class="practice-wrap">
+    <div class="section-label">Daily Practice</div>
+    <div class="practice-card">
+      <div class="practice-progress"><span class="practice-progress-count" id="practiceCount">0</span> of 4 complete</div>
+      <div class="practice-item">
+        <div class="practice-check" id="practiceCheck0"></div>
+        <div class="practice-item-text" id="practiceText0">Reveal today's affirmation</div>
+        <div class="practice-item-cinders" id="practiceCinders0">+10 ✦</div>
+      </div>
+      <div class="practice-item">
+        <div class="practice-check" id="practiceCheck1"></div>
+        <div class="practice-item-text" id="practiceText1">Write in your journal</div>
+        <div class="practice-item-cinders" id="practiceCinders1">+20 ✦</div>
+      </div>
+      <div class="practice-item">
+        <div class="practice-check" id="practiceCheck2"></div>
+        <div class="practice-item-text" id="practiceText2">Check in your mood</div>
+        <div class="practice-item-cinders" id="practiceCinders2">+5 ✦</div>
+      </div>
+      <div class="practice-item">
+        <div class="practice-check" id="practiceCheck3"></div>
+        <div class="practice-item-text" id="practiceText3">Set your weekly mantra</div>
+        <div class="practice-item-cinders" id="practiceCinders3">+10 ✦</div>
+      </div>
     </div>
   </div>
 
@@ -1324,6 +1367,22 @@ async function loadUserProfile() {
   if(data.last_affirmation_date === today) {
     dailyActions.affirmationUnlocked = true;
   }
+  // Check if mantra set this week
+  if(lastMantraDate && lastMantraDate >= getThisMonday()) {
+    dailyActions.mantraSetThisWeek = true;
+  }
+  // Check if journal saved today (also sets moodCheckedIn if mood was recorded)
+  if(currentUser) {
+    const { data: todayJournal } = await db.from('journal_entries')
+      .select('id, mood_category')
+      .eq('user_id', currentUser.id)
+      .eq('entry_date', today)
+      .maybeSingle();
+    if(todayJournal) {
+      dailyActions.journalSaved = true;
+      if(todayJournal.mood_category) dailyActions.moodCheckedIn = true;
+    }
+  }
   // Saved affirmation is for profile display only — never overwrites today's affirmation
   savedAffirmationText = data.saved_affirmation_text || '';
   savedAffirmationCat = data.saved_affirmation_cat || '';
@@ -1670,6 +1729,26 @@ async function goToHome(){
   showScreen('home');
   setTabByName('today');
 }
+function updateDailyPractice() {
+  const states = [
+    dailyActions.affirmationUnlocked,
+    dailyActions.journalSaved,
+    dailyActions.moodCheckedIn,
+    dailyActions.mantraSetThisWeek,
+  ];
+  const count = states.filter(Boolean).length;
+  const countEl = document.getElementById('practiceCount');
+  if(countEl) countEl.textContent = count;
+  states.forEach((done, i) => {
+    const check = document.getElementById('practiceCheck' + i);
+    const text = document.getElementById('practiceText' + i);
+    const cinders = document.getElementById('practiceCinders' + i);
+    if(check) check.classList.toggle('done', done);
+    if(text) text.classList.toggle('done', done);
+    if(cinders) cinders.classList.toggle('done', done);
+  });
+}
+
 async function buildHome(){
   const h=new Date().getHours();
   document.getElementById('greetingTime').textContent=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
@@ -1773,6 +1852,7 @@ async function buildHome(){
   updateCountdown();
   if(countdownInterval) clearInterval(countdownInterval);
   countdownInterval = setInterval(updateCountdown, 1000);
+  updateDailyPractice();
 }
 
 async function unlockTodaysAffirmation() {
@@ -1807,6 +1887,7 @@ async function unlockTodaysAffirmation() {
     saveBtn.textContent = saved ? '♥︎  Saved' : '♡  Save';
     saveBtn.classList.toggle('active', saved);
   }
+  updateDailyPractice();
 }
 function buildLibrary(){
   const grid=document.getElementById('libraryGrid');
@@ -1991,6 +2072,9 @@ async function saveJournal(){
       await db.from('journal_entries').insert(entryData);
       awardCinders(20, 'Journal entry saved');
     }
+    dailyActions.journalSaved = true;
+    if(selectedMoodCategory) dailyActions.moodCheckedIn = true;
+    updateDailyPractice();
   }
 
   // Flash confirmation on button
@@ -2771,6 +2855,8 @@ async function saveMantra() {
     }
     lastMantraDate = today;
   }
+  dailyActions.mantraSetThisWeek = true;
+  updateDailyPractice();
 }
 
 function updateJournalMantra() {
