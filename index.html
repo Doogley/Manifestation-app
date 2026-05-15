@@ -756,7 +756,7 @@
 <!-- JOURNAL -->
 <div id="journal" class="screen">
   <div class="screen-logo-bar">
-    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today')">Already Mine</button>
+    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today');buildHome()">Already Mine</button>
     <button class="back-btn" onclick="showScreen('home');setTabByName('today');buildHome()" style="margin-top:0">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       Back
@@ -840,7 +840,7 @@
 <!-- BADGES -->
 <div id="badges" class="screen">
   <div class="screen-logo-bar">
-    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today')">Already Mine</button>
+    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today');buildHome()">Already Mine</button>
   </div>
   <div class="badges-header">
     <div class="badges-header-top">
@@ -866,8 +866,8 @@
 <!-- UPGRADE / PAYWALL -->
 <div id="upgrade" class="screen">
   <div class="screen-logo-bar">
-    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today')">Already Mine</button>
-    <button class="upgrade-close-btn" onclick="showScreen('home');setTabByName('today')">✕ Close</button>
+    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today');buildHome()">Already Mine</button>
+    <button class="upgrade-close-btn" onclick="showScreen('home');setTabByName('today');buildHome()">✕ Close</button>
   </div>
   <div class="upgrade-hero">
     <div class="upgrade-orb">
@@ -939,7 +939,7 @@
 
     <div style="margin-bottom:16px;font-size:13px;font-weight:300;color:var(--muted)">Your streak before: <span style="color:var(--gold)" id="graceStreakNum">7</span> days</div>
 
-    <button class="btn-primary" style="width:100%;padding:18px;margin-bottom:16px" onclick="showScreen('home');setTabByName('today')">I'm Back — Continue My Journey</button>
+    <button class="btn-primary" style="width:100%;padding:18px;margin-bottom:16px" onclick="showScreen('home');setTabByName('today');buildHome()">I'm Back — Continue My Journey</button>
     <br>
     <button class="btn-ghost" onclick="openUpgrade()" style="font-size:12px">Members get 1 streak freeze per month</button>
   </div>
@@ -948,7 +948,7 @@
 <!-- LIBRARY -->
 <div id="library" class="screen">
   <div class="screen-logo-bar">
-    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today')">Already Mine</button>
+    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today');buildHome()">Already Mine</button>
   </div>
   <div class="library-screen-header">
     <div class="library-screen-title">Your Library</div>
@@ -970,7 +970,7 @@
 <!-- PROFILE -->
 <div id="profile" class="screen">
   <div class="screen-logo-bar">
-    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today')">Already Mine</button>
+    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today');buildHome()">Already Mine</button>
   </div>
 
   <!-- Hero / Name -->
@@ -2112,7 +2112,7 @@ function setPricing(type){
 }
 function handleSubscribe(){
   const wrap=document.querySelector('.upgrade-cta-wrap');
-  wrap.innerHTML=`<div style="text-align:center;padding:24px;border:1px solid rgba(201,169,110,.2)"><div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--cream);margin-bottom:8px">Welcome, Member.</div><div style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:20px">✦ Your library is now open</div><button onclick="showScreen('home');setTabByName('today')" style="padding:14px 32px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer">Enter the App</button></div>`;
+  wrap.innerHTML=`<div style="text-align:center;padding:24px;border:1px solid rgba(201,169,110,.2)"><div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--cream);margin-bottom:8px">Welcome, Member.</div><div style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:20px">✦ Your library is now open</div><button onclick="showScreen('home');setTabByName('today');buildHome()" style="padding:14px 32px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer">Enter the App</button></div>`;
 }
 
 // ── BADGE DATA ──
