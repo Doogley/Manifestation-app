@@ -315,7 +315,7 @@
   .mood-btn:hover { border-color:rgba(201,169,110,.3); color:var(--soft); }
   .mood-btn.selected { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.08); }
 
-  .journal-save-wrap { position:relative; z-index:1; padding:28px 32px 0; opacity:0; animation:fadeUp .6s .4s ease forwards; }
+  .journal-save-wrap { position:sticky; bottom:0; z-index:10; padding:16px 32px 20px; background:rgba(11,10,8,.85); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-top:1px solid rgba(201,169,110,.08); }
 
   /* ── BADGES ── */
   #badges { padding-bottom:90px; }
@@ -758,8 +758,8 @@
 <!-- JOURNAL -->
 <div id="journal" class="screen">
   <div class="screen-logo-bar">
-    <button class="screen-logo-link" onclick="showScreen('home');setTabByName('today');buildHome()">Already Mine</button>
-    <button class="back-btn" onclick="showScreen('home');setTabByName('today');buildHome()" style="margin-top:0">
+    <button class="screen-logo-link" onclick="closeJournal()">Already Mine</button>
+    <button class="back-btn" onclick="closeJournal()" style="margin-top:0">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       Back
     </button>
@@ -838,7 +838,8 @@
 
   <!-- Save -->
   <div class="journal-save-wrap">
-    <button class="btn-primary" style="width:100%;padding:18px" onclick="saveJournal()">Save Today's Entry</button>
+    <button class="btn-primary" id="journalSaveBtn" style="width:100%;padding:18px" onclick="saveJournal()">Save Entry</button>
+    <div id="journalLastSaved" style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px;letter-spacing:.05em;min-height:16px;"></div>
   </div>
 </div>
 
@@ -2018,8 +2019,31 @@ function clearJournalFields() {
   selectedMoodSub = null;
 }
 
+function closeJournal() {
+  if(journalAutoSaveTimer) { clearInterval(journalAutoSaveTimer); journalAutoSaveTimer = null; }
+  showScreen('home');
+  setTabByName('today');
+  buildHome();
+}
+
+function updateLastSavedTime() {
+  const el = document.getElementById('journalLastSaved');
+  if(el) {
+    const now = new Date();
+    el.textContent = 'Last saved at ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  }
+}
+
 async function openJournal(){
   clearJournalFields();
+  document.getElementById('journalLastSaved').textContent = '';
+  if(journalAutoSaveTimer) clearInterval(journalAutoSaveTimer);
+  journalAutoSaveTimer = setInterval(async () => {
+    const saveBtn = document.getElementById('journalSaveBtn');
+    if(saveBtn) saveBtn.textContent = 'Saving...';
+    await saveJournal();
+    if(saveBtn) saveBtn.textContent = 'Save Entry';
+  }, 30000);
   const intent=answers.intention||'abundance';
   const now=new Date();
   const dateStr=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
@@ -2072,8 +2096,8 @@ async function openJournal(){
         }
       }
       // Update save button text
-      const saveBtn = document.querySelector('.journal-save-wrap .btn-primary');
-      if(saveBtn) saveBtn.textContent = 'Update Today\'s Entry';
+      const saveBtn = document.getElementById('journalSaveBtn');
+      if(saveBtn) saveBtn.textContent = 'Save Entry';
     }
   }
 }
@@ -2117,18 +2141,19 @@ async function saveJournal(){
     updateDailyPractice();
   }
 
-  // Flash confirmation on button
-  const saveBtn = document.querySelector('.journal-save-wrap .btn-primary');
+  // Flash confirmation on button and update last saved time
+  updateLastSavedTime();
+  const saveBtn = document.getElementById('journalSaveBtn');
   if(saveBtn) {
     const originalText = saveBtn.textContent;
-    saveBtn.textContent = '✓ Saved Successfully';
+    saveBtn.textContent = '✓ Saved';
     saveBtn.style.borderColor = 'var(--gold)';
     saveBtn.style.color = 'var(--gold)';
     setTimeout(() => {
-      saveBtn.textContent = originalText;
+      saveBtn.textContent = 'Save Entry';
       saveBtn.style.borderColor = '';
       saveBtn.style.color = '';
-    }, 2000);
+    }, 1500);
   }
 }
 function openModal(day,text,cat){document.getElementById('modalDay').textContent=day;document.getElementById('modalText').textContent=text;document.getElementById('modalCat').textContent=cat;document.getElementById('modalOverlay').classList.add('open');}
@@ -2254,6 +2279,7 @@ function toRoman(n) {
 let currentCinders = 50;
 let dailyLoginChecked = false;
 let countdownInterval = null;
+let journalAutoSaveTimer = null;
 
 // ── DAILY TRACKING (resets each session — backend will use real dates) ──
 const dailyActions = {
