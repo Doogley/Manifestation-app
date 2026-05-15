@@ -2339,9 +2339,7 @@ function showGracePeriod(streakBefore, daysCompleted) {
   showScreen('grace');
 }
 
-// ── EMPTY STATES ──
-function buildBadgeScreen() {
-  // Update badge earned states from real user data
+function updateBadgeEarnedStates() {
   const badgeEarned = {
     streak7:   streakCount >= 7,
     streak30:  streakCount >= 30,
@@ -2359,6 +2357,11 @@ function buildBadgeScreen() {
     if(b.id in badgeEarned) b.earned = badgeEarned[b.id];
     else b.earned = false;
   }));
+}
+
+// ── EMPTY STATES ──
+function buildBadgeScreen() {
+  updateBadgeEarnedStates();
 
   const info = getLevelInfo(currentCinders);
   document.getElementById('levelName').textContent = info.name;
@@ -2626,6 +2629,7 @@ async function buildProfile() {
   }
 
   // Recent badges — clickable
+  updateBadgeEarnedStates();
   const earnedBadges = badgeCategories.flatMap(c=>c.badges).filter(b=>b.earned);
   const recentWrap = document.getElementById('profileRecentBadges');
   recentWrap.innerHTML = earnedBadges.length === 0
