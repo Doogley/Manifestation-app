@@ -1309,7 +1309,6 @@ async function loadUserProfile() {
  
   // Check if user already unlocked today's affirmation
   const today = getLocalDateString();
-  console.log('last_affirmation_date from DB:', data.last_affirmation_date, 'today:', today);
   if(data.last_affirmation_date === today) {
     dailyActions.affirmationUnlocked = true;
   }
@@ -1322,8 +1321,6 @@ async function loadUserProfile() {
   todayAffirmation = libEntry ? libEntry.text : affirmations[answers.intention][answers.tone];
   todayCategory = libEntry ? libEntry.cat : catLabels[answers.intention];
   setTimeout(() => {
-    console.log('affirmationUnlocked before buildHome:', dailyActions.affirmationUnlocked);
-    console.trace('buildHome: loadUserProfile setTimeout');
     buildHome();
     showScreen('home');
     setTabByName('today');
@@ -1596,7 +1593,7 @@ function showScreen(id){
   nav.style.display = noNavScreens.includes(id) ? 'none' : 'flex';
 }
 function startOnboarding(){showScreen('onboarding');renderQuestion(0);}
-function skipToHome(){todayAffirmation=affirmations.abundance.gentle;todayCategory=catLabels.abundance;console.trace('buildHome: skipToHome');buildHome();showScreen('home');setTabByName('today');}
+function skipToHome(){todayAffirmation=affirmations.abundance.gentle;todayCategory=catLabels.abundance;buildHome();showScreen('home');setTabByName('today');}
 
 function prevQ(){
   if(currentQuestion>0){
@@ -1657,7 +1654,6 @@ async function goToHome(){
   const firstEntry = affirmationLibrary[0];
   todayAffirmation = firstEntry ? firstEntry.text : affirmations[answers.intention || 'abundance'][answers.tone || 'gentle'];
   todayCategory = firstEntry ? firstEntry.cat : catLabels[answers.intention || 'abundance'];
-  console.trace('buildHome: goToHome');
   buildHome();
   showScreen('home');
   setTabByName('today');
@@ -1728,11 +1724,7 @@ async function buildHome(){
   // Show locked or unlocked affirmation
   const lockedEl = document.getElementById('affirmationLocked');
   const unlockedEl = document.getElementById('affirmationUnlocked');
-  console.log('building home, affirmationUnlocked:', dailyActions.affirmationUnlocked);
   if(dailyActions.affirmationUnlocked) {
-    console.log('todayAffirmation:', todayAffirmation);
-    console.log('lockedEl:', document.getElementById('affirmationLocked'));
-    console.log('unlockedEl:', document.getElementById('affirmationUnlocked'));
     lockedEl.style.display = 'none';
     unlockedEl.style.display = 'block';
     document.getElementById('homeAffirmationText').textContent = todayAffirmation;
@@ -2362,7 +2354,6 @@ function handleLogoTap() {
       dailyActions.affirmationUnlocked = false;
       badgeCategories.forEach((cat,ci) => cat.badges.forEach((b,bi) => b.earned = (ci===0&&bi===0)||(ci===1&&bi===0)||(ci===2&&bi===0)));
       buildLibrary();
-      console.trace('buildHome: admin mode off');
       buildHome();
       showAdminBanner(false);
     }
