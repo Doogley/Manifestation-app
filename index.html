@@ -723,7 +723,7 @@
     <div class="library-grid" id="libraryGrid"></div>
   </div>
   <div class="upgrade-teaser">
-    <p>You have <strong>29 more affirmations</strong> to unlock on the free plan — and <strong>800+ waiting</strong> for members.</p>
+    <p>You have <strong><span id="teaserAffirmationsRemaining">29</span> more affirmations</strong> to unlock on the free plan — and <strong>800+ waiting</strong> for members.</p>
     <button class="btn-primary" style="padding:12px 32px;font-size:12px" onclick="openUpgrade()">Unlock Everything</button>
   </div>
   </div>
@@ -1849,6 +1849,8 @@ async function buildHome(){
     unlockedEl.style.display = 'none';
   }
 
+  const teaserEl = document.getElementById('teaserAffirmationsRemaining');
+  if(teaserEl) teaserEl.textContent = Math.max(0, 30 - unlockedCount);
   buildLibrary();
   updateCountdown();
   if(countdownInterval) clearInterval(countdownInterval);
