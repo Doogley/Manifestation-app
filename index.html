@@ -1083,7 +1083,7 @@
     <div class="profile-sub-status">
       <div class="profile-sub-label">
         <span>Current Plan</span>
-        Free — 29 affirmations remaining
+        <span id="profileMembershipStatus">Free — 29 affirmations remaining</span>
       </div>
       <button class="profile-sub-badge" onclick="openUpgrade()" style="padding:6px 16px;border:1px solid var(--gold);background:none;color:var(--gold);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Upgrade</button>
     </div>
@@ -1227,6 +1227,7 @@ function getThisMonday() {
 
 let currentUser = null;
 let streakCount = 0;
+let journalEntryCount = 0;
 // ── AUTH FUNCTIONS ──
 function switchAuthTab(tab) {
   const loginForm = document.getElementById('loginForm');
@@ -1276,6 +1277,7 @@ function resetUserState() {
   lastMantraDate = '';
   currentCinders = 0;
   streakCount = 0;
+  journalEntryCount = 0;
   unlockedCount = 1;
   userNickname = '';
   userRealName = '';
@@ -1370,17 +1372,17 @@ async function loadUserProfile() {
   if(lastMantraDate && lastMantraDate >= getThisMonday()) {
     dailyActions.mantraSetThisWeek = true;
   }
-  // Check if journal saved today (also sets moodCheckedIn if mood was recorded)
+  // Check if journal saved today (also sets moodCheckedIn if mood was recorded) + total count for badges
   if(currentUser) {
-    const { data: todayJournal } = await db.from('journal_entries')
-      .select('id, mood_category')
-      .eq('user_id', currentUser.id)
-      .eq('entry_date', today)
-      .maybeSingle();
+    const [{ data: todayJournal }, { count }] = await Promise.all([
+      db.from('journal_entries').select('id, mood_category').eq('user_id', currentUser.id).eq('entry_date', today).maybeSingle(),
+      db.from('journal_entries').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id),
+    ]);
     if(todayJournal) {
       dailyActions.journalSaved = true;
       if(todayJournal.mood_category) dailyActions.moodCheckedIn = true;
     }
+    journalEntryCount = count ?? 0;
   }
   // Saved affirmation is for profile display only — never overwrites today's affirmation
   savedAffirmationText = data.saved_affirmation_text || '';
@@ -2339,6 +2341,25 @@ function showGracePeriod(streakBefore, daysCompleted) {
 
 // ── EMPTY STATES ──
 function buildBadgeScreen() {
+  // Update badge earned states from real user data
+  const badgeEarned = {
+    streak7:   streakCount >= 7,
+    streak30:  streakCount >= 30,
+    streak90:  streakCount >= 90,
+    streak180: streakCount >= 180,
+    streak365: streakCount >= 365,
+    journal1:   journalEntryCount >= 1,
+    journal30:  journalEntryCount >= 30,
+    journal100: journalEntryCount >= 100,
+    aff1:   unlockedCount >= 1,
+    aff30:  unlockedCount >= 30,
+    aff100: unlockedCount >= 100,
+  };
+  badgeCategories.forEach(cat => cat.badges.forEach(b => {
+    if(b.id in badgeEarned) b.earned = badgeEarned[b.id];
+    else b.earned = false;
+  }));
+
   const info = getLevelInfo(currentCinders);
   document.getElementById('levelName').textContent = info.name;
   document.getElementById('levelNum').textContent = info.pos + 1 + (info.prestige * 6);
@@ -2531,6 +2552,10 @@ async function buildProfile() {
   const monthYear = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
   const [month, year] = monthYear.split(' ');
   document.getElementById('profileMemberDate').textContent = `${month} ${ordinal}, ${year}`;
+
+  // Membership status
+  const membershipEl = document.getElementById('profileMembershipStatus');
+  if(membershipEl) membershipEl.textContent = 'Free — ' + Math.max(0, 30 - unlockedCount) + ' affirmations remaining';
 
   // Rank
   const info = getLevelInfo(currentCinders);
