@@ -3122,8 +3122,6 @@ function selectSubMood(category, sub, el) {
 }
 
 function dismissModal() {
-  // Cancel any pending intention deletions — closing modal = implicit undo
-  Object.keys(pendingDeletions).forEach(id => { clearTimeout(pendingDeletions[id]); delete pendingDeletions[id]; });
   document.getElementById('modalOverlay').classList.remove('open');
 }
 function closeModal(e){ if(e.target===document.getElementById('modalOverlay')) dismissModal(); }
