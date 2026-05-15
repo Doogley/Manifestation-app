@@ -1673,10 +1673,10 @@ function _navigateToScreen(id){
 function showScreen(id){
   if(id !== 'auth' && !currentUser){ id = 'auth'; }
   if(currentScreen === 'journal' && id !== 'journal' && journalHasChanges) {
-    const save = confirm('You have unsaved changes. Save before leaving?');
-    if(save) {
-      saveJournal().then(() => { journalHasChanges = false; _navigateToScreen(id); });
-    }
+    showUnsavedChangesModal(
+      () => { journalHasChanges = false; _navigateToScreen(id); },
+      () => { journalHasChanges = false; _navigateToScreen(id); }
+    );
     return;
   }
   _navigateToScreen(id);
@@ -2030,13 +2030,27 @@ function clearJournalFields() {
   selectedMoodSub = null;
 }
 
+function showUnsavedChangesModal(onSave, onLeave) {
+  const closeModal = () => document.getElementById('modalOverlay').classList.remove('open');
+  document.getElementById('modalDay').textContent = 'Unsaved Changes';
+  document.getElementById('modalText').textContent = 'You have unsaved reflections. Would you like to save before leaving?';
+  document.getElementById('modalCat').innerHTML = `
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:4px;">
+      <button onclick="saveJournal().then(()=>{document.getElementById('modalOverlay').classList.remove('open');window._unsavedOnSave&&window._unsavedOnSave();})" style="padding:11px 22px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Save &amp; Leave</button>
+      <button onclick="document.getElementById('modalOverlay').classList.remove('open');window._unsavedOnLeave&&window._unsavedOnLeave();" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.15);color:var(--muted);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Leave Anyway</button>
+    </div>`;
+  window._unsavedOnSave = onSave;
+  window._unsavedOnLeave = onLeave;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
 function closeJournal() {
   const goHome = () => { _navigateToScreen('home'); setTabByName('today'); buildHome(); };
   if(journalHasChanges) {
-    const save = confirm('You have unsaved changes. Save before leaving?');
-    if(save) {
-      saveJournal().then(() => { journalHasChanges = false; goHome(); });
-    }
+    showUnsavedChangesModal(
+      () => { journalHasChanges = false; goHome(); },
+      () => { journalHasChanges = false; goHome(); }
+    );
   } else {
     goHome();
   }
