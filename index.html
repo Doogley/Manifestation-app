@@ -129,9 +129,8 @@
   .practice-progress-count { color:var(--gold); }
   .practice-item { display:flex; align-items:center; gap:14px; padding:10px 0; border-bottom:1px solid rgba(201,169,110,.07); }
   .practice-item:last-child { border-bottom:none; padding-bottom:0; }
-  .practice-check { width:18px; height:18px; border:1px solid rgba(201,169,110,.3); border-radius:2px; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .3s; }
-  .practice-check.done { background:var(--gold); border-color:var(--gold); }
-  .practice-check.done::after { content:'✓'; font-size:10px; color:var(--deep); font-weight:700; }
+  .practice-check { font-size:14px; color:var(--muted); flex-shrink:0; transition:color .3s; }
+  .practice-check.done { color:var(--gold); }
   .practice-item-text { flex:1; font-size:13px; font-weight:300; color:var(--soft); transition:color .3s; }
   .practice-item-text.done { color:var(--muted); text-decoration:line-through; text-decoration-color:rgba(201,169,110,.3); }
   .practice-item-cinders { font-size:11px; color:var(--gold); opacity:.6; letter-spacing:.04em; transition:opacity .3s; white-space:nowrap; }
@@ -680,22 +679,22 @@
     <div class="practice-card">
       <div class="practice-progress"><span class="practice-progress-count" id="practiceCount">0</span> of 4 complete</div>
       <div class="practice-item">
-        <div class="practice-check" id="practiceCheck0"></div>
+        <div class="practice-check" id="practiceCheck0">◇</div>
         <div class="practice-item-text" id="practiceText0">Reveal today's affirmation</div>
         <div class="practice-item-cinders" id="practiceCinders0">+10 ✦</div>
       </div>
       <div class="practice-item">
-        <div class="practice-check" id="practiceCheck1"></div>
+        <div class="practice-check" id="practiceCheck1">◇</div>
         <div class="practice-item-text" id="practiceText1">Write in your journal</div>
         <div class="practice-item-cinders" id="practiceCinders1">+20 ✦</div>
       </div>
       <div class="practice-item">
-        <div class="practice-check" id="practiceCheck2"></div>
+        <div class="practice-check" id="practiceCheck2">◇</div>
         <div class="practice-item-text" id="practiceText2">Check in your mood</div>
         <div class="practice-item-cinders" id="practiceCinders2">+5 ✦</div>
       </div>
       <div class="practice-item">
-        <div class="practice-check" id="practiceCheck3"></div>
+        <div class="practice-check" id="practiceCheck3">◇</div>
         <div class="practice-item-text" id="practiceText3">Set your weekly mantra</div>
         <div class="practice-item-cinders" id="practiceCinders3">+10 ✦</div>
       </div>
@@ -1743,7 +1742,7 @@ function updateDailyPractice() {
     const check = document.getElementById('practiceCheck' + i);
     const text = document.getElementById('practiceText' + i);
     const cinders = document.getElementById('practiceCinders' + i);
-    if(check) check.classList.toggle('done', done);
+    if(check) { check.textContent = done ? '✦' : '◇'; check.classList.toggle('done', done); }
     if(text) text.classList.toggle('done', done);
     if(cinders) cinders.classList.toggle('done', done);
   });
