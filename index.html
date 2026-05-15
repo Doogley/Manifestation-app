@@ -1967,15 +1967,31 @@ async function toggleSave(){
   b.classList.toggle('active',saved);
   if(currentUser) {
     if(saved) {
+      savedAffirmationText = todayAffirmation;
+      savedAffirmationCat = todayCategory;
       await db.from('profiles').update({
         saved_affirmation_text: todayAffirmation,
         saved_affirmation_cat: todayCategory,
       }).eq('id', currentUser.id);
     } else {
+      savedAffirmationText = '';
+      savedAffirmationCat = '';
       await db.from('profiles').update({
         saved_affirmation_text: null,
         saved_affirmation_cat: null,
       }).eq('id', currentUser.id);
+    }
+  }
+  const favEl = document.getElementById('profileFavAffirmation');
+  if(favEl) {
+    if(saved && savedAffirmationText) {
+      favEl.textContent = savedAffirmationText;
+      favEl.style.cursor = 'pointer';
+      favEl.onclick = () => openModal('Saved Affirmation', savedAffirmationText, savedAffirmationCat);
+    } else {
+      favEl.textContent = 'Tap the ♡ Save button on any affirmation to pin it here.';
+      favEl.style.cursor = '';
+      favEl.onclick = null;
     }
   }
 }
