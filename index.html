@@ -2298,17 +2298,47 @@ function renderIntentions() {
   const list = document.getElementById('intentionsList');
   const count = document.getElementById('intentionsCount');
   if(!list) return;
-  list.innerHTML = intentions.length === 0
-    ? `<div class="empty-state" style="padding:20px 0"><div class="empty-state-icon">❋</div><div class="empty-state-title">No intentions yet</div><div class="empty-state-sub">Write what you are calling into your life and watch it unfold.</div></div>`
-    : intentions.map((intent,i) => `
-      <div style="display:flex;align-items:flex-start;gap:10px;padding:14px 16px;background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,${intent.received?'.25':'.1'});">
-        <div style="flex:1;font-size:14px;font-weight:300;color:${intent.received?'var(--muted)':'var(--soft)'};line-height:1.6;${intent.received?'text-decoration:line-through;':''}">${intent.text}</div>
+
+  const active = intentions.filter(i => !i.received);
+  const received = intentions.filter(i => i.received);
+
+  let html = '';
+
+  if(active.length === 0 && received.length === 0) {
+    html = `<div class="empty-state" style="padding:20px 0"><div class="empty-state-icon">❋</div><div class="empty-state-title">No intentions yet</div><div class="empty-state-sub">Write what you are calling into your life and watch it unfold.</div></div>`;
+  } else {
+    html += active.map(intent => {
+      const i = intentions.indexOf(intent);
+      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:14px 16px;background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.1);margin-bottom:6px;">
+        <div style="flex:1;font-size:14px;font-weight:300;color:var(--soft);line-height:1.6;">${intent.text}</div>
         <div style="display:flex;gap:8px;flex-shrink:0">
-          ${!intent.received ? `<button onclick="markReceived(${i})" style="padding:4px 10px;background:none;border:1px solid rgba(201,169,110,.2);color:var(--muted);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;white-space:nowrap" title="Mark as received">✦ Received</button>` : `<span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);padding:4px 0">✦ Manifested</span>`}
-          <button onclick="removeIntention(${i})" style="padding:4px 8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .3s" title="Remove">×</button>
+          <button onclick="markReceived(${i})" style="padding:4px 10px;background:none;border:1px solid rgba(201,169,110,.2);color:var(--muted);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;white-space:nowrap">✦ Received</button>
+          <button onclick="removeIntention(${i})" style="padding:4px 8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .3s">×</button>
         </div>
-      </div>`).join('');
-  if(count) count.textContent = `${intentions.filter(i => !i.received).length} of ${MAX_FREE_INTENTIONS} intentions used (free plan)`;
+      </div>`;
+    }).join('');
+
+    if(received.length > 0) {
+      html += `<div style="margin-top:12px;">
+        <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'" style="background:none;border:none;color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;padding:0;opacity:.8;">✦ ${received.length} thing${received.length===1?'':'s'} manifested</button>
+        <div style="display:none;margin-top:10px;">
+          ${received.map(intent => {
+            const i = intentions.indexOf(intent);
+            return `<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 16px;background:rgba(201,169,110,.02);border:1px solid rgba(201,169,110,.08);margin-bottom:4px;">
+              <div style="flex:1;font-size:14px;font-weight:300;color:var(--muted);line-height:1.6;text-decoration:line-through;text-decoration-color:rgba(201,169,110,.3);">${intent.text}</div>
+              <div style="display:flex;gap:8px;flex-shrink:0;align-items:center;">
+                <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);opacity:.7;">✦ Received</span>
+                <button onclick="removeIntention(${i})" style="padding:4px 8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .3s">×</button>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }
+  }
+
+  list.innerHTML = html;
+  if(count) count.textContent = `${active.length} of ${MAX_FREE_INTENTIONS} intentions used (free plan)`;
 }
 
 async function markReceived(i) {
