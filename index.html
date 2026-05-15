@@ -687,7 +687,7 @@
 
 <!-- GLOBAL BOTTOM NAV -->
 <div class="bottom-nav" id="globalBottomNav" style="display:none">
-    <button class="nav-tab active" onclick="setTab(this);showScreen('home')">
+    <button class="nav-tab active" onclick="setTab(this);showScreen('home');buildHome()">
       <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg></span>
       <span class="nav-tab-label">Today</span>
     </button>
@@ -1307,6 +1307,7 @@ async function loadUserProfile() {
  
  // Check if user already unlocked today's affirmation
   const today = getLocalDateString();
+  console.log('last_affirmation_date from DB:', data.last_affirmation_date, 'today:', today);
   if(data.last_affirmation_date === today) {
     dailyActions.affirmationUnlocked = true;
     const unlockedEntry = affirmationLibrary[unlockedCount - 1];
