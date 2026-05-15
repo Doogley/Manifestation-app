@@ -2442,6 +2442,7 @@ function openPastIntentions() {
 }
 
 function deletePastIntention(intentionId) {
+  console.log('delete clicked for intention:', intentionId);
   const row = document.getElementById('past-intent-' + intentionId);
   if(!row) return;
   const intent = intentions.find(i => i.id === intentionId);
@@ -2464,6 +2465,7 @@ function deletePastIntention(intentionId) {
   row.appendChild(undoWrap);
 
   pendingDeletions[intentionId] = setTimeout(async () => {
+    console.log('timer fired, deleting:', intentionId);
     delete pendingDeletions[intentionId];
     if(currentUser) {
       await db.from('intentions').delete().eq('id', intentionId);
@@ -2475,6 +2477,7 @@ function deletePastIntention(intentionId) {
   }, 8000);
 
   undoWrap.onclick = () => {
+    console.log('undo clicked for:', intentionId);
     clearTimeout(pendingDeletions[intentionId]);
     delete pendingDeletions[intentionId];
     row.style.opacity = '';
@@ -3122,6 +3125,7 @@ function selectSubMood(category, sub, el) {
 }
 
 function dismissModal() {
+  console.log('modal closed, pendingDeletions:', Object.keys(pendingDeletions));
   document.getElementById('modalOverlay').classList.remove('open');
 }
 function closeModal(e){ if(e.target===document.getElementById('modalOverlay')) dismissModal(); }
