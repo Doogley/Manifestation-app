@@ -1442,11 +1442,17 @@ async function loadUserProfile() {
     }
     journalEntryCount = count ?? 0;
   }
-  // Today's affirmation comes from the user's category sequence, looping when exhausted
-  const seq = getUserAffirmationSequence();
-  const libEntry = seq[(unlockedCount - 1) % seq.length];
-  todayAffirmation = libEntry ? libEntry.text : affirmations[answers.intention][answers.tone];
-  todayCategory = libEntry ? libEntry.cat : catLabels[answers.intention];
+  // If already revealed today, use the saved affirmation text (locked for the day)
+  // Otherwise calculate dynamically from current preference so changes take effect on next reveal
+  if(data.last_affirmation_date === today && data.today_affirmation_text) {
+    todayAffirmation = data.today_affirmation_text;
+    todayCategory = data.today_affirmation_cat || '';
+  } else {
+    const seq = getUserAffirmationSequence();
+    const libEntry = seq[(unlockedCount - 1) % seq.length];
+    todayAffirmation = libEntry ? libEntry.text : affirmations[answers.intention][answers.tone];
+    todayCategory = libEntry ? libEntry.cat : catLabels[answers.intention];
+  }
   // Only mark as saved if the stored affirmation matches today's — clears stale saves from previous days
   savedAffirmationText = data.saved_affirmation_text || '';
   savedAffirmationCat = data.saved_affirmation_cat || '';
@@ -1816,6 +1822,8 @@ async function goToHome(){
       timing: answers.timing || 'morning',
       last_affirmation_date: today,
       unlocked_count: 1,
+      today_affirmation_text: todayAffirmation,
+      today_affirmation_cat: todayCategory,
     }).eq('id', currentUser.id);
     if(!alreadyUnlockedToday) awardCinders(10, 'Affirmation unlocked');
   }
@@ -2003,7 +2011,9 @@ async function unlockTodaysAffirmation() {
     const { error: updateError } = await db.from('profiles')
       .update({
         last_affirmation_date: today,
-        unlocked_count: unlockedCount
+        unlocked_count: unlockedCount,
+        today_affirmation_text: todayAffirmation,
+        today_affirmation_cat: todayCategory,
       })
       .eq('id', currentUser.id);
     if(updateError) {
