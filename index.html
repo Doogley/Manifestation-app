@@ -1973,9 +1973,8 @@ function buildLibrary(){
     grid.appendChild(tile);
   }
 
-  // Locked tiles for days not yet unlocked
-  const totalShown=14;
-  for(let d=unlockedCount+1;d<=Math.max(unlockedCount+totalShown,totalShown+1);d++){
+  // Locked tiles — next 7 days only
+  for(let d=unlockedCount+1;d<=unlockedCount+7;d++){
     const aff=affirmationLibrary[d-1];
     const tile=document.createElement('div');
     tile.className='lib-tile locked';
@@ -2620,7 +2619,10 @@ function buildLibraryScreen(filter) {
   grid.innerHTML = '';
 
   const isAdmin = adminMode;
-  const filtered = filter === 'all' ? affirmationLibrary : affirmationLibrary.filter(a => a.cat === filter);
+  const filtered = affirmationLibrary.filter(a =>
+    (filter === 'all' || a.cat === filter) &&
+    (isAdmin || a.id <= unlockedCount + 7)
+  );
 
   filtered.forEach((aff, i) => {
     const tile = document.createElement('div');
