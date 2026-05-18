@@ -97,14 +97,14 @@
   .nav-logo { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--cream); letter-spacing:.05em; }
   .nav-streak { display:flex; align-items:center; gap:8px; padding:6px 14px; border:1px solid rgba(201,169,110,.2); font-size:12px; letter-spacing:.1em; color:var(--gold); }
   .nav-avatar { width:36px; height:36px; border-radius:50%; background:rgba(201,169,110,.1); border:1px solid rgba(201,169,110,.2); display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; }
-  .home-greeting { position:relative; z-index:1; padding:40px 32px 0; opacity:0; animation:fadeUp .7s .1s ease forwards; }
+  .home-greeting { position:relative; z-index:1; padding:40px 32px 0; }
   .greeting-time { font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
   .greeting-name { font-family:'Cormorant Garamond',serif; font-size:clamp(28px,7vw,40px); font-weight:300; color:var(--cream); line-height:1.2; }
   .section-label { font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; display:flex; align-items:center; gap:12px; }
   .section-label::after { content:''; flex:1; height:1px; background:rgba(201,169,110,.15); }
 
   /* Today card */
-  .todays-card-wrap { position:relative; z-index:1; padding:32px 32px 0; opacity:0; animation:fadeUp .7s .2s ease forwards; }
+  .todays-card-wrap { position:relative; z-index:1; padding:32px 32px 0; }
   .todays-card { position:relative; background:linear-gradient(135deg,rgba(201,169,110,.07) 0%,rgba(201,169,110,.03) 100%); border:1px solid rgba(201,169,110,.2); padding:40px 36px; animation:glowPulse 5s ease-in-out infinite; }
   .todays-card::before { content:''; position:absolute; inset:4px; border:1px solid rgba(201,169,110,.06); pointer-events:none; }
   .card-day-num { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-bottom:24px; display:flex; align-items:center; gap:10px; }
@@ -116,14 +116,14 @@
   .card-action-btn:hover, .card-action-btn.active { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.06); }
 
   /* Countdown */
-  .next-unlock-wrap { position:relative; z-index:1; padding:24px 32px 0; opacity:0; animation:fadeUp .7s .3s ease forwards; }
+  .next-unlock-wrap { position:relative; z-index:1; padding:24px 32px 0; }
   .next-unlock { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; background:rgba(201,169,110,.03); border:1px solid rgba(201,169,110,.1); }
   .next-unlock-left { font-size:13px; font-weight:300; color:var(--soft); }
   .next-unlock-left span { display:block; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
   .next-unlock-time { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--gold); letter-spacing:.05em; }
 
   /* Daily Practice */
-  .practice-wrap { position:relative; z-index:1; padding:16px 32px 0; opacity:0; animation:fadeUp .7s .28s ease forwards; }
+  .practice-wrap { position:relative; z-index:1; padding:16px 32px 0; }
   .practice-card { border:1px solid rgba(201,169,110,.12); background:rgba(201,169,110,.02); padding:20px 24px; }
   .practice-progress { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
   .practice-progress-count { color:var(--gold); }
@@ -139,7 +139,7 @@
   .practice-item-cinders.done { opacity:.25; }
 
   /* Library */
-  .library-wrap { position:relative; z-index:1; padding:32px 32px 0; opacity:0; animation:fadeUp .7s .4s ease forwards; }
+  .library-wrap { position:relative; z-index:1; padding:32px 32px 0; }
   .library-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
   .library-count { font-size:12px; color:var(--muted); letter-spacing:.05em; }
   .library-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -160,7 +160,7 @@
   .lib-tile.locked::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent 0%,rgba(201,169,110,.03) 50%,transparent 100%); background-size:200% 100%; animation:shimmer 4s ease-in-out infinite; }
 
   /* Upgrade */
-  .upgrade-teaser { position:relative; z-index:1; margin:20px 32px 0; padding:24px; background:linear-gradient(135deg,rgba(201,169,110,.06) 0%,rgba(201,169,110,.02) 100%); border:1px solid rgba(201,169,110,.15); text-align:center; opacity:0; animation:fadeUp .7s .5s ease forwards; }
+  .upgrade-teaser { position:relative; z-index:1; margin:20px 32px 0; padding:24px; background:linear-gradient(135deg,rgba(201,169,110,.06) 0%,rgba(201,169,110,.02) 100%); border:1px solid rgba(201,169,110,.15); text-align:center; }
   .upgrade-teaser p { font-size:14px; font-weight:300; color:var(--soft); line-height:1.7; margin-bottom:16px; }
   .upgrade-teaser strong { color:var(--gold); font-weight:400; }
 
@@ -229,7 +229,7 @@
   .cinders-toast.hide { transform:translateX(-50%) translateY(-80px); opacity:0; }
 
   /* ── WEEKLY MANTRA ── */
-  .mantra-card-wrap { position:relative; z-index:1; padding:16px 32px 0; opacity:0; animation:fadeUp .7s .25s ease forwards; }
+  .mantra-card-wrap { position:relative; z-index:1; padding:16px 32px 0; }
   .mantra-card { position:relative; padding:24px 28px; border:1px solid rgba(201,169,110,.15); background:rgba(201,169,110,.03); transition:border-color .4s, box-shadow .4s; }
   .mantra-card.mantra-monday { border-color:rgba(201,169,110,.45); box-shadow:0 0 18px rgba(201,169,110,.12), inset 0 0 12px rgba(201,169,110,.04); }
   .mantra-card-label { font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); opacity:.7; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; }
