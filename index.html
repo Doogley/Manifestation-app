@@ -299,7 +299,7 @@
 
   .journal-prompt { font-family:'Jost',sans-serif; font-size:15px; font-weight:300; color:var(--soft); line-height:1.7; margin-bottom:14px; }
 
-  .journal-textarea { width:100%; background:rgba(201,169,110,.03); border:1px solid rgba(201,169,110,.12); color:var(--cream); font-family:'Jost',sans-serif; font-weight:300; font-size:14px; line-height:1.7; padding:16px 18px; resize:none; outline:none; transition:border-color .3s; font-size:15px; }
+  .journal-textarea { width:100%; background:rgba(201,169,110,.03); border:1px solid rgba(201,169,110,.12); color:var(--cream); font-family:'Jost',sans-serif; font-weight:300; font-size:15px; line-height:1.7; padding:16px 18px; resize:none; outline:none; transition:border-color .3s; }
   .journal-textarea::placeholder { color:var(--muted); opacity:.6; }
   .journal-textarea:focus { border-color:rgba(201,169,110,.3); }
 
@@ -631,7 +631,7 @@
 <!-- REVEAL -->
 <div id="reveal" class="screen">
   <div class="reveal-inner">
-    <div class="day-badge">✦ Day 1 · Affirmation Unlocked</div>
+    <div class="day-badge" id="revealDayBadge">✦ Day 1 · Affirmation Unlocked</div>
     <p class="reveal-label">Your first affirmation has been chosen for you</p>
     <div class="affirmation-card">
       <span class="affirmation-quote-mark">"</span>
@@ -981,6 +981,9 @@
       <button class="filter-btn" onclick="filterLibrary('Career',this)">Career</button>
       <button class="filter-btn" onclick="filterLibrary('Healing',this)">Healing</button>
       <button class="filter-btn" onclick="filterLibrary('Courage',this)">Courage</button>
+      <button class="filter-btn" onclick="filterLibrary('New Beginnings',this)">New Beginnings</button>
+      <button class="filter-btn" onclick="filterLibrary('Family',this)">Family</button>
+      <button class="filter-btn" onclick="filterLibrary('Growth',this)">Growth</button>
     </div>
   </div>
   <div class="library-screen-grid" id="libraryScreenGrid"></div>
@@ -995,14 +998,14 @@
   <!-- Hero / Name -->
   <div class="profile-hero">
     <div style="position:relative;width:72px;margin:0 auto 16px">
-      <div class="profile-avatar" id="profileInitial" onclick="document.getElementById('profilePicInput').click()">D</div>
+      <div class="profile-avatar" id="profileInitial" onclick="document.getElementById('profilePicInput').click()">✦</div>
       <div class="avatar-camera-btn" onclick="document.getElementById('profilePicInput').click()">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
       </div>
     </div>
     <input type="file" id="profilePicInput" accept="image/*" style="display:none" onchange="handleProfilePic(this)">
-    <div class="profile-real-name" id="profileRealName" style="display:none">Douglas</div>
-    <div class="profile-nickname" id="profileNicknameDisplay">Douglas</div>
+    <div class="profile-real-name" id="profileRealName" style="display:none"></div>
+    <div class="profile-nickname" id="profileNicknameDisplay"></div>
     <input class="profile-nickname-input" id="profileNicknameInput" type="text" placeholder="Add a nickname..." maxlength="20">
     <div class="profile-nickname-edit">
       <button class="profile-edit-btn" id="profileEditBtn" onclick="toggleNicknameEdit()">✎ Add nickname</button>
@@ -1083,7 +1086,7 @@
       </div>
     </div>
     <div class="profile-pref-row" onclick="togglePrefEdit('timing')" style="cursor:pointer">
-      <div class="profile-pref-label">Notification time</div>
+      <div class="profile-pref-label">Preferred reading time</div>
       <div class="profile-pref-value" id="prefTiming">Morning</div>
     </div>
     <div id="prefTimingEdit" style="display:none;padding:10px 0 0">
@@ -1134,15 +1137,16 @@
         <option value="love" style="background:var(--deep)">I love the app ✦</option>
       </select>
       <textarea id="feedbackText" style="background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.12);color:var(--cream);font-family:'Jost',sans-serif;font-weight:300;font-size:14px;line-height:1.7;padding:14px 16px;resize:none;outline:none;transition:border-color .3s;" rows="4" placeholder="Tell us what's on your mind..."></textarea>
+      <div id="feedbackError" style="font-size:12px;color:#c97070;min-height:18px;text-align:left"></div>
       <button onclick="submitFeedback()" style="padding:14px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Submit Feedback</button>
     </div>
   </div>
 
   <!-- Links — footer -->
   <div class="profile-links" style="padding-bottom:32px;border-top:1px solid rgba(201,169,110,.06);padding-top:24px;margin-top:8px">
-    <button class="profile-link" onclick="alert('Terms of Service coming before launch.')">Terms of Service</button>
-    <button class="profile-link" onclick="alert('Privacy Policy coming before launch.')">Privacy Policy</button>
-    <button class="profile-link" onclick="alert('Email: support@alreadymine.com')">Contact Us</button>
+    <button class="profile-link" onclick="currentModalType='info';document.getElementById('modalDay').textContent='Terms of Service';document.getElementById('modalText').textContent='Our Terms of Service will be available before launch. Thank you for your patience.';document.getElementById('modalCat').textContent='';document.getElementById('modalOverlay').classList.add('open')">Terms of Service</button>
+    <button class="profile-link" onclick="currentModalType='info';document.getElementById('modalDay').textContent='Privacy Policy';document.getElementById('modalText').textContent='Our Privacy Policy will be available before launch. Thank you for your patience.';document.getElementById('modalCat').textContent='';document.getElementById('modalOverlay').classList.add('open')">Privacy Policy</button>
+    <button class="profile-link" onclick="currentModalType='info';document.getElementById('modalDay').textContent='Contact Us';document.getElementById('modalText').textContent='We\'d love to hear from you.';document.getElementById('modalCat').textContent='support@alreadymine.com';document.getElementById('modalOverlay').classList.add('open')">Contact Us</button>
     <button class="profile-link" onclick="handleLogout()">Log Out</button>
   </div>
 </div>
@@ -1720,7 +1724,7 @@ function showScreen(id){
   _navigateToScreen(id);
 }
 function startOnboarding(){showScreen('onboarding');renderQuestion(0);}
-function skipToHome(){todayAffirmation=affirmations.abundance.gentle;todayCategory=catLabels.abundance;buildHome();showScreen('home');setTabByName('today');}
+function skipToHome(){showScreen('auth');}
 
 function prevQ(){
   if(currentQuestion>0){
@@ -1757,6 +1761,7 @@ function showReveal(){
   document.getElementById('affirmationText').textContent=todayAffirmation;
   document.getElementById('affirmationCategory').textContent=todayCategory;
   document.getElementById('revealMessage').textContent=(msgs[answers.currentState]||"Your journey begins today.")+" Come back tomorrow to unlock the next affirmation.";
+  document.getElementById('revealDayBadge').textContent=`✦ Day ${unlockedCount} · Affirmation Unlocked`;
   showScreen('reveal');
 }
 
@@ -1822,7 +1827,7 @@ function updateDailyPractice() {
 }
 
 async function buildHome(){
-  if(!currentUser) { console.log('buildHome called with no currentUser, skipping'); return; }
+  if(!currentUser) return;
   const h=new Date().getHours();
   document.getElementById('greetingTime').textContent=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
   document.getElementById('greetingName').textContent = userNickname || userRealName;
@@ -2060,7 +2065,7 @@ async function toggleSave(){
     }
   }
 }
-function shareAffirmation(){if(navigator.share){navigator.share({title:'Already Mine',text:todayAffirmation,url:window.location.href});}else{navigator.clipboard.writeText(todayAffirmation).then(()=>alert('Copied to clipboard!'));}}
+function shareAffirmation(){if(navigator.share){navigator.share({title:'Already Mine',text:todayAffirmation,url:window.location.href});}else{navigator.clipboard.writeText(todayAffirmation).then(()=>showCindersToast(0,'Copied to clipboard')).catch(()=>{});}}
 function setTab(el){document.querySelectorAll('#globalBottomNav .nav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
 function setTabByName(name){document.querySelectorAll('#globalBottomNav .nav-tab').forEach((t,i)=>{const labels=['today','library','journal','badges','profile'];if(labels[i]===name)t.classList.add('active');else t.classList.remove('active');});}
 
@@ -2403,7 +2408,11 @@ async function addIntention() {
   const text = input.value.trim();
   if(!text) return;
   if(intentions.filter(i => !i.received).length >= MAX_FREE_INTENTIONS) {
-    if(confirm('You\'ve reached your 3 intention limit on the free plan. Upgrade for unlimited intentions?')) openUpgrade();
+    currentModalType='info';
+    document.getElementById('modalDay').textContent='Intention Limit Reached';
+    document.getElementById('modalText').textContent='You\'ve used all 3 intention slots on the free plan. Upgrade for unlimited intentions.';
+    document.getElementById('modalCat').innerHTML=`<button onclick="dismissModal();openUpgrade()" style="margin-top:12px;padding:11px 28px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;">Upgrade</button>`;
+    document.getElementById('modalOverlay').classList.add('open');
     return;
   }
   const newIntention = { text, received: false, id: Date.now() };
@@ -2423,7 +2432,11 @@ async function addIntention() {
 async function useExampleIntention(btn) {
   const text = btn.textContent.trim();
   if(intentions.filter(i => !i.received).length >= MAX_FREE_INTENTIONS) {
-    if(confirm('You\'ve reached your 3 intention limit on the free plan. Upgrade for unlimited intentions?')) openUpgrade();
+    currentModalType='info';
+    document.getElementById('modalDay').textContent='Intention Limit Reached';
+    document.getElementById('modalText').textContent='You\'ve used all 3 intention slots on the free plan. Upgrade for unlimited intentions.';
+    document.getElementById('modalCat').innerHTML=`<button onclick="dismissModal();openUpgrade()" style="margin-top:12px;padding:11px 28px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;">Upgrade</button>`;
+    document.getElementById('modalOverlay').classList.add('open');
     return;
   }
   const newIntention = { text, received: false, id: Date.now() };
@@ -2760,13 +2773,15 @@ function setPref(type, value, label) {
   const capType = type.charAt(0).toUpperCase() + type.slice(1);
   document.getElementById(`pref${capType}`).textContent = label;
   document.getElementById(`pref${capType}Edit`).style.display = 'none';
-  // Update active state
   document.querySelectorAll(`#pref${capType}Edit .pref-opt`).forEach(btn => {
     btn.classList.toggle('active', btn.textContent === label);
   });
+  if(currentUser) {
+    db.from('profiles').update({ [type]: value }).eq('id', currentUser.id);
+  }
 }
 let userNickname = '';
-let userRealName = 'Douglas';
+let userRealName = '';
 let editingNickname = false;
 
 async function openProfile() {
@@ -2891,32 +2906,35 @@ async function handleProfilePic(input) {
   reader.readAsDataURL(file);
   if(currentUser) {
     const path = `${currentUser.id}/avatar.jpg`;
-    console.log('uploading avatar for user:', currentUser?.id);
     const { error: uploadError } = await db.storage.from('avatars').upload(path, file, { upsert: true, contentType: file.type });
-    console.log('upload result:', uploadError);
     if(!uploadError) {
       const { data: urlData } = db.storage.from('avatars').getPublicUrl(path);
       const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-      console.log('public url:', publicUrl);
       await db.from('profiles').update({ avatar_url: publicUrl }).eq('id', currentUser.id);
     }
   }
 }
 
-function submitFeedback() {
+async function submitFeedback() {
   const type = document.getElementById('feedbackType').value;
   const text = document.getElementById('feedbackText').value.trim();
-  if(!type) { alert('Please select a feedback type.'); return; }
-  if(!text) { alert('Please write your feedback before submitting.'); return; }
-  // In the real app this sends to your support email
+  const errEl = document.getElementById('feedbackError');
+  if(errEl) errEl.textContent = '';
+  if(!type) { if(errEl) errEl.textContent = 'Please select a feedback type.'; return; }
+  if(!text) { if(errEl) errEl.textContent = 'Please write your feedback before submitting.'; return; }
+  if(currentUser) {
+    await db.from('feedback').insert({ user_id: currentUser.id, type, message: text });
+  }
   document.getElementById('feedbackType').value = '';
   document.getElementById('feedbackText').value = '';
   const section = document.querySelector('#profile .profile-section:last-of-type');
-  const btn = section.querySelector('button');
-  btn.textContent = '✦ Thank you — received';
-  btn.style.color = 'var(--gold)';
-  btn.style.borderColor = 'var(--gold)';
-  setTimeout(() => { btn.textContent = 'Submit Feedback'; }, 3000);
+  const btn = section.querySelector('button[onclick="submitFeedback()"]');
+  if(btn) {
+    btn.textContent = '✦ Thank you — received';
+    btn.style.color = 'var(--gold)';
+    btn.style.borderColor = 'var(--gold)';
+    setTimeout(() => { btn.textContent = 'Submit Feedback'; btn.style.color=''; btn.style.borderColor=''; }, 3000);
+  }
 }
 
 function toggleNicknameEdit() {
@@ -3032,36 +3050,31 @@ async function generateSummary() {
     console.error('Summary generation error:', err);
   }
 
-  // Mood bars from real entry data, with fallback
+  // Mood bars from real entry data only
   const moodEntries = Object.entries(moodCounts).sort((a,b) => b[1]-a[1]).slice(0,6);
-  const moods = moodEntries.length > 0
-    ? moodEntries.map(([name, count]) => ({ name, count }))
-    : [
-        { name:'Aligned', count:8 },
-        { name:'Grateful', count:7 },
-        { name:'Peaceful', count:6 },
-        { name:'Hopeful', count:5 },
-        { name:'Anxious', count:3 },
-        { name:'Tired', count:2 },
-      ];
-  const maxCount = Math.max(...moods.map(m=>m.count));
-  document.getElementById('summaryMoodBars').innerHTML = moods.map(m=>`
-    <div class="summary-mood-row">
-      <div class="summary-mood-name">${m.name}</div>
-      <div class="summary-mood-bar"><div class="summary-mood-fill" style="width:${Math.round((m.count/maxCount)*100)}%"></div></div>
-      <div class="summary-mood-count">${m.count}</div>
-    </div>`).join('');
+  if(moodEntries.length > 0) {
+    const moods = moodEntries.map(([name, count]) => ({ name, count }));
+    const maxCount = Math.max(...moods.map(m=>m.count));
+    document.getElementById('summaryMoodBars').innerHTML = moods.map(m=>`
+      <div class="summary-mood-row">
+        <div class="summary-mood-name">${m.name}</div>
+        <div class="summary-mood-bar"><div class="summary-mood-fill" style="width:${Math.round((m.count/maxCount)*100)}%"></div></div>
+        <div class="summary-mood-count">${m.count}</div>
+      </div>`).join('');
+  } else {
+    document.getElementById('summaryMoodBars').innerHTML = `<div style="font-size:13px;font-weight:300;color:var(--muted);font-style:italic;padding:8px 0">No mood check-ins recorded this month. Add them in your journal entries.</div>`;
+  }
 
-  // Intentions (pull from active intentions or placeholder)
-  const intentionItems = intentions.length > 0 ? intentions : [
-    { text:'I am calling in financial freedom and ease.', received:true },
-    { text:'I am calling in deep, meaningful connection.', received:false },
-  ];
-  document.getElementById('summaryIntentionsList').innerHTML = intentionItems.map(i=>`
-    <div class="summary-intention-item">
-      <div class="summary-intention-check">${i.received ? '✦' : '◌'}</div>
-      <div class="summary-intention-text" style="${i.received?'text-decoration:line-through;color:var(--muted)':''}">${i.text}${i.received?' — Manifested':''}</div>
-    </div>`).join('');
+  // Intentions — real data only
+  if(intentions.length > 0) {
+    document.getElementById('summaryIntentionsList').innerHTML = intentions.map(i=>`
+      <div class="summary-intention-item">
+        <div class="summary-intention-check">${i.received ? '✦' : '◌'}</div>
+        <div class="summary-intention-text" style="${i.received?'text-decoration:line-through;color:var(--muted)':''}">${i.text}${i.received?' — Manifested':''}</div>
+      </div>`).join('');
+  } else {
+    document.getElementById('summaryIntentionsList').innerHTML = `<div style="font-size:13px;font-weight:300;color:var(--muted);font-style:italic;padding:8px 0">No intentions set this month. Add them in your journal to track what you're calling in.</div>`;
+  }
 
   // Show content, hide loading
   document.getElementById('summaryLoading').style.display = 'none';
@@ -3074,7 +3087,7 @@ let toastTimer = null;
 function showCindersToast(amount, reason) {
   const toast = document.getElementById('cindersToast');
   if(!toast) return;
-  toast.textContent = `✦ +${amount} Cinders · ${reason}`;
+  toast.textContent = amount ? `✦ +${amount} Cinders · ${reason}` : `✦ ${reason}`;
   toast.classList.remove('hide');
   toast.classList.add('show');
   clearTimeout(toastTimer);
