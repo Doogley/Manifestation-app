@@ -746,7 +746,7 @@
 
 <!-- GLOBAL BOTTOM NAV -->
 <div class="bottom-nav" id="globalBottomNav" style="display:none">
-    <button class="nav-tab active" onclick="setTab(this);showScreen('home');setTimeout(()=>buildHome().catch(e=>console.error('buildHome error:',e)),50)">
+    <button class="nav-tab active" onclick="setTab(this);showScreen('home');setTimeout(()=>buildHome().catch(e=>console.error('buildHome error:',e)),200)">
       <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg></span>
       <span class="nav-tab-label">Today</span>
     </button>
@@ -1822,6 +1822,7 @@ function updateDailyPractice() {
 }
 
 async function buildHome(){
+  if(!currentUser) { console.log('buildHome called with no currentUser, skipping'); return; }
   const h=new Date().getHours();
   document.getElementById('greetingTime').textContent=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
   document.getElementById('greetingName').textContent = userNickname || userRealName;
