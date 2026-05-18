@@ -1374,6 +1374,7 @@ async function loadUserProfile() {
   if(!data) { showScreen('onboarding'); renderQuestion(0); return; }
   // If onboarding was never completed, send back to onboarding
   if(data.unlocked_count == null || data.intention == null) {
+    userRealName = data.real_name || '';
     showScreen('onboarding');
     renderQuestion(0);
     return;
