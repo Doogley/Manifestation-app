@@ -2956,6 +2956,7 @@ function openMonthlySummary() {
 }
 
 async function generateSummary() {
+  if(!currentUser) return;
   let moodCounts = {};
 
   try {
