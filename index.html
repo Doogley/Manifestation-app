@@ -958,7 +958,7 @@
 
     <div style="margin-bottom:16px;font-size:13px;font-weight:300;color:var(--muted)">Your streak before: <span style="color:var(--gold)" id="graceStreakNum">7</span> days</div>
 
-    <button class="btn-primary" style="width:100%;padding:18px;margin-bottom:16px" onclick="showScreen('home');setTabByName('today');buildHome()">I'm Back — Continue My Journey</button>
+    <button class="btn-primary" style="width:100%;padding:18px;margin-bottom:16px" onclick="restoreFromGrace()">I'm Back — Continue My Journey</button>
     <br>
     <button class="btn-ghost" onclick="openUpgrade()" style="font-size:12px">Members get 1 streak freeze per month</button>
   </div>
@@ -1365,7 +1365,19 @@ async function handleLogout() {
 
 async function loadUserProfile() {
   const { data, error } = await db.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
-  if(error || !data) { showScreen('onboarding'); renderQuestion(0); return; }
+  if(error && error.code !== 'PGRST116') {
+    // Real DB error (not just "no rows") — stay on auth with a message
+    document.getElementById('loginError').textContent = 'Connection error. Please check your network and try again.';
+    showScreen('auth');
+    return;
+  }
+  if(!data) { showScreen('onboarding'); renderQuestion(0); return; }
+  // If onboarding was never completed, send back to onboarding
+  if(data.unlocked_count == null || data.intention == null) {
+    showScreen('onboarding');
+    renderQuestion(0);
+    return;
+  }
   // Load their saved data into our variables
  userRealName = data.real_name || 'Friend';
   userNickname = data.nickname || '';
@@ -1447,11 +1459,16 @@ async function loadUserProfile() {
 
 // Check if user is already logged in when app loads
 window.addEventListener('load', async () => {
-  const { data } = await db.auth.getSession();
-  if(data.session && !currentUser) {
-    currentUser = data.session.user;
-    await loadUserProfile();
-  } else {
+  try {
+    const { data } = await db.auth.getSession();
+    if(data.session && !currentUser) {
+      currentUser = data.session.user;
+      await loadUserProfile();
+    } else {
+      showScreen('auth');
+    }
+  } catch(e) {
+    console.error('Session check failed:', e);
     showScreen('auth');
   }
 });
@@ -1881,8 +1898,12 @@ async function buildHome(){
             streak_count: streakCount,
             last_streak_date: today
           }).eq('id', currentUser.id);
+        } else if(streakData.last_streak_date != null) {
+          // Missed a day — show grace screen instead of silently resetting
+          showGracePeriod(streakData.streak_count, 0);
+          return;
         } else {
-          // Missed a day — reset
+          // No streak history yet (brand new user) — start at 1
           streakCount = 1;
           await db.from('profiles').update({
             streak_count: 1,
@@ -1944,6 +1965,10 @@ async function buildHome(){
 }
 
 async function unlockTodaysAffirmation() {
+  if(!isPaidMember && unlockedCount >= 30) {
+    openUpgrade();
+    return;
+  }
   const today = getLocalDateString();
   if(currentUser) {
     const { data } = await db.from('profiles')
@@ -1954,12 +1979,17 @@ async function unlockTodaysAffirmation() {
     unlockedCount = unlockedCount + 1;
     const newEntry = affirmationLibrary[unlockedCount - 1];
     if(newEntry) { todayAffirmation = newEntry.text; todayCategory = newEntry.cat; }
-    await db.from('profiles')
-      .update({ 
+    const { error: updateError } = await db.from('profiles')
+      .update({
         last_affirmation_date: today,
         unlocked_count: unlockedCount
       })
       .eq('id', currentUser.id);
+    if(updateError) {
+      unlockedCount = unlockedCount - 1;
+      showCindersToast(0, 'Connection error — please try again');
+      return;
+    }
     awardCinders(10, 'Affirmation unlocked');
   }
   dailyActions.affirmationUnlocked = true;
@@ -2364,6 +2394,7 @@ function toRoman(n) {
 }
 
 let currentCinders = 50;
+let isPaidMember = false;
 let dailyLoginChecked = false;
 let countdownInterval = null;
 let journalHasChanges = false;
@@ -2582,6 +2613,20 @@ function showGracePeriod(streakBefore, daysCompleted) {
     if(dot) dot.classList.toggle('done', i <= daysCompleted);
   }
   showScreen('grace');
+}
+
+async function restoreFromGrace() {
+  const today = getLocalDateString();
+  streakCount = 1;
+  if(currentUser) {
+    await db.from('profiles').update({
+      streak_count: 1,
+      last_streak_date: today
+    }).eq('id', currentUser.id);
+  }
+  showScreen('home');
+  setTabByName('today');
+  buildHome();
 }
 
 function updateBadgeEarnedStates() {
