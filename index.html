@@ -1396,20 +1396,31 @@ async function loadUserProfile() {
     }
     journalEntryCount = count ?? 0;
   }
-  // Saved affirmation is for profile display only — never overwrites today's affirmation
-  savedAffirmationText = data.saved_affirmation_text || '';
-  savedAffirmationCat = data.saved_affirmation_cat || '';
-  saved = !!data.saved_affirmation_text;
   // Today's affirmation always comes from the library based on unlocked day count
   const libEntry = affirmationLibrary[unlockedCount - 1];
   todayAffirmation = libEntry ? libEntry.text : affirmations[answers.intention][answers.tone];
   todayCategory = libEntry ? libEntry.cat : catLabels[answers.intention];
+  // Only mark as saved if the stored affirmation matches today's — clears stale saves from previous days
+  savedAffirmationText = data.saved_affirmation_text || '';
+  savedAffirmationCat = data.saved_affirmation_cat || '';
+  if(savedAffirmationText && savedAffirmationText === todayAffirmation) {
+    saved = true;
+  } else {
+    saved = false;
+    if(savedAffirmationText) {
+      savedAffirmationText = '';
+      savedAffirmationCat = '';
+      await db.from('profiles').update({ saved_affirmation_text: null, saved_affirmation_cat: null }).eq('id', currentUser.id);
+    }
+  }
+  // Set nav avatar to initial by default; overridden below if avatar_url exists
+  const navAvatarEl = document.getElementById('navAvatar');
+  if(navAvatarEl) navAvatarEl.textContent = (userRealName || 'F')[0].toUpperCase();
   if(data.avatar_url) {
     const imgStyle = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
     const profileAvatar = document.getElementById('profileInitial');
     if(profileAvatar) profileAvatar.innerHTML = `<img src="${data.avatar_url}" alt="Profile" style="${imgStyle}">`;
-    const navAvatar = document.getElementById('navAvatar');
-    if(navAvatar) navAvatar.innerHTML = `<img src="${data.avatar_url}" alt="" style="${imgStyle}">`;
+    if(navAvatarEl) navAvatarEl.innerHTML = `<img src="${data.avatar_url}" alt="" style="${imgStyle}">`;
   }
   setTimeout(() => {
     buildHome();
