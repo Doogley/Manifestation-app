@@ -734,7 +734,7 @@
 
 <!-- GLOBAL BOTTOM NAV -->
 <div class="bottom-nav" id="globalBottomNav" style="display:none">
-    <button class="nav-tab active" onclick="setTab(this);showScreen('home');buildHome()">
+    <button class="nav-tab active" onclick="setTab(this);showScreen('home');buildHome().catch(e=>console.error('buildHome error:',e))">
       <span class="nav-tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg></span>
       <span class="nav-tab-label">Today</span>
     </button>
@@ -1842,51 +1842,59 @@ async function buildHome(){
 
   // Update streak
   if(currentUser) {
-    const today = getLocalDateString();
-    const d = new Date(); d.setDate(d.getDate() - 1);
-    const yesterday = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-    const { data: streakData } = await db.from('profiles')
-      .select('streak_count, last_streak_date')
-      .eq('id', currentUser.id)
-      .single();
-    if(streakData) {
-      if(streakData.last_streak_date === today) {
-        // Already counted today
-        streakCount = streakData.streak_count;
-      } else if(streakData.last_streak_date === yesterday) {
-        // Consecutive day — increment
-        streakCount = (streakData.streak_count || 0) + 1;
-        await db.from('profiles').update({
-          streak_count: streakCount,
-          last_streak_date: today
-        }).eq('id', currentUser.id);
-      } else {
-        // Missed a day — reset
-        streakCount = 1;
-        await db.from('profiles').update({
-          streak_count: 1,
-          last_streak_date: today
-        }).eq('id', currentUser.id);
+    try {
+      const today = getLocalDateString();
+      const d = new Date(); d.setDate(d.getDate() - 1);
+      const yesterday = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      const { data: streakData } = await db.from('profiles')
+        .select('streak_count, last_streak_date')
+        .eq('id', currentUser.id)
+        .single();
+      if(streakData) {
+        if(streakData.last_streak_date === today) {
+          // Already counted today
+          streakCount = streakData.streak_count;
+        } else if(streakData.last_streak_date === yesterday) {
+          // Consecutive day — increment
+          streakCount = (streakData.streak_count || 0) + 1;
+          await db.from('profiles').update({
+            streak_count: streakCount,
+            last_streak_date: today
+          }).eq('id', currentUser.id);
+        } else {
+          // Missed a day — reset
+          streakCount = 1;
+          await db.from('profiles').update({
+            streak_count: 1,
+            last_streak_date: today
+          }).eq('id', currentUser.id);
+        }
+        document.getElementById('streakCount').textContent = streakCount;
       }
-      document.getElementById('streakCount').textContent = streakCount;
+    } catch(e) {
+      console.error('buildHome streak error:', e);
     }
   }
 
- // Award daily login Cinders — only once per session and only for returning users
+  // Award daily login Cinders — only once per session and only for returning users
   if(currentUser && !dailyLoginChecked) {
-    dailyLoginChecked = true;
-    const today = getLocalDateString();
-    const { data: visitData } = await db.from('profiles')
-      .select('last_visit_date')
-      .eq('id', currentUser.id)
-      .single();
-    const isNewDay = visitData?.last_visit_date !== today;
-    const isReturning = visitData?.last_visit_date != null;
-    await db.from('profiles')
-      .update({ last_visit_date: today })
-      .eq('id', currentUser.id);
-    if(isNewDay && isReturning) awardCinders(5, 'Daily login');
-  } 
+    try {
+      dailyLoginChecked = true;
+      const today = getLocalDateString();
+      const { data: visitData } = await db.from('profiles')
+        .select('last_visit_date')
+        .eq('id', currentUser.id)
+        .single();
+      const isNewDay = visitData?.last_visit_date !== today;
+      const isReturning = visitData?.last_visit_date != null;
+      await db.from('profiles')
+        .update({ last_visit_date: today })
+        .eq('id', currentUser.id);
+      if(isNewDay && isReturning) awardCinders(5, 'Daily login');
+    } catch(e) {
+      console.error('buildHome login cinders error:', e);
+    }
+  }
 
   // Show locked or unlocked affirmation
   const lockedEl = document.getElementById('affirmationLocked');
