@@ -519,6 +519,7 @@
     .badge-icon{width:40px;height:40px;font-size:18px}
     .badge-name{font-size:9px}
   }
+  @media(max-width:480px){
     .question-container,.onboarding-header{padding-left:24px;padding-right:24px}
     .home-nav,.home-greeting,.todays-card-wrap,.next-unlock-wrap,.practice-wrap,.library-wrap,.mantra-card-wrap{padding-left:20px;padding-right:20px}
     .upgrade-teaser{margin-left:20px;margin-right:20px}
@@ -628,7 +629,7 @@
     <p class="reveal-message" id="revealMessage"></p>
     <div class="reveal-actions">
       <button class="btn-primary" onclick="goToHome()">Enter the App</button>
-      <button class="btn-ghost">Save this affirmation</button>
+      <button class="btn-ghost" onclick="saved=false;toggleSave();goToHome()">Save this affirmation</button>
     </div>
   </div>
 </div>
@@ -2047,7 +2048,7 @@ function showUnsavedChangesModal(onSave, onLeave) {
   document.getElementById('modalText').textContent = 'You have unsaved reflections. Would you like to save before leaving?';
   document.getElementById('modalCat').innerHTML = `
     <div style="display:flex;gap:12px;justify-content:center;margin-top:4px;">
-      <button onclick="saveJournal().then(()=>{dismissModal();window._unsavedOnSave&&window._unsavedOnSave();})" style="padding:11px 22px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Save &amp; Leave</button>
+      <button onclick="(async()=>{await saveJournal();dismissModal();window._unsavedOnSave&&window._unsavedOnSave();})()" style="padding:11px 22px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Save &amp; Leave</button>
       <button onclick="dismissModal();window._unsavedOnLeave&&window._unsavedOnLeave();" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.15);color:var(--muted);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Leave Anyway</button>
     </div>`;
   window._unsavedOnSave = onSave;
@@ -2226,7 +2227,7 @@ const badgeCategories = [
   {
     name: 'Streak', id: 'streak',
     badges: [
-      { id:'streak7', icon:'☽', name:'7 Day Streak', tier:'Intention', desc:'You showed up for 7 days in a row. The seed is planted.', earned:true },
+      { id:'streak7', icon:'☽', name:'7 Day Streak', tier:'Intention', desc:'You showed up for 7 days in a row. The seed is planted.', earned:false },
       { id:'streak30', icon:'☽◌', name:'30 Day Streak', tier:'Belief', desc:'30 days of intention. You are awakening to your power.', earned:false },
       { id:'streak90', icon:'☽○', name:'90 Day Streak', tier:'Alignment', desc:'90 days. Your practice is blooming into something real.', earned:false },
       { id:'streak180', icon:'☽◎', name:'180 Day Streak', tier:'Momentum', desc:'Half a year of daily devotion. You are radiant.', earned:false },
@@ -2236,7 +2237,7 @@ const badgeCategories = [
   {
     name: 'Journal', id: 'journal',
     badges: [
-      { id:'journal1', icon:'✦', name:'First Entry', tier:'Intention', desc:'You wrote your first journal entry. Your story begins.', earned:true },
+      { id:'journal1', icon:'✦', name:'First Entry', tier:'Intention', desc:'You wrote your first journal entry. Your story begins.', earned:false },
       { id:'journal30', icon:'✦✦', name:'30 Entries', tier:'Belief', desc:'30 reflections written. You are learning to listen within.', earned:false },
       { id:'journal100', icon:'✦◌', name:'100 Entries', tier:'Alignment', desc:'100 entries. Your inner world is rich and alive.', earned:false },
       { id:'journal365', icon:'✦◎', name:'365 Entries', tier:'Momentum', desc:'A year of daily reflection. You know yourself deeply.', earned:false },
@@ -2245,7 +2246,7 @@ const badgeCategories = [
   {
     name: 'Affirmations', id: 'affirmations',
     badges: [
-      { id:'aff1', icon:'◎', name:'First Unlock', tier:'Intention', desc:'Your first affirmation unlocked. The door is open.', earned:true },
+      { id:'aff1', icon:'◎', name:'First Unlock', tier:'Intention', desc:'Your first affirmation unlocked. The door is open.', earned:false },
       { id:'aff30', icon:'◎◌', name:'30 Unlocked', tier:'Belief', desc:'30 affirmations in your library. You are awakening.', earned:false },
       { id:'aff100', icon:'◎○', name:'100 Unlocked', tier:'Alignment', desc:'100 affirmations. Your library is coming alive.', earned:false },
       { id:'aff300', icon:'◎◎', name:'300 Unlocked', tier:'Momentum', desc:'300 affirmations. Your collection is radiant.', earned:false },
@@ -2971,7 +2972,7 @@ async function generateSummary() {
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 1000,
         messages: [{ role: 'user', content: prompt }]
       })
