@@ -1373,7 +1373,6 @@ async function loadUserProfile() {
   answers.intention = data.intention || 'abundance';
   answers.tone = data.tone || 'gentle';
   answers.timing = data.timing || 'morning';
-  console.log('prefs loaded from DB:', answers.intention, answers.tone, answers.timing);
   unlockedCount = data.unlocked_count || 1;
   weeklyMantra = data.mantra || '';
   lastMantraDate = data.last_mantra_date || '';
@@ -2773,7 +2772,6 @@ function setPref(type, value, label) {
   if(currentUser) {
     db.from('profiles').update({ [type]: value }).eq('id', currentUser.id).then(({error}) => {
       if(error) console.error('pref save error:', error);
-      else console.log('pref saved:', type, value);
     });
   }
 }
