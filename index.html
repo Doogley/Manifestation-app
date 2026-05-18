@@ -1348,7 +1348,7 @@ async function handleLogout() {
 }
 
 async function loadUserProfile() {
-  const { data, error } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
+  const { data, error } = await db.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
   if(error || !data) { showScreen('onboarding'); renderQuestion(0); return; }
   // Load their saved data into our variables
  userRealName = data.real_name || 'Friend';
@@ -1753,7 +1753,7 @@ async function goToHome(){
     const { data: affCheck } = await db.from('profiles')
       .select('last_affirmation_date')
       .eq('id', currentUser.id)
-      .single();
+      .maybeSingle();
     const alreadyUnlockedToday = affCheck?.last_affirmation_date === today;
     await db.from('profiles').update({
       intention: answers.intention || 'abundance',
@@ -1849,7 +1849,7 @@ async function buildHome(){
       const { data: streakData } = await db.from('profiles')
         .select('streak_count, last_streak_date')
         .eq('id', currentUser.id)
-        .single();
+        .maybeSingle();
       if(streakData) {
         if(streakData.last_streak_date === today) {
           // Already counted today
@@ -1884,7 +1884,7 @@ async function buildHome(){
       const { data: visitData } = await db.from('profiles')
         .select('last_visit_date')
         .eq('id', currentUser.id)
-        .single();
+        .maybeSingle();
       const isNewDay = visitData?.last_visit_date !== today;
       const isReturning = visitData?.last_visit_date != null;
       await db.from('profiles')
@@ -1929,7 +1929,7 @@ async function unlockTodaysAffirmation() {
     const { data } = await db.from('profiles')
       .select('last_affirmation_date')
       .eq('id', currentUser.id)
-      .single();
+      .maybeSingle();
     if(data?.last_affirmation_date === today) return; // already unlocked today
     unlockedCount = unlockedCount + 1;
     const newEntry = affirmationLibrary[unlockedCount - 1];
@@ -2131,7 +2131,7 @@ async function openJournal(){
       .select('*')
       .eq('user_id', currentUser.id)
       .eq('entry_date', today)
-      .single();
+      .maybeSingle();
     if(data) {
       const textarea = document.querySelector('#journal .journal-textarea');
       if(textarea && data.reflection) textarea.value = data.reflection;
@@ -2184,7 +2184,7 @@ async function saveJournal(){
       .select('id')
       .eq('user_id', currentUser.id)
       .eq('entry_date', today)
-      .single();
+      .maybeSingle();
 
     const entryData = {
       user_id: currentUser.id,
