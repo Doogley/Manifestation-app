@@ -2125,8 +2125,6 @@ async function openJournal(){
   // Load today's existing entry if there is one
   if(currentUser) {
     const today = getLocalDateString();
-    const { data: sessionCheck } = await db.auth.getSession();
-    console.log('session when querying journal:', sessionCheck?.session?.user?.id);
     const { data } = await db.from('journal_entries')
       .select('*')
       .eq('user_id', currentUser.id)
