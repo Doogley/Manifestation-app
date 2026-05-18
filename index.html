@@ -551,8 +551,20 @@
 <div class="bg-texture"></div>
 <div class="cinders-toast" id="cindersToast"></div>
 
+<!-- LOADING -->
+<div id="loading" class="screen active" style="align-items:center;justify-content:center;text-align:center;padding:60px 40px">
+  <div style="position:relative;z-index:1;animation:fadeIn .6s ease forwards">
+    <div class="orb" style="margin-bottom:40px">
+      <div class="orb-ring"></div><div class="orb-ring"></div><div class="orb-ring"></div>
+      <div class="orb-core">✦</div>
+    </div>
+    <h1 class="app-name">Already Mine</h1>
+    <p class="app-tagline">Daily Manifestation</p>
+  </div>
+</div>
+
 <!-- AUTH -->
-<div id="auth" class="screen active">
+<div id="auth" class="screen">
   <div class="splash-inner" style="position:relative;z-index:1;animation:fadeUp 1.2s ease forwards;text-align:center;padding:60px 40px">
     <div class="orb" style="margin-bottom:40px">
       <div class="orb-ring"></div><div class="orb-ring"></div><div class="orb-ring"></div>
@@ -1435,6 +1447,8 @@ window.addEventListener('load', async () => {
   if(data.session && !currentUser) {
     currentUser = data.session.user;
     await loadUserProfile();
+  } else {
+    showScreen('auth');
   }
 });
 const questions=[
@@ -1685,7 +1699,7 @@ const affirmationLibrary = [
 let currentQuestion=0,answers={},selectedOption=null,todayAffirmation='',todayCategory='',saved=false;
 let savedAffirmationText='',savedAffirmationCat='';
 
-const noNavScreens = ['auth','splash','onboarding','reveal','grace','monthlySummary'];
+const noNavScreens = ['loading','auth','splash','onboarding','reveal','grace','monthlySummary'];
 function _navigateToScreen(id){
   currentScreen = id;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
