@@ -2351,9 +2351,9 @@ const dailyActions = {
 };
 
 function openBadges() {
-  buildBadgeScreen();
   showScreen('badges');
   setTabByName('badges');
+  buildBadgeScreen();
 }
 
 function openBadgeModal(badgeId) {
@@ -2615,9 +2615,9 @@ let currentLibraryFilter = 'all';
 let unlockedCount = 1; // will be overridden by Supabase
 
 function openLibrary() {
-  buildLibraryScreen();
   showScreen('library');
   setTabByName('library');
+  buildLibraryScreen();
 }
 
 function buildLibraryScreen(filter) {
@@ -2747,9 +2747,9 @@ let userRealName = 'Douglas';
 let editingNickname = false;
 
 async function openProfile() {
-  await buildProfile();
   showScreen('profile');
   setTabByName('profile');
+  await buildProfile();
 }
 
 async function buildProfile() {
