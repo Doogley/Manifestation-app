@@ -1271,6 +1271,7 @@ async function handleLogin() {
 }
 
 function resetUserState() {
+  const resetInitial = userRealName ? userRealName[0].toUpperCase() : '✦';
   currentQuestion = 0;
   answers = {};
   selectedOption = null;
@@ -1307,9 +1308,9 @@ function resetUserState() {
   const mantraInput = document.getElementById('mantraInput');
   if(mantraInput) mantraInput.value = '';
   const profileAvatar = document.getElementById('profileInitial');
-  if(profileAvatar) { profileAvatar.innerHTML = ''; profileAvatar.textContent = '✦'; }
+  if(profileAvatar) { profileAvatar.innerHTML = ''; profileAvatar.textContent = resetInitial; }
   const navAvatar = document.getElementById('navAvatar');
-  if(navAvatar) { navAvatar.innerHTML = ''; navAvatar.textContent = '✦'; }
+  if(navAvatar) { navAvatar.innerHTML = ''; navAvatar.textContent = resetInitial; }
 }
 
 async function handleSignup() {
@@ -2734,7 +2735,8 @@ async function openProfile() {
 async function buildProfile() {
   // Name display — show nickname if set, otherwise real name
   const displayName = userNickname || userRealName;
-  document.getElementById('profileInitial').textContent = displayName.charAt(0).toUpperCase();
+  const profileInitialEl = document.getElementById('profileInitial');
+  if(!profileInitialEl.querySelector('img')) profileInitialEl.textContent = displayName.charAt(0).toUpperCase();
   document.getElementById('profileRealName').style.display = 'none';
   document.getElementById('profileNicknameDisplay').textContent = displayName;
   document.getElementById('profileEditBtn').textContent = userNickname ? '✎ Edit nickname' : '✎ Add nickname';
