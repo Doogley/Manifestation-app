@@ -1363,6 +1363,23 @@ async function handleLogout() {
   showScreen('auth');
 }
 
+const intentionCategoryMap = {
+  abundance: 'Abundance',
+  love: 'Love',
+  confidence: 'Confidence',
+  health: 'Health',
+  peace: 'Peace',
+  career: 'Career',
+  healing: 'Healing',
+  courage: 'Courage',
+};
+
+function getUserAffirmationSequence() {
+  const cat = intentionCategoryMap[answers.intention] || 'Abundance';
+  const filtered = affirmationLibrary.filter(a => a.cat.toLowerCase() === cat.toLowerCase());
+  return filtered.length > 0 ? filtered : affirmationLibrary;
+}
+
 async function loadUserProfile() {
   const { data, error } = await db.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
   if(error && error.code !== 'PGRST116') {
@@ -1425,8 +1442,9 @@ async function loadUserProfile() {
     }
     journalEntryCount = count ?? 0;
   }
-  // Today's affirmation always comes from the library based on unlocked day count
-  const libEntry = affirmationLibrary[unlockedCount - 1];
+  // Today's affirmation comes from the user's category sequence, looping when exhausted
+  const seq = getUserAffirmationSequence();
+  const libEntry = seq[(unlockedCount - 1) % seq.length];
   todayAffirmation = libEntry ? libEntry.text : affirmations[answers.intention][answers.tone];
   todayCategory = libEntry ? libEntry.cat : catLabels[answers.intention];
   // Only mark as saved if the stored affirmation matches today's — clears stale saves from previous days
@@ -1801,7 +1819,8 @@ async function goToHome(){
     }).eq('id', currentUser.id);
     if(!alreadyUnlockedToday) awardCinders(10, 'Affirmation unlocked');
   }
-  const firstEntry = affirmationLibrary[0];
+  const seq = getUserAffirmationSequence();
+  const firstEntry = seq[0];
   todayAffirmation = firstEntry ? firstEntry.text : affirmations[answers.intention || 'abundance'][answers.tone || 'gentle'];
   todayCategory = firstEntry ? firstEntry.cat : catLabels[answers.intention || 'abundance'];
   buildHome();
@@ -1978,7 +1997,8 @@ async function unlockTodaysAffirmation() {
       .maybeSingle();
     if(data?.last_affirmation_date === today) return; // already unlocked today
     unlockedCount = unlockedCount + 1;
-    const newEntry = affirmationLibrary[unlockedCount - 1];
+    const seq = getUserAffirmationSequence();
+    const newEntry = seq[(unlockedCount - 1) % seq.length];
     if(newEntry) { todayAffirmation = newEntry.text; todayCategory = newEntry.cat; }
     const { error: updateError } = await db.from('profiles')
       .update({
