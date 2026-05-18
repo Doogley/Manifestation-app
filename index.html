@@ -2624,7 +2624,7 @@ function buildLibraryScreen(filter) {
 
   filtered.forEach((aff, i) => {
     const tile = document.createElement('div');
-    const isToday = aff.id === 1;
+    const isToday = aff.id === unlockedCount;
     const isUnlocked = isAdmin || aff.id <= unlockedCount;
 
     if(isToday) {
