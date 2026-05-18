@@ -2687,13 +2687,6 @@ function buildLibraryScreen(filter) {
     grid.appendChild(tile);
   });
 
-  // Add upgrade teaser at bottom if not admin
-  if(!isAdmin) {
-    const teaser = document.createElement('div');
-    teaser.style.cssText = 'grid-column:span 2;margin-top:8px;padding:24px 20px;background:linear-gradient(135deg,rgba(201,169,110,.06) 0%,rgba(201,169,110,.02) 100%);border:1px solid rgba(201,169,110,.15);text-align:center';
-    teaser.innerHTML = `<div style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">✦ 800+ affirmations waiting</div><p style="font-size:13px;font-weight:300;color:var(--soft);line-height:1.7;margin-bottom:14px">A vast library is waiting for members — one new affirmation every day, forever.</p><button onclick="openUpgrade()" style="padding:10px 28px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Unlock Everything</button>`;
-    grid.appendChild(teaser);
-  }
 }
 
 function filterLibrary(cat, btn) {
