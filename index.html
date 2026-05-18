@@ -2021,6 +2021,7 @@ async function unlockTodaysAffirmation() {
       showCindersToast(0, 'Connection error — please try again');
       return;
     }
+    console.log('saving affirmation to DB:', todayAffirmation, todayCategory);
     awardCinders(10, 'Affirmation unlocked');
   }
   dailyActions.affirmationUnlocked = true;
