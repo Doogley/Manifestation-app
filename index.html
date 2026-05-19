@@ -165,7 +165,7 @@
   .upgrade-teaser strong { color:var(--gold); font-weight:400; }
 
   /* Bottom nav */
-  .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:rgba(26,22,16,.95); backdrop-filter:blur(12px); border-top:1px solid rgba(201,169,110,.1); display:flex; align-items:center; justify-content:space-around; padding:14px 20px 20px; z-index:100; -webkit-transform:translateZ(0); transform:translateZ(0); }
+  .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:color-mix(in srgb,var(--deep2) 95%,transparent); backdrop-filter:blur(12px); border-top:1px solid rgba(201,169,110,.1); display:flex; align-items:center; justify-content:space-around; padding:14px 20px 20px; z-index:100; -webkit-transform:translateZ(0); transform:translateZ(0); }
   .nav-tab { display:flex; flex-direction:column; align-items:center; gap:5px; background:none; border:none; cursor:pointer; color:var(--muted); transition:color .3s; font-family:'Jost',sans-serif; }
   .nav-tab.active { color:var(--gold); }
   .nav-tab-icon { font-size:18px; display:flex; align-items:center; justify-content:center; }
@@ -224,7 +224,7 @@
   }
 
   /* ── CINDERS TOAST ── */
-  .cinders-toast { position:fixed; top:24px; left:50%; transform:translateX(-50%) translateY(-80px); background:rgba(26,22,16,.95); border:1px solid rgba(201,169,110,.3); color:var(--gold); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; padding:10px 20px; z-index:999; white-space:nowrap; backdrop-filter:blur(8px); transition:transform .4s cubic-bezier(.34,1.56,.64,1), opacity .4s ease; opacity:0; pointer-events:none; }
+  .cinders-toast { position:fixed; top:24px; left:50%; transform:translateX(-50%) translateY(-80px); background:color-mix(in srgb,var(--deep2) 95%,transparent); border:1px solid rgba(201,169,110,.3); color:var(--gold); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; padding:10px 20px; z-index:999; white-space:nowrap; backdrop-filter:blur(8px); transition:transform .4s cubic-bezier(.34,1.56,.64,1), opacity .4s ease; opacity:0; pointer-events:none; }
   .cinders-toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
   .cinders-toast.hide { transform:translateX(-50%) translateY(-80px); opacity:0; }
 
@@ -315,7 +315,7 @@
   .mood-btn:hover { border-color:rgba(201,169,110,.3); color:var(--soft); }
   .mood-btn.selected { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.08); }
 
-  .journal-save-wrap { position:sticky; bottom:0; z-index:10; padding:16px 32px 90px; background:rgba(26,22,16,.95); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-top:1px solid rgba(201,169,110,.1); }
+  .journal-save-wrap { position:sticky; bottom:0; z-index:10; padding:16px 32px 90px; background:color-mix(in srgb,var(--deep2) 95%,transparent); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-top:1px solid rgba(201,169,110,.1); }
 
   /* ── BADGES ── */
   #badges { padding-bottom:90px; }
