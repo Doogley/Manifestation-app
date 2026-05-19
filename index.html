@@ -545,6 +545,15 @@
     .price-amount{font-size:44px}
     .upgrade-headline{font-size:26px}
   }
+
+  /* ── THEME SELECTOR ── */
+  .theme-swatches { display:flex; flex-wrap:wrap; gap:16px; padding-top:4px; }
+  .theme-swatch-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; }
+  .theme-swatch { width:44px; height:44px; border-radius:50%; border:2px solid transparent; transition:border-color .3s, transform .2s; position:relative; display:flex; align-items:center; justify-content:center; }
+  .theme-swatch:hover { transform:scale(1.08); }
+  .theme-swatch.active { border-color:var(--gold); }
+  .theme-swatch-lock { font-size:12px; color:rgba(255,255,255,.5); }
+  .theme-swatch-name { font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); text-align:center; }
 </style>
 </head>
 <body>
@@ -1095,6 +1104,13 @@
     </div>
   </div>
 
+  <!-- Themes -->
+  <div class="profile-section" style="animation-delay:.43s">
+    <div class="profile-section-title">Appearance</div>
+    <div class="theme-swatches" id="themeSelectorSwatches"></div>
+    <div style="margin-top:10px;font-size:12px;font-weight:300;color:var(--muted)">8 themes unlock with membership</div>
+  </div>
+
   <!-- Subscription -->
   <div class="profile-section" style="animation-delay:.44s">
     <div class="profile-section-title">Membership</div>
@@ -1232,6 +1248,69 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 const CLAUDE_API_KEY = 'YOUR_CLAUDE_API_KEY';
+
+// ── THEME SYSTEM ──
+const themes = {
+  dusk:     { cream:'#f5f0e8', gold:'#c9a96e', deep:'#1a1610', deep2:'#211e17', muted:'#8a7d6b', soft:'#d4c9b8', locked:'#1e1b14' },
+  dawn:     { cream:'#2a2420', gold:'#c9a96e', deep:'#f5f0e8', deep2:'#ede8e0', muted:'#9a8d7d', soft:'#4a3f35', locked:'#e8e2d8' },
+  celestial:{ cream:'#e8eaf6', gold:'#9fa8da', deep:'#0d0f1a', deep2:'#131628', muted:'#5c6bc0', soft:'#c5cae9', locked:'#0a0c15' },
+  midnight: { cream:'#f0f0f0', gold:'#ffffff', deep:'#000000', deep2:'#0a0a0a', muted:'#666666', soft:'#cccccc', locked:'#050505' },
+  forest:   { cream:'#e8f0e8', gold:'#81c784', deep:'#0a1a0a', deep2:'#0f1f0f', muted:'#4a7a4a', soft:'#c8e6c9', locked:'#071207' },
+  obsidian: { cream:'#f3e8e8', gold:'#c9956e', deep:'#1a1010', deep2:'#211515', muted:'#8a6b6b', soft:'#d4b8b8', locked:'#1a0f0f' },
+  bloom:    { cream:'#3a2030', gold:'#e8a0b8', deep:'#fdf0f5', deep2:'#f8e8f0', muted:'#b87090', soft:'#5a3050', locked:'#f5e0ea' },
+  cloud:    { cream:'#1a2030', gold:'#5b8dd9', deep:'#f0f5ff', deep2:'#e8f0ff', muted:'#7090c0', soft:'#2a3a60', locked:'#e0ecff' },
+  sage:     { cream:'#2a3025', gold:'#8faa7a', deep:'#f5f2e8', deep2:'#eeeae0', muted:'#7a9060', soft:'#3a4530', locked:'#ede8d8' },
+  pearl:    { cream:'#2a2215', gold:'#d4b896', deep:'#faf6f0', deep2:'#f5f0e8', muted:'#9a8870', soft:'#3a2f20', locked:'#f0ebe0' }
+};
+const freeThemes = ['dusk', 'dawn'];
+const themeNames = { dusk:'Dusk', dawn:'Dawn', celestial:'Celestial', midnight:'Midnight', forest:'Forest', obsidian:'Obsidian', bloom:'Bloom', cloud:'Cloud', sage:'Sage', pearl:'Pearl' };
+let currentTheme = 'dusk';
+
+function applyTheme(themeName) {
+  const t = themes[themeName] || themes.dusk;
+  const r = document.documentElement.style;
+  r.setProperty('--cream', t.cream);
+  r.setProperty('--gold', t.gold);
+  r.setProperty('--deep', t.deep);
+  r.setProperty('--deep2', t.deep2);
+  r.setProperty('--muted', t.muted);
+  r.setProperty('--soft', t.soft);
+  r.setProperty('--locked', t.locked);
+  currentTheme = themeName;
+  document.querySelectorAll('.theme-swatch').forEach(s => {
+    s.classList.toggle('active', s.dataset.theme === themeName);
+  });
+}
+
+async function selectTheme(themeName) {
+  const free = freeThemes.includes(themeName);
+  if(!free && !isPaidMember) { openUpgrade(); return; }
+  applyTheme(themeName);
+  if(currentUser) {
+    await db.from('profiles').update({ theme_preference: themeName }).eq('id', currentUser.id);
+  }
+}
+
+function buildThemeSelector() {
+  const wrap = document.getElementById('themeSelectorSwatches');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  Object.keys(themes).forEach(key => {
+    const t = themes[key];
+    const free = freeThemes.includes(key);
+    const locked = !free && !isPaidMember;
+    const div = document.createElement('div');
+    div.className = 'theme-swatch-wrap';
+    div.innerHTML = `
+      <div class="theme-swatch${currentTheme === key ? ' active' : ''}" data-theme="${key}"
+        style="background:linear-gradient(135deg,${t.deep} 50%,${t.gold} 50%)"
+        onclick="selectTheme('${key}')">
+        ${locked ? '<span class="theme-swatch-lock">🔒</span>' : ''}
+      </div>
+      <span class="theme-swatch-name">${themeNames[key]}</span>`;
+    wrap.appendChild(div);
+  });
+}
 
 function getLocalDateString() {
   const now = new Date();
@@ -1421,6 +1500,9 @@ async function loadUserProfile() {
   graceDaysCompleted = data.grace_days_completed || 0;
   graceLastDate    = data.grace_last_date   || '';
   comebackCount    = data.comeback_count    || 0;
+  if(data.theme_preference && themes[data.theme_preference]) {
+    applyTheme(data.theme_preference);
+  }
   // Load intentions from Supabase
   if(currentUser) {
     const { data: intentionsData } = await db.from('intentions')
@@ -1499,6 +1581,7 @@ async function loadUserProfile() {
 
 // Check if user is already logged in when app loads
 window.addEventListener('load', async () => {
+  applyTheme('dusk');
   try {
     const { data } = await db.auth.getSession();
     if(data.session && !currentUser) {
@@ -3015,6 +3098,7 @@ async function openProfile() {
 }
 
 async function buildProfile() {
+  buildThemeSelector();
   // Name display — show nickname if set, otherwise real name
   const displayName = userNickname || userRealName;
   const profileInitialEl = document.getElementById('profileInitial');
