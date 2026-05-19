@@ -317,6 +317,47 @@
 
   .journal-save-wrap { position:sticky; bottom:0; z-index:10; padding:16px 32px 90px; background:rgba(26,22,16,.95); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-top:1px solid rgba(201,169,110,.1); }
 
+  /* ── JOURNAL CALENDAR ── */
+  .journal-view-toggle { position:relative; z-index:1; display:flex; justify-content:center; padding:20px 32px 0; }
+  .journal-toggle { display:flex; background:rgba(201,169,110,.05); border:1px solid rgba(201,169,110,.12); padding:4px; gap:4px; width:100%; max-width:320px; }
+  .journal-toggle-btn { flex:1; padding:10px 24px; font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.12em; text-transform:uppercase; background:none; border:none; color:var(--muted); cursor:pointer; transition:all .3s; }
+  .journal-toggle-btn.active { background:rgba(201,169,110,.12); color:var(--gold); }
+
+  .journal-calendar-wrap { position:relative; z-index:1; padding:24px 32px 100px; }
+  .cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+  .cal-nav-btn { background:none; border:1px solid rgba(201,169,110,.2); color:var(--muted); width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .3s; font-size:14px; }
+  .cal-nav-btn:hover { border-color:var(--gold); color:var(--gold); }
+  .cal-month-label { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--cream); letter-spacing:.05em; }
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+  .cal-dow { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); text-align:center; padding:8px 0 12px; }
+  .cal-day { display:flex; flex-direction:column; align-items:center; padding:10px 4px 8px; min-height:52px; position:relative; border:1px solid transparent; transition:border-color .2s; }
+  .cal-day.has-entry { cursor:pointer; }
+  .cal-day.has-entry:hover { border-color:rgba(201,169,110,.2); background:rgba(201,169,110,.04); }
+  .cal-day.today-day .cal-day-num { color:var(--gold); font-weight:400; }
+  .cal-day.other-month .cal-day-num { opacity:.2; }
+  .cal-day-num { font-size:14px; font-weight:300; color:var(--soft); line-height:1; }
+  .cal-dot { width:5px; height:5px; border-radius:50%; background:var(--gold); margin-top:5px; }
+  .cal-lock { font-size:10px; margin-top:4px; opacity:.35; }
+  .cal-empty { border:none; }
+
+  .cal-entry-modal { display:none; position:fixed; inset:0; background:rgba(10,8,5,.88); z-index:200; align-items:flex-end; justify-content:center; backdrop-filter:blur(8px); }
+  .cal-entry-modal.open { display:flex; }
+  .cal-entry-sheet { width:100%; max-width:520px; max-height:80vh; overflow-y:auto; background:var(--deep2); border-top:1px solid rgba(201,169,110,.2); padding:32px 28px 48px; animation:fadeUp .3s ease forwards; }
+  .cal-entry-date { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:20px; }
+  .cal-entry-section { margin-bottom:20px; }
+  .cal-entry-label { font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .cal-entry-text { font-family:'Jost',sans-serif; font-size:14px; font-weight:300; color:var(--soft); line-height:1.7; }
+  .cal-entry-mood { display:inline-block; padding:4px 12px; border:1px solid rgba(201,169,110,.2); font-size:12px; color:var(--gold); letter-spacing:.06em; }
+  .cal-entry-close { width:100%; padding:14px; background:none; border:1px solid rgba(201,169,110,.2); color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:all .3s; margin-top:8px; }
+  .cal-entry-close:hover { border-color:var(--gold); color:var(--gold); }
+
+  @media(max-width:480px){
+    .journal-view-toggle,.journal-calendar-wrap{padding-left:20px;padding-right:20px}
+    .cal-day-num{font-size:13px}
+    .cal-day{padding:8px 2px 6px;min-height:46px}
+    .cal-entry-sheet{padding:24px 20px 40px}
+  }
+
   /* ── BADGES ── */
   #badges { padding-bottom:90px; }
   .badges-header { position:relative; z-index:1; padding:28px 32px 20px; border-bottom:1px solid rgba(201,169,110,.08); }
@@ -774,6 +815,17 @@
       Back
     </button>
   </div>
+
+  <!-- View toggle -->
+  <div class="journal-view-toggle">
+    <div class="journal-toggle">
+      <button class="journal-toggle-btn active" id="journalTabToday" onclick="switchJournalView('today')">Today</button>
+      <button class="journal-toggle-btn" id="journalTabCalendar" onclick="switchJournalView('calendar')">Calendar</button>
+    </div>
+  </div>
+
+  <!-- Today view -->
+  <div id="journalTodayView">
   <div class="journal-header" style="position:relative;z-index:1">
     <div>
       <div class="journal-date" id="journalDate"></div>
@@ -850,6 +902,44 @@
   <div class="journal-save-wrap">
     <button class="btn-primary" id="journalSaveBtn" style="width:100%;padding:18px" onclick="saveJournal()">Save Entry</button>
     <div id="journalLastSaved" style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px;letter-spacing:.05em;min-height:16px;"></div>
+  </div>
+  </div><!-- /journalTodayView -->
+
+  <!-- Calendar view -->
+  <div id="journalCalendarView" style="display:none">
+    <div class="journal-calendar-wrap">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="shiftCalMonth(-1)">&#8592;</button>
+        <div class="cal-month-label" id="calMonthLabel"></div>
+        <button class="cal-nav-btn" onclick="shiftCalMonth(1)">&#8594;</button>
+      </div>
+      <div class="cal-grid" id="calDowRow">
+        <div class="cal-dow">Su</div><div class="cal-dow">Mo</div><div class="cal-dow">Tu</div>
+        <div class="cal-dow">We</div><div class="cal-dow">Th</div><div class="cal-dow">Fr</div>
+        <div class="cal-dow">Sa</div>
+      </div>
+      <div class="cal-grid" id="calDaysGrid"></div>
+    </div>
+  </div>
+
+  <!-- Past entry modal (bottom sheet) -->
+  <div class="cal-entry-modal" id="calEntryModal" onclick="closeCalEntryModal(event)">
+    <div class="cal-entry-sheet">
+      <div class="cal-entry-date" id="calEntryDate"></div>
+      <div class="cal-entry-section" id="calEntryMoodWrap" style="display:none">
+        <div class="cal-entry-label">Mood</div>
+        <span class="cal-entry-mood" id="calEntryMood"></span>
+      </div>
+      <div class="cal-entry-section" id="calEntryReflectionWrap" style="display:none">
+        <div class="cal-entry-label">Reflection</div>
+        <div class="cal-entry-text" id="calEntryReflection"></div>
+      </div>
+      <div class="cal-entry-section" id="calEntryGratitudeWrap" style="display:none">
+        <div class="cal-entry-label">Gratitude</div>
+        <div class="cal-entry-text" id="calEntryGratitude"></div>
+      </div>
+      <button class="cal-entry-close" onclick="closeCalEntryModal()">Close</button>
+    </div>
   </div>
 </div>
 
@@ -2229,6 +2319,157 @@ function closeJournal() {
   }
 }
 
+// ── JOURNAL CALENDAR ──
+let calYear = 0;
+let calMonth = 0;
+let calEntries = {};
+
+function switchJournalView(view) {
+  const todayView = document.getElementById('journalTodayView');
+  const calView = document.getElementById('journalCalendarView');
+  const btnToday = document.getElementById('journalTabToday');
+  const btnCal = document.getElementById('journalTabCalendar');
+  if(view === 'calendar') {
+    todayView.style.display = 'none';
+    calView.style.display = 'block';
+    btnToday.classList.remove('active');
+    btnCal.classList.add('active');
+    const now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+    renderCalendar();
+  } else {
+    todayView.style.display = 'block';
+    calView.style.display = 'none';
+    btnToday.classList.add('active');
+    btnCal.classList.remove('active');
+  }
+}
+
+async function loadMonthEntries(year, month) {
+  if(!currentUser) return {};
+  const start = `${year}-${String(month + 1).padStart(2,'0')}-01`;
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const end = `${year}-${String(month + 1).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
+  const { data } = await db.from('journal_entries')
+    .select('entry_date,reflection,mood_category,mood_sub,gratitude_1,gratitude_2,gratitude_3')
+    .eq('user_id', currentUser.id)
+    .gte('entry_date', start)
+    .lte('entry_date', end);
+  const map = {};
+  if(data) data.forEach(e => { map[e.entry_date] = e; });
+  return map;
+}
+
+async function renderCalendar() {
+  document.getElementById('calMonthLabel').textContent =
+    new Date(calYear, calMonth, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  document.getElementById('calDaysGrid').innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">Loading…</div>';
+  calEntries = await loadMonthEntries(calYear, calMonth);
+  buildCalendarGrid();
+}
+
+function buildCalendarGrid() {
+  const grid = document.getElementById('calDaysGrid');
+  const today = getLocalDateString();
+  const now = new Date();
+  const todayTime = now.getTime();
+  const threeDaysAgo = new Date(now); threeDaysAgo.setDate(now.getDate() - 2); threeDaysAgo.setHours(0,0,0,0);
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(calYear, calMonth, 0).getDate();
+
+  let html = '';
+
+  // Prev month fill
+  for(let i = firstDay - 1; i >= 0; i--) {
+    html += `<div class="cal-day other-month"><span class="cal-day-num">${daysInPrevMonth - i}</span></div>`;
+  }
+
+  for(let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = dateStr === today;
+    const entry = calEntries[dateStr];
+    const dayDate = new Date(calYear, calMonth, d);
+    const isAccessible = isPaidMember || dayDate >= threeDaysAgo;
+
+    let cls = 'cal-day';
+    if(isToday) cls += ' today-day';
+
+    let inner = `<span class="cal-day-num">${d}</span>`;
+    let onclick = '';
+
+    if(entry) {
+      if(isAccessible) {
+        cls += ' has-entry';
+        inner += `<span class="cal-dot"></span>`;
+        onclick = `onclick="openCalEntry('${dateStr}')"`;
+      } else {
+        inner += `<span class="cal-dot"></span><span class="cal-lock">🔒</span>`;
+        onclick = `onclick="openUpgrade()"`;
+        cls += ' has-entry';
+      }
+    }
+
+    html += `<div class="${cls}" ${onclick}>${inner}</div>`;
+  }
+
+  // Next month fill to complete the last row
+  const totalCells = firstDay + daysInMonth;
+  const remainder = totalCells % 7;
+  if(remainder !== 0) {
+    for(let i = 1; i <= 7 - remainder; i++) {
+      html += `<div class="cal-day other-month"><span class="cal-day-num">${i}</span></div>`;
+    }
+  }
+
+  grid.innerHTML = html;
+}
+
+function shiftCalMonth(dir) {
+  calMonth += dir;
+  if(calMonth > 11) { calMonth = 0; calYear++; }
+  if(calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function openCalEntry(dateStr) {
+  const entry = calEntries[dateStr];
+  if(!entry) return;
+  const [y, m, d] = dateStr.split('-');
+  const label = new Date(parseInt(y), parseInt(m) - 1, parseInt(d))
+    .toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  document.getElementById('calEntryDate').textContent = label;
+
+  const moodWrap = document.getElementById('calEntryMoodWrap');
+  const reflWrap = document.getElementById('calEntryReflectionWrap');
+  const gratWrap = document.getElementById('calEntryGratitudeWrap');
+
+  if(entry.mood_sub || entry.mood_category) {
+    document.getElementById('calEntryMood').textContent = entry.mood_sub || entry.mood_category;
+    moodWrap.style.display = 'block';
+  } else { moodWrap.style.display = 'none'; }
+
+  if(entry.reflection) {
+    document.getElementById('calEntryReflection').textContent = entry.reflection;
+    reflWrap.style.display = 'block';
+  } else { reflWrap.style.display = 'none'; }
+
+  const gratLines = [entry.gratitude_1, entry.gratitude_2, entry.gratitude_3].filter(Boolean);
+  if(gratLines.length) {
+    document.getElementById('calEntryGratitude').innerHTML = gratLines.map(g => `<div style="margin-bottom:6px">✦ ${g}</div>`).join('');
+    gratWrap.style.display = 'block';
+  } else { gratWrap.style.display = 'none'; }
+
+  document.getElementById('calEntryModal').classList.add('open');
+}
+
+function closeCalEntryModal(e) {
+  if(e && e.target !== document.getElementById('calEntryModal')) return;
+  document.getElementById('calEntryModal').classList.remove('open');
+}
+
 function updateLastSavedTime() {
   const el = document.getElementById('journalLastSaved');
   if(el) {
@@ -2238,6 +2479,7 @@ function updateLastSavedTime() {
 }
 
 async function openJournal(){
+  switchJournalView('today');
   clearJournalFields();
   journalHasChanges = false;
   document.getElementById('journalLastSaved').textContent = '';
