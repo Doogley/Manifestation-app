@@ -919,9 +919,9 @@
         <button class="cal-nav-btn" onclick="shiftCalMonth(1)">&#8594;</button>
       </div>
       <div class="cal-dow-row">
-        <div class="cal-dow">Su</div><div class="cal-dow">Mo</div><div class="cal-dow">Tu</div>
-        <div class="cal-dow">We</div><div class="cal-dow">Th</div><div class="cal-dow">Fr</div>
-        <div class="cal-dow">Sa</div>
+        <div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div>
+        <div class="cal-dow">Th</div><div class="cal-dow">F</div><div class="cal-dow">Sa</div>
+        <div class="cal-dow">Su</div>
       </div>
       <div class="cal-grid" id="calDaysGrid"></div>
     </div>
@@ -1199,7 +1199,7 @@
         <span>Current Plan</span>
         <span id="profileMembershipStatus">Free — 29 affirmations remaining</span>
       </div>
-      <button class="profile-sub-badge" onclick="openUpgrade()" style="padding:6px 16px;border:1px solid var(--gold);background:none;color:var(--gold);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Upgrade</button>
+      <button id="profileUpgradeBtn" class="profile-sub-badge" onclick="openUpgrade()" style="padding:6px 16px;border:1px solid var(--gold);background:none;color:var(--gold);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Upgrade</button>
     </div>
   </div>
 
@@ -1209,7 +1209,7 @@
     <div style="position:relative;padding:24px;background:linear-gradient(135deg,rgba(201,169,110,.06) 0%,rgba(201,169,110,.02) 100%);border:1px solid rgba(201,169,110,.15);">
       <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:var(--cream);margin-bottom:8px;">What This Month Held</div>
       <div style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.7;margin-bottom:16px;">A personalized reflection on your journey this month — your moods, your intentions, your growth. Generated just for you.</div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:rgba(201,169,110,.05);border:1px solid rgba(201,169,110,.1);">
+      <div id="monthlyLockNotice" style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:rgba(201,169,110,.05);border:1px solid rgba(201,169,110,.1);">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Members only · 1 per month</span>
       </div>
@@ -1517,6 +1517,7 @@ async function loadUserProfile() {
   graceDaysCompleted = data.grace_days_completed || 0;
   graceLastDate    = data.grace_last_date   || '';
   comebackCount    = data.comeback_count    || 0;
+  applyMembershipState();
   // Load intentions from Supabase
   if(currentUser) {
     const { data: intentionsData } = await db.from('intentions')
@@ -1982,6 +1983,24 @@ function updateDailyPractice() {
   });
 }
 
+function applyMembershipState() {
+  // Grace screen — hide upgrade nag for paid members
+  const graceBtn = document.querySelector('#grace .btn-ghost');
+  if(graceBtn) graceBtn.style.display = isPaidMember ? 'none' : '';
+
+  // Library count label on home screen
+  const libraryCount = document.getElementById('libraryCount');
+  if(libraryCount) {
+    libraryCount.textContent = isPaidMember
+      ? `${unlockedCount} unlocked · full library`
+      : `${unlockedCount} of 30 unlocked · 800+ with membership`;
+  }
+
+  // Intentions counter — hidden for paid members
+  const intentionsCount = document.getElementById('intentionsCount');
+  if(intentionsCount) intentionsCount.style.display = isPaidMember ? 'none' : '';
+}
+
 async function buildHome(){
   if(!currentUser) return;
   if(!document.getElementById('home').classList.contains('active')){
@@ -2133,6 +2152,7 @@ async function buildHome(){
   }
 
   buildLibrary();
+  applyMembershipState();
   updateCountdown();
   if(countdownInterval) clearInterval(countdownInterval);
   countdownInterval = setInterval(updateCountdown, 1000);
@@ -2210,8 +2230,9 @@ function buildLibrary(){
     grid.appendChild(tile);
   }
 
-  // Locked tiles — next 7 days only
-  for(let d=unlockedCount+1;d<=unlockedCount+7;d++){
+  // Locked tiles — paid members see upcoming days up to library length; free users see next 7 only
+  const lockedEnd = isPaidMember ? affirmationLibrary.length : Math.min(unlockedCount + 7, affirmationLibrary.length);
+  for(let d=unlockedCount+1;d<=lockedEnd;d++){
     const aff=affirmationLibrary[d-1];
     const tile=document.createElement('div');
     tile.className='lib-tile locked';
@@ -2219,7 +2240,7 @@ function buildLibrary(){
     grid.appendChild(tile);
   }
 
-  if(!adminMode) {
+  if(!adminMode && !isPaidMember) {
     const remaining = Math.max(0, 30 - unlockedCount);
     const teaser=document.createElement('div');
     teaser.style.cssText='grid-column:span 2;margin-top:8px;padding:24px 20px;background:linear-gradient(135deg,rgba(201,169,110,.06) 0%,rgba(201,169,110,.02) 100%);border:1px solid rgba(201,169,110,.15);text-align:center';
@@ -2380,7 +2401,9 @@ function buildCalendarGrid() {
   const now = new Date();
   const threeDaysAgo = new Date(now); threeDaysAgo.setDate(now.getDate() - 2); threeDaysAgo.setHours(0,0,0,0);
 
-  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  // Monday-first: shift getDay() so Mon=0 … Sun=6
+  const rawFirstDay = new Date(calYear, calMonth, 1).getDay();
+  const firstDay = (rawFirstDay + 6) % 7;
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
   const daysInPrevMonth = new Date(calYear, calMonth, 0).getDate();
 
@@ -2797,7 +2820,7 @@ async function addIntention() {
   const text = input.value.trim();
   if(!text) return;
   if(text.length > 200) { showCindersToast(0, 'Intention must be 200 characters or less'); return; }
-  if(intentions.filter(i => !i.received).length >= MAX_FREE_INTENTIONS) {
+  if(!isPaidMember && intentions.filter(i => !i.received).length >= MAX_FREE_INTENTIONS) {
     currentModalType='info';
     document.getElementById('modalDay').textContent='Intention Limit Reached';
     document.getElementById('modalText').textContent='You\'ve used all 3 intention slots on the free plan. Upgrade for unlimited intentions.';
@@ -2821,7 +2844,7 @@ async function addIntention() {
 
 async function useExampleIntention(btn) {
   const text = btn.textContent.trim();
-  if(intentions.filter(i => !i.received).length >= MAX_FREE_INTENTIONS) {
+  if(!isPaidMember && intentions.filter(i => !i.received).length >= MAX_FREE_INTENTIONS) {
     currentModalType='info';
     document.getElementById('modalDay').textContent='Intention Limit Reached';
     document.getElementById('modalText').textContent='You\'ve used all 3 intention slots on the free plan. Upgrade for unlimited intentions.';
@@ -2872,7 +2895,10 @@ function renderIntentions() {
   if(pastLink) pastLink.style.display = received.length > 0 ? 'block' : 'none';
   const pastBtn = document.getElementById('pastIntentionsBtn');
   if(pastBtn) pastBtn.textContent = `✦ View manifested intentions (${received.length})`;
-  if(count) count.textContent = `${active.length} of ${MAX_FREE_INTENTIONS} intentions used (free plan)`;
+  if(count) {
+    if(isPaidMember) { count.style.display = 'none'; }
+    else { count.style.display = ''; count.textContent = `${active.length} of ${MAX_FREE_INTENTIONS} intentions used (free plan)`; }
+  }
 }
 
 function renderPastIntentionsModal() {
@@ -3273,6 +3299,7 @@ async function openProfile() {
 }
 
 async function buildProfile() {
+  applyMembershipState();
   // Name display — show nickname if set, otherwise real name
   const displayName = userNickname || userRealName;
   const profileInitialEl = document.getElementById('profileInitial');
@@ -3291,7 +3318,11 @@ async function buildProfile() {
 
   // Membership status
   const membershipEl = document.getElementById('profileMembershipStatus');
-  if(membershipEl) membershipEl.textContent = 'Free — ' + Math.max(0, 30 - unlockedCount) + ' affirmations remaining';
+  if(membershipEl) membershipEl.textContent = isPaidMember
+    ? 'Member · Full Access'
+    : 'Free — ' + Math.max(0, 30 - unlockedCount) + ' affirmations remaining';
+  const upgradeBtn = document.getElementById('profileUpgradeBtn');
+  if(upgradeBtn) upgradeBtn.style.display = isPaidMember ? 'none' : '';
 
   // Rank
   const info = getLevelInfo(currentCinders);
@@ -3350,13 +3381,16 @@ async function buildProfile() {
 
   // Monthly reflection button
   const reflBtn = document.getElementById('monthlyReflectionBtn');
+  const lockNotice = document.getElementById('monthlyLockNotice');
   if(reflBtn) {
-    if(adminMode) {
-      reflBtn.textContent = summaryGenerated ? 'Read This Month\'s Reflection' : 'What This Month Held';
+    if(adminMode || isPaidMember) {
+      reflBtn.textContent = summaryGenerated ? 'Read This Month\'s Reflection' : 'View This Month\'s Reflection';
       reflBtn.onclick = openMonthlySummary;
+      if(lockNotice) lockNotice.style.display = 'none';
     } else {
       reflBtn.textContent = 'Unlock with Membership';
       reflBtn.onclick = openUpgrade;
+      if(lockNotice) lockNotice.style.display = '';
     }
   }
 
