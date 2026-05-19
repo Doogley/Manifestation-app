@@ -547,13 +547,12 @@
   }
 
   /* ── THEME SELECTOR ── */
-  .theme-swatches { display:flex; flex-wrap:wrap; gap:16px; padding-top:4px; }
-  .theme-swatch-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; }
-  .theme-swatch { width:44px; height:44px; border-radius:50%; border:2px solid transparent; transition:border-color .3s, transform .2s; position:relative; display:flex; align-items:center; justify-content:center; }
-  .theme-swatch:hover { transform:scale(1.08); }
-  .theme-swatch.active { border-color:var(--gold); }
-  .theme-swatch-lock { font-size:12px; color:rgba(255,255,255,.5); }
-  .theme-swatch-name { font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); text-align:center; }
+  .theme-swatches { display:flex; gap:10px; }
+  .theme-toggle-btn { flex:1; display:flex; align-items:center; justify-content:center; gap:10px; padding:14px 16px; background:rgba(201,169,110,.04); border:1px solid rgba(201,169,110,.15); color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:all .3s; }
+  .theme-toggle-btn:hover { border-color:rgba(201,169,110,.35); color:var(--soft); }
+  .theme-toggle-btn.active { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.08); }
+  .theme-toggle-preview { width:22px; height:22px; border-radius:50%; border:1px solid; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .theme-toggle-preview span { width:8px; height:8px; border-radius:50%; display:block; }
 </style>
 </head>
 <body>
@@ -1108,7 +1107,6 @@
   <div class="profile-section" style="animation-delay:.43s">
     <div class="profile-section-title">Appearance</div>
     <div class="theme-swatches" id="themeSelectorSwatches"></div>
-    <div style="margin-top:10px;font-size:12px;font-weight:300;color:var(--muted)">8 themes unlock with membership</div>
   </div>
 
   <!-- Subscription -->
@@ -1251,19 +1249,10 @@ const CLAUDE_API_KEY = 'YOUR_CLAUDE_API_KEY';
 
 // ── THEME SYSTEM ──
 const themes = {
-  dusk:     { cream:'#f5f0e8', gold:'#c9a96e', deep:'#1a1610', deep2:'#211e17', muted:'#8a7d6b', soft:'#d4c9b8', locked:'#1e1b14' },
-  dawn:     { cream:'#2a2420', gold:'#c9a96e', deep:'#f5f0e8', deep2:'#ede8e0', muted:'#9a8d7d', soft:'#4a3f35', locked:'#e8e2d8' },
-  celestial:{ cream:'#e8eaf6', gold:'#9fa8da', deep:'#0d0f1a', deep2:'#131628', muted:'#5c6bc0', soft:'#c5cae9', locked:'#0a0c15' },
-  midnight: { cream:'#f0f0f0', gold:'#ffffff', deep:'#000000', deep2:'#0a0a0a', muted:'#666666', soft:'#cccccc', locked:'#050505' },
-  forest:   { cream:'#e8f0e8', gold:'#81c784', deep:'#0a1a0a', deep2:'#0f1f0f', muted:'#4a7a4a', soft:'#c8e6c9', locked:'#071207' },
-  obsidian: { cream:'#f3e8e8', gold:'#c9956e', deep:'#1a1010', deep2:'#211515', muted:'#8a6b6b', soft:'#d4b8b8', locked:'#1a0f0f' },
-  bloom:    { cream:'#3a2030', gold:'#e8a0b8', deep:'#fdf0f5', deep2:'#f8e8f0', muted:'#b87090', soft:'#5a3050', locked:'#f5e0ea' },
-  cloud:    { cream:'#1a2030', gold:'#5b8dd9', deep:'#f0f5ff', deep2:'#e8f0ff', muted:'#7090c0', soft:'#2a3a60', locked:'#e0ecff' },
-  sage:     { cream:'#2a3025', gold:'#8faa7a', deep:'#f5f2e8', deep2:'#eeeae0', muted:'#7a9060', soft:'#3a4530', locked:'#ede8d8' },
-  pearl:    { cream:'#2a2215', gold:'#d4b896', deep:'#faf6f0', deep2:'#f5f0e8', muted:'#9a8870', soft:'#3a2f20', locked:'#f0ebe0' }
+  dusk: { cream:'#f5f0e8', gold:'#c9a96e', deep:'#1a1610', deep2:'#211e17', muted:'#8a7d6b', soft:'#d4c9b8', locked:'#1e1b14' },
+  dawn: { cream:'#1a1610', gold:'#c9a96e', deep:'#f5f0e8', deep2:'#ede8e0', muted:'#6b5d4f', soft:'#3a2f25', locked:'#e0d8cc' }
 };
 const freeThemes = ['dusk', 'dawn'];
-const themeNames = { dusk:'Dusk', dawn:'Dawn', celestial:'Celestial', midnight:'Midnight', forest:'Forest', obsidian:'Obsidian', bloom:'Bloom', cloud:'Cloud', sage:'Sage', pearl:'Pearl' };
 let currentTheme = 'dusk';
 
 function applyTheme(themeName) {
@@ -1277,14 +1266,12 @@ function applyTheme(themeName) {
   r.setProperty('--soft', t.soft);
   r.setProperty('--locked', t.locked);
   currentTheme = themeName;
-  document.querySelectorAll('.theme-swatch').forEach(s => {
-    s.classList.toggle('active', s.dataset.theme === themeName);
+  document.querySelectorAll('.theme-toggle-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.theme === themeName);
   });
 }
 
 async function selectTheme(themeName) {
-  const free = freeThemes.includes(themeName);
-  if(!free && !isPaidMember) { openUpgrade(); return; }
   applyTheme(themeName);
   if(currentUser) {
     await db.from('profiles').update({ theme_preference: themeName }).eq('id', currentUser.id);
@@ -1294,22 +1281,15 @@ async function selectTheme(themeName) {
 function buildThemeSelector() {
   const wrap = document.getElementById('themeSelectorSwatches');
   if(!wrap) return;
-  wrap.innerHTML = '';
-  Object.keys(themes).forEach(key => {
-    const t = themes[key];
-    const free = freeThemes.includes(key);
-    const locked = !free && !isPaidMember;
-    const div = document.createElement('div');
-    div.className = 'theme-swatch-wrap';
-    div.innerHTML = `
-      <div class="theme-swatch${currentTheme === key ? ' active' : ''}" data-theme="${key}"
-        style="background:linear-gradient(135deg,${t.deep} 50%,${t.gold} 50%)"
-        onclick="selectTheme('${key}')">
-        ${locked ? '<span class="theme-swatch-lock">🔒</span>' : ''}
-      </div>
-      <span class="theme-swatch-name">${themeNames[key]}</span>`;
-    wrap.appendChild(div);
-  });
+  wrap.innerHTML = `
+    <button class="theme-toggle-btn${currentTheme === 'dusk' ? ' active' : ''}" data-theme="dusk" onclick="selectTheme('dusk')">
+      <span class="theme-toggle-preview" style="background:#1a1610;border-color:#c9a96e"><span style="background:#c9a96e"></span></span>
+      Dark
+    </button>
+    <button class="theme-toggle-btn${currentTheme === 'dawn' ? ' active' : ''}" data-theme="dawn" onclick="selectTheme('dawn')">
+      <span class="theme-toggle-preview" style="background:#f5f0e8;border-color:#c9a96e"><span style="background:#c9a96e"></span></span>
+      Light
+    </button>`;
 }
 
 function getLocalDateString() {
