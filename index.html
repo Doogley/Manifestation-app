@@ -1125,13 +1125,16 @@
   <div class="profile-section" style="animation-delay:.52s;padding-bottom:24px">
     <div class="profile-section-title">Share Your Thoughts</div>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <select id="feedbackType" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.15);color:var(--soft);font-family:'Jost',sans-serif;font-size:14px;font-weight:300;padding:12px 16px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;">
-        <option value="" style="background:var(--deep)">What kind of feedback?</option>
-        <option value="bug" style="background:var(--deep)">Bug Report</option>
-        <option value="feature" style="background:var(--deep)">Feature Request</option>
-        <option value="general" style="background:var(--deep)">General Feedback</option>
-        <option value="love" style="background:var(--deep)">I love the app ✦</option>
-      </select>
+      <div style="position:relative">
+        <select id="feedbackType" style="width:100%;background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.15);color:var(--soft);font-family:'Jost',sans-serif;font-size:14px;font-weight:300;padding:12px 40px 12px 16px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;">
+          <option value="" style="background:var(--deep)">What kind of feedback?</option>
+          <option value="bug" style="background:var(--deep)">Bug Report</option>
+          <option value="feature" style="background:var(--deep)">Feature Request</option>
+          <option value="general" style="background:var(--deep)">General Feedback</option>
+          <option value="love" style="background:var(--deep)">I love the app ✦</option>
+        </select>
+        <svg style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;opacity:.5" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
       <textarea id="feedbackText" style="background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.12);color:var(--cream);font-family:'Jost',sans-serif;font-weight:300;font-size:14px;line-height:1.7;padding:14px 16px;resize:none;outline:none;transition:border-color .3s;" rows="4" placeholder="Tell us what's on your mind..."></textarea>
       <div id="feedbackError" style="font-size:12px;color:#c97070;min-height:18px;text-align:left"></div>
       <button onclick="submitFeedback()" style="padding:14px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Submit Feedback</button>
