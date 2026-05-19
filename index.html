@@ -2880,6 +2880,8 @@ function filterLibrary(cat, btn) {
 let adminMode = false;
 let logoTapCount = 0;
 let logoTapTimer = null;
+let _preAdminCinders = 0;
+let _preAdminUnlockedCount = 1;
 
 function handleLogoTap() {
   logoTapCount++;
@@ -2889,6 +2891,9 @@ function handleLogoTap() {
     logoTapCount = 0;
     adminMode = !adminMode;
     if(adminMode) {
+      // Save real values before overwriting
+      _preAdminCinders = currentCinders;
+      _preAdminUnlockedCount = unlockedCount;
       currentCinders = 18500;
       unlockedCount = 100;
       badgeCategories.forEach(cat => cat.badges.forEach(b => b.earned = true));
@@ -2907,10 +2912,9 @@ function handleLogoTap() {
       }
       showAdminBanner(true);
     } else {
-      currentCinders = 50;
-      unlockedCount = 1;
-      dailyActions.affirmationUnlocked = false;
-      badgeCategories.forEach((cat,ci) => cat.badges.forEach((b,bi) => b.earned = (ci===0&&bi===0)||(ci===1&&bi===0)||(ci===2&&bi===0)));
+      // Restore real values
+      currentCinders = _preAdminCinders;
+      unlockedCount = _preAdminUnlockedCount;
       buildLibrary();
       buildHome();
       showAdminBanner(false);
