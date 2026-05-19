@@ -737,10 +737,6 @@
     <div class="library-header"><div class="library-count" id="libraryCount">1 of 30 unlocked · 800+ with membership</div></div>
     <div class="library-grid" id="libraryGrid"></div>
   </div>
-  <div class="upgrade-teaser">
-    <p>You have <strong><span id="teaserAffirmationsRemaining">29</span> more affirmations</strong> to unlock on the free plan — and <strong>800+ waiting</strong> for members.</p>
-    <button class="btn-primary" style="padding:12px 32px;font-size:12px" onclick="openUpgrade()">Unlock Everything</button>
-  </div>
   </div>
 </div>
 
@@ -947,9 +943,9 @@
   <div class="grace-inner">
     <div class="grace-icon">☽</div>
     <h2 class="grace-title">Your streak is resting.<br>But it's not over.</h2>
-    <p class="grace-sub">You missed a day — and that's okay. Show up for the next 3 days and your streak will be fully restored. You've come too far to stop now.</p>
+    <p class="grace-sub" id="graceSub">You missed a day — and that's okay. Show up for the next 3 days and your streak will be fully restored. You've come too far to stop now.</p>
 
-    <div class="grace-days-label">Complete 3 days to restore</div>
+    <div class="grace-days-label" id="graceDaysLabel">Complete 3 days to restore</div>
     <div class="grace-streak-display">
       <div class="grace-streak-dot" id="graceDot1"></div>
       <div class="grace-streak-dot" id="graceDot2"></div>
@@ -1250,6 +1246,11 @@ function getThisMonday() {
 
 let currentUser = null;
 let streakCount = 0;
+let inGracePeriod = false;
+let graceStreakBefore = 0;
+let graceDaysCompleted = 0;
+let graceLastDate = '';
+let comebackCount = 0;
 let journalEntryCount = 0;
 // ── AUTH FUNCTIONS ──
 function switchAuthTab(tab) {
@@ -1301,6 +1302,11 @@ function resetUserState() {
   lastMantraDate = '';
   currentCinders = 0;
   streakCount = 0;
+  inGracePeriod = false;
+  graceStreakBefore = 0;
+  graceDaysCompleted = 0;
+  graceLastDate = '';
+  comebackCount = 0;
   journalEntryCount = 0;
   unlockedCount = 1;
   userNickname = '';
@@ -1916,12 +1922,38 @@ async function buildHome(){
       const d = new Date(); d.setDate(d.getDate() - 1);
       const yesterday = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
       const { data: streakData } = await db.from('profiles')
-        .select('streak_count, last_streak_date')
+        .select('streak_count, last_streak_date, in_grace_period, grace_streak_before, grace_days_completed, grace_last_date, comeback_count')
         .eq('id', currentUser.id)
         .maybeSingle();
       if(streakData) {
-        if(streakData.last_streak_date === today) {
-          // Already counted today
+        inGracePeriod    = streakData.in_grace_period    || false;
+        graceStreakBefore = streakData.grace_streak_before || 0;
+        graceDaysCompleted = streakData.grace_days_completed || 0;
+        graceLastDate    = streakData.grace_last_date    || '';
+        comebackCount    = streakData.comeback_count     || 0;
+
+        if(inGracePeriod) {
+          streakCount = streakData.streak_count;
+          if(graceLastDate === today) {
+            // Already checked in during grace today — let through
+          } else if(graceLastDate && graceLastDate !== yesterday) {
+            // Missed another day during grace — grace fails, reset streak to 1
+            streakCount = 1;
+            inGracePeriod = false;
+            await db.from('profiles').update({
+              streak_count: 1,
+              last_streak_date: today,
+              in_grace_period: false,
+              grace_streak_before: 0,
+              grace_days_completed: 0,
+              grace_last_date: null
+            }).eq('id', currentUser.id);
+          } else {
+            // First visit today during grace — show grace screen
+            showGracePeriod(graceStreakBefore, graceDaysCompleted);
+            return;
+          }
+        } else if(streakData.last_streak_date === today) {
           streakCount = streakData.streak_count;
         } else if(streakData.last_streak_date === yesterday) {
           // Consecutive day — increment
@@ -1931,8 +1963,18 @@ async function buildHome(){
             last_streak_date: today
           }).eq('id', currentUser.id);
         } else if(streakData.last_streak_date != null) {
-          // Missed a day — show grace screen instead of silently resetting
-          showGracePeriod(streakData.streak_count, 0);
+          // Missed a day — enter grace period
+          graceStreakBefore  = streakData.streak_count;
+          graceDaysCompleted = 0;
+          graceLastDate      = '';
+          inGracePeriod      = true;
+          await db.from('profiles').update({
+            in_grace_period:    true,
+            grace_streak_before: graceStreakBefore,
+            grace_days_completed: 0,
+            grace_last_date:    null
+          }).eq('id', currentUser.id);
+          showGracePeriod(graceStreakBefore, 0);
           return;
         } else {
           // No streak history yet (brand new user) — start at 1
@@ -1987,8 +2029,6 @@ async function buildHome(){
     unlockedEl.style.display = 'none';
   }
 
-  const teaserEl = document.getElementById('teaserAffirmationsRemaining');
-  if(teaserEl) teaserEl.textContent = Math.max(0, 30 - unlockedCount);
   buildLibrary();
   updateCountdown();
   if(countdownInterval) clearInterval(countdownInterval);
@@ -2077,9 +2117,10 @@ function buildLibrary(){
   }
 
   if(!adminMode) {
+    const remaining = Math.max(0, 30 - unlockedCount);
     const teaser=document.createElement('div');
     teaser.style.cssText='grid-column:span 2;margin-top:8px;padding:24px 20px;background:linear-gradient(135deg,rgba(201,169,110,.06) 0%,rgba(201,169,110,.02) 100%);border:1px solid rgba(201,169,110,.15);text-align:center';
-    teaser.innerHTML=`<div style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">✦ 800+ affirmations waiting</div><p style="font-size:13px;font-weight:300;color:var(--soft);line-height:1.7;margin-bottom:14px">A vast library is waiting for members — one new affirmation every day, forever.</p><button onclick="openUpgrade()" style="padding:10px 28px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Unlock Everything</button>`;
+    teaser.innerHTML=`<div style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">✦ ${remaining} more affirmations ahead</div><p style="font-size:13px;font-weight:300;color:var(--soft);line-height:1.7;margin-bottom:14px">Keep showing up — a new affirmation unlocks each day. Members get instant access to 800+.</p><button onclick="openUpgrade()" style="padding:10px 28px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Unlock Everything</button>`;
     grid.appendChild(teaser);
   }
 }
@@ -2648,16 +2689,47 @@ function showGracePeriod(streakBefore, daysCompleted) {
     const dot = document.getElementById(`graceDot${i}`);
     if(dot) dot.classList.toggle('done', i <= daysCompleted);
   }
+  const subMessages = [
+    "You missed a day — and that's okay. Show up for the next 3 days and your streak will be fully restored. You've come too far to stop now.",
+    "One day down. Keep going — two more and your streak is fully restored.",
+    "Two days down. One more and your streak comes back to you."
+  ];
+  const labelMessages = [
+    "Complete 3 days to restore",
+    "1 of 3 days complete",
+    "2 of 3 days complete"
+  ];
+  const sub = document.getElementById('graceSub');
+  const label = document.getElementById('graceDaysLabel');
+  if(sub) sub.textContent = subMessages[Math.min(daysCompleted, 2)];
+  if(label) label.textContent = labelMessages[Math.min(daysCompleted, 2)];
   showScreen('grace');
 }
 
 async function restoreFromGrace() {
   const today = getLocalDateString();
-  streakCount = 1;
-  if(currentUser) {
+  if(!currentUser) { buildHome(); return; }
+  graceDaysCompleted++;
+  graceLastDate = today;
+  if(graceDaysCompleted >= 3) {
+    // Restore streak to what it was before the miss
+    streakCount = graceStreakBefore;
+    comebackCount++;
+    inGracePeriod = false;
     await db.from('profiles').update({
-      streak_count: 1,
-      last_streak_date: today
+      streak_count: streakCount,
+      last_streak_date: today,
+      in_grace_period: false,
+      grace_streak_before: 0,
+      grace_days_completed: 0,
+      grace_last_date: null,
+      comeback_count: comebackCount
+    }).eq('id', currentUser.id);
+    awardCinders(25, 'Streak restored');
+  } else {
+    await db.from('profiles').update({
+      grace_days_completed: graceDaysCompleted,
+      grace_last_date: today
     }).eq('id', currentUser.id);
   }
   showScreen('home');
@@ -2678,6 +2750,8 @@ function updateBadgeEarnedStates() {
     aff1:   unlockedCount >= 1,
     aff30:  unlockedCount >= 30,
     aff100: unlockedCount >= 100,
+    come1:  comebackCount >= 1,
+    come3:  comebackCount >= 3,
   };
   badgeCategories.forEach(cat => cat.badges.forEach(b => {
     if(b.id in badgeEarned) b.earned = badgeEarned[b.id];
@@ -2767,6 +2841,15 @@ function buildLibraryScreen(filter) {
     }
     grid.appendChild(tile);
   });
+
+  if(!isAdmin) {
+    const totalInLib = affirmationLibrary.length;
+    const beyondPreview = Math.max(0, totalInLib - (unlockedCount + 7));
+    const footer = document.createElement('div');
+    footer.style.cssText = 'grid-column:span 2;margin-top:16px;padding:28px 20px;text-align:center;border-top:1px solid rgba(201,169,110,.08)';
+    footer.innerHTML = `<div style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(201,169,110,.4);margin-bottom:10px">✦ The journey continues</div><p style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.8;margin-bottom:16px">You're seeing a 7-day preview ahead. There are <span style="color:var(--soft)">${beyondPreview}+ more affirmations</span> beyond that — one unlocks every day you show up.<br><span style="color:rgba(201,169,110,.5);font-size:12px">Members unlock 800+ instantly.</span></p><button onclick="openUpgrade()" style="padding:10px 28px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Unlock Everything</button>`;
+    grid.appendChild(footer);
+  }
 
 }
 
