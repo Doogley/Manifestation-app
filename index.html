@@ -660,7 +660,7 @@
   </div>
   <div class="todays-card-wrap">
     <div class="section-label">Today's Affirmation</div>
-    <div style="font-size:11px;font-weight:300;color:var(--muted);letter-spacing:.04em;margin-top:-10px;margin-bottom:14px;">Your daily affirmation — chosen for you, one per day</div>
+    <div style="font-size:11px;font-weight:300;color:var(--muted);letter-spacing:.04em;margin-top:-10px;margin-bottom:14px;">Your daily truth</div>
     <div class="todays-card" id="todaysCard">
       <div class="card-day-num"><span class="card-day-dot"></span> Day <span id="homeDayCount">1</span> of your journey</div>
       <!-- Locked state -->
@@ -2303,8 +2303,8 @@ function selectMood(el){document.querySelectorAll('.mood-btn').forEach(b=>b.clas
 async function saveJournal(){
   const textarea = document.querySelector('#journal .journal-textarea');
   const gratitude = [...document.querySelectorAll('.gratitude-input')].map(i=>i.value).filter(Boolean);
-  if(!textarea.value && !selectedMoodSub && gratitude.length===0){ return; }
-  
+  const hasContent = !!(textarea.value || selectedMoodSub || gratitude.length);
+
   if(currentUser) {
     const today = getLocalDateString();
     // Check if entry exists for today
@@ -2313,6 +2313,21 @@ async function saveJournal(){
       .eq('user_id', currentUser.id)
       .eq('entry_date', today)
       .maybeSingle();
+
+    if(!hasContent) {
+      if(existing) {
+        // User cleared their entry — delete it and reverse cinders if they were awarded
+        await db.from('journal_entries').delete().eq('id', existing.id);
+        if(dailyActions.journalSaved) {
+          currentCinders = Math.max(0, currentCinders - 20);
+          await db.from('profiles').update({ cinders: currentCinders }).eq('id', currentUser.id);
+          dailyActions.journalSaved = false;
+          dailyActions.moodCheckedIn = false;
+          updateDailyPractice();
+        }
+      }
+      return;
+    }
 
     const entryData = {
       user_id: currentUser.id,
