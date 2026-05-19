@@ -2230,8 +2230,8 @@ function buildLibrary(){
     grid.appendChild(tile);
   }
 
-  // Locked tiles — paid members see upcoming days up to library length; free users see next 7 only
-  const lockedEnd = isPaidMember ? affirmationLibrary.length : Math.min(unlockedCount + 7, affirmationLibrary.length);
+  // Locked tiles — always show next 7 ahead regardless of membership
+  const lockedEnd = Math.min(unlockedCount + 7, affirmationLibrary.length);
   for(let d=unlockedCount+1;d<=lockedEnd;d++){
     const aff=affirmationLibrary[d-1];
     const tile=document.createElement('div');
@@ -3151,7 +3151,7 @@ function buildLibraryScreen(filter) {
     grid.appendChild(tile);
   });
 
-  if(!isAdmin) {
+  if(!isAdmin && !isPaidMember) {
     const totalInLib = affirmationLibrary.length;
     const beyondPreview = Math.max(0, totalInLib - (unlockedCount + 7));
     const footer = document.createElement('div');
