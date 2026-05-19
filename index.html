@@ -1918,6 +1918,11 @@ async function buildHome(){
     if(display) { display.textContent = weeklyMantra; display.classList.remove('empty'); }
   }
 
+  // Set day counters immediately — unlockedCount is already loaded from profile
+  document.getElementById('streakCount').textContent = unlockedCount;
+  const _dayCountEl = document.getElementById('homeDayCount');
+  if(_dayCountEl) _dayCountEl.textContent = unlockedCount;
+
   // Update streak
   if(currentUser) {
     try {
@@ -1925,16 +1930,10 @@ async function buildHome(){
       const d = new Date(); d.setDate(d.getDate() - 1);
       const yesterday = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
       const { data: streakData } = await db.from('profiles')
-        .select('streak_count, last_streak_date, in_grace_period, grace_streak_before, grace_days_completed, grace_last_date, comeback_count')
+        .select('streak_count, last_streak_date')
         .eq('id', currentUser.id)
         .maybeSingle();
       if(streakData) {
-        inGracePeriod    = streakData.in_grace_period    || false;
-        graceStreakBefore = streakData.grace_streak_before || 0;
-        graceDaysCompleted = streakData.grace_days_completed || 0;
-        graceLastDate    = streakData.grace_last_date    || '';
-        comebackCount    = streakData.comeback_count     || 0;
-
         if(inGracePeriod) {
           streakCount = streakData.streak_count;
           if(graceLastDate === today) {
@@ -1987,7 +1986,6 @@ async function buildHome(){
             last_streak_date: today
           }).eq('id', currentUser.id);
         }
-        document.getElementById('streakCount').textContent = unlockedCount;
       }
     } catch(e) {
       console.error('buildHome streak error:', e);
