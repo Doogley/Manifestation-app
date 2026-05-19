@@ -2928,6 +2928,41 @@ function showAdminBanner(on) {
   }
   banner.style.display = on ? 'block' : 'none';
   banner.textContent = '✦ Admin Mode Active — tap logo 5x to disable';
+
+  let panel = document.getElementById('adminPanel');
+  if(!panel) {
+    panel = document.createElement('div');
+    panel.id = 'adminPanel';
+    panel.style.cssText = 'position:fixed;top:37px;left:50%;transform:translateX(-50%);display:flex;gap:6px;padding:7px 10px;background:rgba(16,13,9,.96);border:1px solid rgba(201,169,110,.3);border-top:none;z-index:998;flex-wrap:wrap;justify-content:center;white-space:nowrap;';
+    const btnStyle = 'padding:4px 10px;background:none;border:1px solid rgba(201,169,110,.35);color:var(--gold);font-family:Jost,sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;';
+    panel.innerHTML = `
+      <button onclick="adminTestGrace()" style="${btnStyle}">Test Grace</button>
+      <button onclick="adminTestDay30()" style="${btnStyle}">Day 30 Limit</button>
+      <button onclick="adminResetToday()" style="${btnStyle}">Reset Today</button>
+    `;
+    document.body.appendChild(panel);
+  }
+  panel.style.display = on ? 'flex' : 'none';
+}
+
+function adminTestGrace() {
+  showGracePeriod(streakCount || 7, 0);
+}
+
+function adminTestDay30() {
+  unlockedCount = 30;
+  buildLibrary();
+}
+
+async function adminResetToday() {
+  if(!currentUser) return;
+  await db.from('profiles').update({
+    last_affirmation_date: null,
+    last_visit_date: null
+  }).eq('id', currentUser.id);
+  dailyActions.affirmationUnlocked = false;
+  dailyLoginChecked = false;
+  buildHome();
 }
 
 // ── PREFERENCES ──
