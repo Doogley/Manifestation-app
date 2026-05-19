@@ -165,7 +165,7 @@
   .upgrade-teaser strong { color:var(--gold); font-weight:400; }
 
   /* Bottom nav */
-  .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:color-mix(in srgb,var(--deep2) 95%,transparent); backdrop-filter:blur(12px); border-top:1px solid rgba(201,169,110,.1); display:flex; align-items:center; justify-content:space-around; padding:14px 20px 20px; z-index:100; -webkit-transform:translateZ(0); transform:translateZ(0); }
+  .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:rgba(26,22,16,.95); backdrop-filter:blur(12px); border-top:1px solid rgba(201,169,110,.1); display:flex; align-items:center; justify-content:space-around; padding:14px 20px 20px; z-index:100; -webkit-transform:translateZ(0); transform:translateZ(0); }
   .nav-tab { display:flex; flex-direction:column; align-items:center; gap:5px; background:none; border:none; cursor:pointer; color:var(--muted); transition:color .3s; font-family:'Jost',sans-serif; }
   .nav-tab.active { color:var(--gold); }
   .nav-tab-icon { font-size:18px; display:flex; align-items:center; justify-content:center; }
@@ -224,7 +224,7 @@
   }
 
   /* ── CINDERS TOAST ── */
-  .cinders-toast { position:fixed; top:24px; left:50%; transform:translateX(-50%) translateY(-80px); background:color-mix(in srgb,var(--deep2) 95%,transparent); border:1px solid rgba(201,169,110,.3); color:var(--gold); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; padding:10px 20px; z-index:999; white-space:nowrap; backdrop-filter:blur(8px); transition:transform .4s cubic-bezier(.34,1.56,.64,1), opacity .4s ease; opacity:0; pointer-events:none; }
+  .cinders-toast { position:fixed; top:24px; left:50%; transform:translateX(-50%) translateY(-80px); background:rgba(26,22,16,.95); border:1px solid rgba(201,169,110,.3); color:var(--gold); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; padding:10px 20px; z-index:999; white-space:nowrap; backdrop-filter:blur(8px); transition:transform .4s cubic-bezier(.34,1.56,.64,1), opacity .4s ease; opacity:0; pointer-events:none; }
   .cinders-toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
   .cinders-toast.hide { transform:translateX(-50%) translateY(-80px); opacity:0; }
 
@@ -315,7 +315,7 @@
   .mood-btn:hover { border-color:rgba(201,169,110,.3); color:var(--soft); }
   .mood-btn.selected { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.08); }
 
-  .journal-save-wrap { position:sticky; bottom:0; z-index:10; padding:16px 32px 90px; background:color-mix(in srgb,var(--deep2) 95%,transparent); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-top:1px solid rgba(201,169,110,.1); }
+  .journal-save-wrap { position:sticky; bottom:0; z-index:10; padding:16px 32px 90px; background:rgba(26,22,16,.95); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-top:1px solid rgba(201,169,110,.1); }
 
   /* ── BADGES ── */
   #badges { padding-bottom:90px; }
@@ -546,13 +546,6 @@
     .upgrade-headline{font-size:26px}
   }
 
-  /* ── THEME SELECTOR ── */
-  .theme-swatches { display:flex; gap:10px; }
-  .theme-toggle-btn { flex:1; display:flex; align-items:center; justify-content:center; gap:10px; padding:14px 16px; background:rgba(201,169,110,.04); border:1px solid rgba(201,169,110,.15); color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:all .3s; }
-  .theme-toggle-btn:hover { border-color:rgba(201,169,110,.35); color:var(--soft); }
-  .theme-toggle-btn.active { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.08); }
-  .theme-toggle-preview { width:22px; height:22px; border-radius:50%; border:1px solid; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .theme-toggle-preview span { width:8px; height:8px; border-radius:50%; display:block; }
 </style>
 </head>
 <body>
@@ -1103,12 +1096,6 @@
     </div>
   </div>
 
-  <!-- Themes -->
-  <div class="profile-section" style="animation-delay:.43s">
-    <div class="profile-section-title">Appearance</div>
-    <div class="theme-swatches" id="themeSelectorSwatches"></div>
-  </div>
-
   <!-- Subscription -->
   <div class="profile-section" style="animation-delay:.44s">
     <div class="profile-section-title">Membership</div>
@@ -1246,51 +1233,6 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 const CLAUDE_API_KEY = 'YOUR_CLAUDE_API_KEY';
-
-// ── THEME SYSTEM ──
-const themes = {
-  dusk: { cream:'#f5f0e8', gold:'#c9a96e', deep:'#1a1610', deep2:'#211e17', muted:'#8a7d6b', soft:'#d4c9b8', locked:'#1e1b14' },
-  dawn: { cream:'#2c2118', gold:'#b8935a', deep:'#f0e8d8', deep2:'#e8dfc8', muted:'#7a6a55', soft:'#3d2e1e', locked:'#d8cdb8' }
-};
-const freeThemes = ['dusk', 'dawn'];
-let currentTheme = 'dusk';
-
-function applyTheme(themeName) {
-  const t = themes[themeName] || themes.dusk;
-  const r = document.documentElement.style;
-  r.setProperty('--cream', t.cream);
-  r.setProperty('--gold', t.gold);
-  r.setProperty('--deep', t.deep);
-  r.setProperty('--deep2', t.deep2);
-  r.setProperty('--muted', t.muted);
-  r.setProperty('--soft', t.soft);
-  r.setProperty('--locked', t.locked);
-  currentTheme = themeName;
-  document.querySelectorAll('.theme-toggle-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.theme === themeName);
-  });
-}
-
-async function selectTheme(themeName) {
-  applyTheme(themeName);
-  if(currentUser) {
-    await db.from('profiles').update({ theme_preference: themeName }).eq('id', currentUser.id);
-  }
-}
-
-function buildThemeSelector() {
-  const wrap = document.getElementById('themeSelectorSwatches');
-  if(!wrap) return;
-  wrap.innerHTML = `
-    <button class="theme-toggle-btn${currentTheme === 'dusk' ? ' active' : ''}" data-theme="dusk" onclick="selectTheme('dusk')">
-      <span class="theme-toggle-preview" style="background:#1a1610;border-color:#c9a96e"><span style="background:#c9a96e"></span></span>
-      Dark
-    </button>
-    <button class="theme-toggle-btn${currentTheme === 'dawn' ? ' active' : ''}" data-theme="dawn" onclick="selectTheme('dawn')">
-      <span class="theme-toggle-preview" style="background:#f0e8d8;border-color:#b8935a"><span style="background:#b8935a"></span></span>
-      Light
-    </button>`;
-}
 
 function getLocalDateString() {
   const now = new Date();
@@ -1480,9 +1422,6 @@ async function loadUserProfile() {
   graceDaysCompleted = data.grace_days_completed || 0;
   graceLastDate    = data.grace_last_date   || '';
   comebackCount    = data.comeback_count    || 0;
-  if(data.theme_preference && themes[data.theme_preference]) {
-    applyTheme(data.theme_preference);
-  }
   // Load intentions from Supabase
   if(currentUser) {
     const { data: intentionsData } = await db.from('intentions')
@@ -1561,7 +1500,6 @@ async function loadUserProfile() {
 
 // Check if user is already logged in when app loads
 window.addEventListener('load', async () => {
-  applyTheme('dusk');
   try {
     const { data } = await db.auth.getSession();
     if(data.session && !currentUser) {
@@ -3078,7 +3016,6 @@ async function openProfile() {
 }
 
 async function buildProfile() {
-  buildThemeSelector();
   // Name display — show nickname if set, otherwise real name
   const displayName = userNickname || userRealName;
   const profileInitialEl = document.getElementById('profileInitial');
