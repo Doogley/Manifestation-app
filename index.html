@@ -727,7 +727,7 @@
       </div>
       <div class="mantra-text empty" id="mantraDisplay">Tap edit to write your mantra for this week...</div>
       <div class="mantra-input-wrap" id="mantraInputWrap">
-        <textarea class="mantra-textarea" id="mantraInput" rows="3" placeholder="I am strong, I am focused, I am already becoming..."></textarea>
+        <textarea class="mantra-textarea" id="mantraInput" rows="3" placeholder="I am strong, I am focused, I am already becoming..." maxlength="200"></textarea>
         <button class="mantra-save-btn" onclick="saveMantra()">✦ Save Mantra</button>
       </div>
     </div>
@@ -796,7 +796,7 @@
   <div class="journal-section" style="animation-delay:.15s">
     <div class="journal-section-title">Reflection</div>
     <div class="journal-prompt" id="journalPrompt"></div>
-    <textarea class="journal-textarea" rows="5" placeholder="Write freely — this space is only for you..."></textarea>
+    <textarea class="journal-textarea" rows="5" placeholder="Write freely — this space is only for you..." maxlength="2000"></textarea>
   </div>
 
   <!-- Mood check-in — expanded -->
@@ -836,7 +836,7 @@
     </div>
     <div id="intentionsList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px"></div>
     <div style="display:flex;gap:10px;align-items:center">
-      <input id="newIntentionInput" class="gratitude-input" type="text" placeholder="I am calling in..." style="flex:1;border:1px solid rgba(201,169,110,.12);padding:12px 14px;">
+      <input id="newIntentionInput" class="gratitude-input" type="text" placeholder="I am calling in..." maxlength="200" style="flex:1;border:1px solid rgba(201,169,110,.12);padding:12px 14px;">
       <button onclick="addIntention()" style="padding:12px 18px;background:none;border:1px solid rgba(201,169,110,.25);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:all .3s;">+ Add</button>
     </div>
     <div style="font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:.05em" id="intentionsCount">0 of 3 intentions used (free plan)</div>
@@ -2173,7 +2173,7 @@ async function toggleSave(){
     }
   }
 }
-function shareAffirmation(){if(navigator.share){navigator.share({title:'Already Mine',text:todayAffirmation,url:window.location.href});}else{navigator.clipboard.writeText(todayAffirmation).then(()=>showCindersToast(0,'Copied to clipboard')).catch(()=>{});}}
+function shareAffirmation(){if(navigator.share){navigator.share({title:'Already Mine',text:todayAffirmation,url:window.location.href}).then(()=>showCindersToast(0,'✦ Shared')).catch(()=>{});}else{navigator.clipboard.writeText(todayAffirmation).then(()=>showCindersToast(0,'✦ Copied to clipboard')).catch(()=>showCindersToast(0,'Could not copy — try again'));}}
 function setTab(el){document.querySelectorAll('#globalBottomNav .nav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
 function setTabByName(name){document.querySelectorAll('#globalBottomNav .nav-tab').forEach((t,i)=>{const labels=['today','library','journal','badges','profile'];if(labels[i]===name)t.classList.add('active');else t.classList.remove('active');});}
 
@@ -2531,6 +2531,7 @@ async function addIntention() {
   const input = document.getElementById('newIntentionInput');
   const text = input.value.trim();
   if(!text) return;
+  if(text.length > 200) { showCindersToast(0, 'Intention must be 200 characters or less'); return; }
   if(intentions.filter(i => !i.received).length >= MAX_FREE_INTENTIONS) {
     currentModalType='info';
     document.getElementById('modalDay').textContent='Intention Limit Reached';
@@ -2692,7 +2693,8 @@ async function removeIntention(i) {
   if(currentUser) {
     await db.from('intentions')
       .delete()
-      .eq('id', intentions[i].id);
+      .eq('id', intentions[i].id)
+      .eq('user_id', currentUser.id);
   }
   intentions.splice(i, 1);
   renderIntentions();
@@ -2889,6 +2891,7 @@ function handleLogoTap() {
   logoTapTimer = setTimeout(() => { logoTapCount = 0; }, 2000);
   if(logoTapCount >= 5) {
     logoTapCount = 0;
+    if(currentUser?.id !== '4db514a7-36ba-4bf9-8212-72029ec7561c') return;
     adminMode = !adminMode;
     if(adminMode) {
       // Save real values before overwriting
@@ -3111,6 +3114,16 @@ async function buildProfile() {
 async function handleProfilePic(input) {
   if(!input.files || !input.files[0]) return;
   const file = input.files[0];
+  if(!file.type.startsWith('image/')) {
+    showCindersToast(0, 'Please upload an image file');
+    input.value = '';
+    return;
+  }
+  if(file.size >= 5000000) {
+    showCindersToast(0, 'Image must be under 5MB');
+    input.value = '';
+    return;
+  }
   const reader = new FileReader();
   reader.onload = (e) => {
     const imgStyle = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
