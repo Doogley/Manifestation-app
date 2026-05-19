@@ -1415,6 +1415,12 @@ async function loadUserProfile() {
   unlockedCount = data.unlocked_count || 1;
   weeklyMantra = data.mantra || '';
   lastMantraDate = data.last_mantra_date || '';
+  isPaidMember     = data.is_paid_member    || false;
+  inGracePeriod    = data.in_grace_period   || false;
+  graceStreakBefore = data.grace_streak_before || 0;
+  graceDaysCompleted = data.grace_days_completed || 0;
+  graceLastDate    = data.grace_last_date   || '';
+  comebackCount    = data.comeback_count    || 0;
   // Load intentions from Supabase
   if(currentUser) {
     const { data: intentionsData } = await db.from('intentions')
@@ -2316,6 +2322,7 @@ async function saveJournal(){
       if(existing) {
         // User cleared their entry — delete it and reverse cinders if they were awarded
         await db.from('journal_entries').delete().eq('id', existing.id);
+        journalEntryCount = Math.max(0, journalEntryCount - 1);
         if(dailyActions.journalSaved) {
           currentCinders = Math.max(0, currentCinders - 20);
           await db.from('profiles').update({ cinders: currentCinders }).eq('id', currentUser.id);
