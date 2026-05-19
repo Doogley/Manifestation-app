@@ -2034,11 +2034,11 @@ async function unlockTodaysAffirmation() {
   unlockedEl.style.animation = 'fadeIn .5s ease forwards';
   document.getElementById('homeAffirmationText').textContent = todayAffirmation;
   document.getElementById('homeAffirmationCat').textContent = '✦  ' + todayCategory;
+  saved = false;
   const saveBtn = document.getElementById('saveBtn');
-  
   if(saveBtn) {
-    saveBtn.textContent = saved ? '♥︎  Saved' : '♡  Save';
-    saveBtn.classList.toggle('active', saved);
+    saveBtn.textContent = '♡  Save';
+    saveBtn.classList.remove('active');
   }
   updateDailyPractice();
   buildLibrary();
