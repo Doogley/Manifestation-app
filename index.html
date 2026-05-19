@@ -1250,7 +1250,7 @@ const CLAUDE_API_KEY = 'YOUR_CLAUDE_API_KEY';
 // ── THEME SYSTEM ──
 const themes = {
   dusk: { cream:'#f5f0e8', gold:'#c9a96e', deep:'#1a1610', deep2:'#211e17', muted:'#8a7d6b', soft:'#d4c9b8', locked:'#1e1b14' },
-  dawn: { cream:'#1a1610', gold:'#c9a96e', deep:'#f5f0e8', deep2:'#ede8e0', muted:'#6b5d4f', soft:'#3a2f25', locked:'#e0d8cc' }
+  dawn: { cream:'#2c2118', gold:'#b8935a', deep:'#f0e8d8', deep2:'#e8dfc8', muted:'#7a6a55', soft:'#3d2e1e', locked:'#d8cdb8' }
 };
 const freeThemes = ['dusk', 'dawn'];
 let currentTheme = 'dusk';
@@ -1287,7 +1287,7 @@ function buildThemeSelector() {
       Dark
     </button>
     <button class="theme-toggle-btn${currentTheme === 'dawn' ? ' active' : ''}" data-theme="dawn" onclick="selectTheme('dawn')">
-      <span class="theme-toggle-preview" style="background:#f5f0e8;border-color:#c9a96e"><span style="background:#c9a96e"></span></span>
+      <span class="theme-toggle-preview" style="background:#f0e8d8;border-color:#b8935a"><span style="background:#b8935a"></span></span>
       Light
     </button>`;
 }
