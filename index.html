@@ -653,6 +653,13 @@
   .add-habit-confirm-btn { padding:12px 18px; background:none; border:1px solid rgba(201,169,110,.3); color:var(--gold); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; white-space:nowrap; transition:all .3s; }
   .add-habit-close-btn { width:100%; padding:14px; background:none; border:1px solid rgba(201,169,110,.1); color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:all .3s; margin-top:4px; }
   .add-habit-close-btn:hover { border-color:rgba(201,169,110,.25); color:var(--cream); }
+  .freq-picker { display:flex; gap:8px; margin-bottom:24px; }
+  .freq-pill { flex:1; padding:9px 6px; border:1px solid rgba(201,169,110,.15); background:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:11px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:all .2s; text-align:center; }
+  .freq-pill.active { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.06); }
+  .habit-meta { display:flex; flex-direction:column; flex:1; gap:3px; }
+  .habit-freq-label { font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); opacity:.55; }
+  .habit-item.inactive { opacity:.35; }
+  .habit-item.inactive .habit-check { pointer-events:none; }
 
   /* ── BODY SCAN ── */
   #bodyScan { align-items:center; justify-content:center; position:relative; }
@@ -1094,6 +1101,12 @@
       <button class="add-habit-x-btn" onclick="closeAddHabitPanel()">✕</button>
     </div>
     <div class="add-habit-sheet-body">
+      <div class="add-habit-label">How often?</div>
+      <div class="freq-picker" id="freqPicker">
+        <button class="freq-pill active" onclick="selectFreq('daily',this)">Daily</button>
+        <button class="freq-pill" onclick="selectFreq('weekdays',this)">Weekdays</button>
+        <button class="freq-pill" onclick="selectFreq('weekly',this)">Weekly</button>
+      </div>
       <div class="add-habit-label">Choose a preset</div>
       <div class="preset-grid" id="presetGrid"></div>
       <div class="add-habit-label">Or write your own</div>
@@ -2997,6 +3010,21 @@ const HABIT_PRESETS = [
 ];
 let habits = [];
 let habitCompletions = {};
+let selectedHabitFrequency = 'daily';
+
+function getWeekKey() {
+  const d = new Date();
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return 'week_' + d.toISOString().slice(0, 10);
+}
+
+function selectFreq(freq, el) {
+  selectedHabitFrequency = freq;
+  document.querySelectorAll('.freq-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
 
 // ── BODY SCAN STATE ──
 const BODY_SCAN_STEPS = [
@@ -4000,7 +4028,10 @@ function closeHabits() {
 
 function renderHabits() {
   const today = getLocalDateString();
-  const completed = new Set(habitCompletions[today] || []);
+  const weekKey = getWeekKey();
+  const todayCompletions = new Set(habitCompletions[today] || []);
+  const weekCompletions = new Set(habitCompletions[weekKey] || []);
+  const isWeekend = [0, 6].includes(new Date().getDay());
   const listEl = document.getElementById('habitsList');
   const emptyEl = document.getElementById('habitsEmpty');
   if(!listEl) return;
@@ -4012,12 +4043,17 @@ function renderHabits() {
     listEl.style.display = 'flex';
     listEl.innerHTML = '';
     habits.forEach(h => {
-      const done = completed.has(h.id);
+      const freq = h.frequency || 'daily';
+      const done = freq === 'weekly' ? weekCompletions.has(h.id) : todayCompletions.has(h.id);
+      const inactive = freq === 'weekdays' && isWeekend;
+      const freqLabel = freq !== 'daily'
+        ? `<span class="habit-freq-label">${freq === 'weekdays' ? 'Weekdays' : 'Weekly'}</span>`
+        : '';
       const item = document.createElement('div');
-      item.className = 'habit-item' + (done ? ' completed' : '');
+      item.className = 'habit-item' + (done ? ' completed' : '') + (inactive ? ' inactive' : '');
       item.innerHTML =
         `<button class="habit-check" onclick="toggleHabitComplete('${h.id}')">${done ? '✓' : ''}</button>` +
-        `<span class="habit-name">${escapeHtml(h.name)}</span>` +
+        `<span class="habit-meta"><span class="habit-name">${escapeHtml(h.name)}</span>${freqLabel}</span>` +
         `<button class="habit-delete-btn" onclick="deleteHabit('${h.id}')">×</button>`;
       listEl.appendChild(item);
     });
@@ -4026,11 +4062,13 @@ function renderHabits() {
 }
 
 function toggleHabitComplete(id) {
-  const today = getLocalDateString();
-  if(!habitCompletions[today]) habitCompletions[today] = [];
-  const idx = habitCompletions[today].indexOf(id);
-  if(idx === -1) habitCompletions[today].push(id);
-  else habitCompletions[today].splice(idx, 1);
+  const h = habits.find(x => x.id === id);
+  const freq = h ? (h.frequency || 'daily') : 'daily';
+  const key = freq === 'weekly' ? getWeekKey() : getLocalDateString();
+  if(!habitCompletions[key]) habitCompletions[key] = [];
+  const idx = habitCompletions[key].indexOf(id);
+  if(idx === -1) habitCompletions[key].push(id);
+  else habitCompletions[key].splice(idx, 1);
   renderHabits();
 }
 
@@ -4043,6 +4081,8 @@ function deleteHabit(id) {
 }
 
 function showAddHabitPanel() {
+  selectedHabitFrequency = 'daily';
+  document.querySelectorAll('.freq-pill').forEach((p, i) => p.classList.toggle('active', i === 0));
   const grid = document.getElementById('presetGrid');
   if(grid) {
     const usedNames = new Set(habits.map(h => h.name));
@@ -4065,7 +4105,7 @@ function closeAddHabitOutside(e) {
 
 function addPresetHabit(name) {
   if(habits.some(h => h.name === name)) return;
-  habits.push({id: Date.now().toString(), name});
+  habits.push({id: Date.now().toString(), name, frequency: selectedHabitFrequency});
   closeAddHabitPanel();
   renderHabits();
 }
@@ -4075,7 +4115,7 @@ function addCustomHabit() {
   const name = input.value.trim();
   if(!name) return;
   if(habits.some(h => h.name === name)) { input.value = ''; return; }
-  habits.push({id: Date.now().toString(), name});
+  habits.push({id: Date.now().toString(), name, frequency: selectedHabitFrequency});
   closeAddHabitPanel();
   renderHabits();
 }
