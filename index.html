@@ -327,6 +327,8 @@
   .cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; padding:0 8px; }
   .cal-nav-btn { background:none; border:1px solid rgba(201,169,110,.2); color:var(--muted); width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .3s; font-size:14px; flex-shrink:0; }
   .cal-nav-btn:hover { border-color:var(--gold); color:var(--gold); }
+  .cal-today-btn { background:none; border:none; color:var(--gold); font-family:'Jost',sans-serif; font-size:11px; font-weight:300; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; padding:0 4px; transition:opacity .3s; flex-shrink:0; }
+  .cal-today-btn:hover { opacity:.7; }
   .cal-month-label { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--cream); letter-spacing:.05em; }
   .cal-dow-row { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; margin-bottom:3px; }
   .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
@@ -917,6 +919,7 @@
         <button class="cal-nav-btn" onclick="shiftCalMonth(-1)">&#8592;</button>
         <div class="cal-month-label" id="calMonthLabel"></div>
         <button class="cal-nav-btn" onclick="shiftCalMonth(1)">&#8594;</button>
+        <button class="cal-today-btn" onclick="jumpCalToToday()">Today</button>
       </div>
       <div class="cal-dow-row">
         <div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div>
@@ -2481,6 +2484,13 @@ function shiftCalMonth(dir) {
   calMonth += dir;
   if(calMonth > 11) { calMonth = 0; calYear++; }
   if(calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function jumpCalToToday() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
   renderCalendar();
 }
 
