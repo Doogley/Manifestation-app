@@ -634,9 +634,9 @@
   .habits-empty-sub { font-size:13px; font-weight:300; color:var(--muted); line-height:1.7; }
   .add-habit-panel { display:none; position:fixed; inset:0; background:rgba(10,8,5,.88); z-index:200; align-items:flex-end; justify-content:center; backdrop-filter:blur(8px); }
   .add-habit-panel.open { display:flex; }
-  .add-habit-sheet { width:100%; max-width:520px; max-height:75vh; overflow-y:auto; background:var(--deep2); border-top:1px solid rgba(201,169,110,.2); animation:fadeUp .3s ease forwards; }
+  .add-habit-sheet { width:100%; max-width:520px; max-height:88vh; overflow-y:auto; background:var(--deep2); border-top:1px solid rgba(201,169,110,.2); animation:fadeUp .3s ease forwards; }
   .add-habit-sheet-header { position:sticky; top:0; background:var(--deep2); z-index:1; display:flex; align-items:center; justify-content:space-between; padding:22px 28px 16px; border-bottom:1px solid rgba(201,169,110,.08); }
-  .add-habit-sheet-body { padding:20px 28px 40px; }
+  .add-habit-sheet-body { padding:20px 28px 48px; }
   .add-habit-x-btn { background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; line-height:1; padding:0; transition:color .3s; }
   .add-habit-x-btn:hover { color:var(--cream); }
   .add-habit-title { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:300; color:var(--cream); margin-bottom:20px; }
@@ -1084,20 +1084,22 @@
   <div class="habits-add-wrap">
     <button class="habits-add-btn" onclick="showAddHabitPanel()">+ Add a Habit</button>
   </div>
-  <div class="add-habit-panel" id="addHabitPanel" onclick="closeAddHabitOutside(event)">
-    <div class="add-habit-sheet">
-      <div class="add-habit-sheet-header">
-        <div class="add-habit-title" style="margin-bottom:0">Add a Foundation</div>
-        <button class="add-habit-x-btn" onclick="closeAddHabitPanel()">✕</button>
-      </div>
-      <div class="add-habit-sheet-body">
-        <div class="add-habit-label">Choose a preset</div>
-        <div class="preset-grid" id="presetGrid"></div>
-        <div class="add-habit-label">Or write your own</div>
-        <div class="add-habit-custom-row">
-          <input class="add-habit-input" id="customHabitInput" type="text" placeholder="e.g. Stretch for 10 minutes" maxlength="60" onkeydown="if(event.key==='Enter')addCustomHabit()">
-          <button class="add-habit-confirm-btn" onclick="addCustomHabit()">+ Add</button>
-        </div>
+</div>
+
+<!-- ADD HABIT PANEL (global overlay, outside screen divs) -->
+<div class="add-habit-panel" id="addHabitPanel" onclick="closeAddHabitOutside(event)">
+  <div class="add-habit-sheet">
+    <div class="add-habit-sheet-header">
+      <div class="add-habit-title" style="margin-bottom:0">Add a Foundation</div>
+      <button class="add-habit-x-btn" onclick="closeAddHabitPanel()">✕</button>
+    </div>
+    <div class="add-habit-sheet-body">
+      <div class="add-habit-label">Choose a preset</div>
+      <div class="preset-grid" id="presetGrid"></div>
+      <div class="add-habit-label">Or write your own</div>
+      <div class="add-habit-custom-row">
+        <input class="add-habit-input" id="customHabitInput" type="text" placeholder="e.g. Stretch for 10 minutes" maxlength="60" onkeydown="if(event.key==='Enter')addCustomHabit()">
+        <button class="add-habit-confirm-btn" onclick="addCustomHabit()">+ Add</button>
       </div>
     </div>
   </div>
