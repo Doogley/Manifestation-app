@@ -340,7 +340,7 @@
   .cal-day.today-day .cal-day-num { color:var(--gold); font-weight:400; }
   .cal-day-preview { font-size:10px; font-weight:300; color:var(--muted); line-height:1.35; margin-top:5px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
   .cal-day.has-entry .cal-day-preview { color:rgba(201,169,110,.55); }
-  .cal-lock-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(26,22,16,.45); }
+  .cal-lock-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(26,22,16,.85); }
   .cal-lock-icon { font-size:13px; opacity:.4; }
 
   .cal-entry-modal { display:none; position:fixed; inset:0; background:rgba(10,8,5,.88); z-index:200; align-items:flex-end; justify-content:center; backdrop-filter:blur(8px); }
@@ -1412,6 +1412,7 @@ function resetUserState() {
   userRealName = '';
   summaryGenerated = false;
   adminMode = false;
+  isPaidMember = false;
   selectedMoodCategory = null;
   selectedMoodSub = null;
   dailyLoginChecked = false;
@@ -2346,6 +2347,15 @@ function closeJournal() {
 }
 
 // ── JOURNAL CALENDAR ──
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 let calYear = 0;
 let calMonth = 0;
 let calEntries = {};
@@ -2360,9 +2370,11 @@ function switchJournalView(view) {
     calView.style.display = 'block';
     btnToday.classList.remove('active');
     btnCal.classList.add('active');
-    const now = new Date();
-    calYear = now.getFullYear();
-    calMonth = now.getMonth();
+    if(calYear === 0) {
+      const now = new Date();
+      calYear = now.getFullYear();
+      calMonth = now.getMonth();
+    }
     renderCalendar();
   } else {
     todayView.style.display = 'block';
@@ -2434,11 +2446,11 @@ function buildCalendarGrid() {
       let previewText = '';
       if(entry.reflection) {
         const words = entry.reflection.trim().split(/\s+/).slice(0, 5).join(' ');
-        previewText = words + (entry.reflection.trim().split(/\s+/).length > 5 ? '…' : '');
+        previewText = escapeHtml(words + (entry.reflection.trim().split(/\s+/).length > 5 ? '…' : ''));
       } else if(entry.mood_sub) {
-        previewText = entry.mood_sub;
+        previewText = escapeHtml(entry.mood_sub);
       } else if(entry.mood_category) {
-        previewText = entry.mood_category;
+        previewText = escapeHtml(entry.mood_category);
       }
       if(previewText) preview = `<span class="cal-day-preview">${previewText}</span>`;
 
