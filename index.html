@@ -634,9 +634,9 @@
   .habits-empty-sub { font-size:13px; font-weight:300; color:var(--muted); line-height:1.7; }
   .add-habit-panel { display:none; position:fixed; inset:0; background:rgba(10,8,5,.88); z-index:200; align-items:flex-end; justify-content:center; backdrop-filter:blur(8px); }
   .add-habit-panel.open { display:flex; }
-  .add-habit-sheet { width:100%; max-width:520px; max-height:75vh; background:var(--deep2); border-top:1px solid rgba(201,169,110,.2); animation:fadeUp .3s ease forwards; display:flex; flex-direction:column; }
-  .add-habit-sheet-header { display:flex; align-items:center; justify-content:space-between; flex-shrink:0; padding:22px 28px 16px; border-bottom:1px solid rgba(201,169,110,.08); }
-  .add-habit-sheet-body { overflow-y:auto; padding:20px 28px 40px; flex:1; }
+  .add-habit-sheet { width:100%; max-width:520px; max-height:75vh; overflow-y:auto; background:var(--deep2); border-top:1px solid rgba(201,169,110,.2); animation:fadeUp .3s ease forwards; }
+  .add-habit-sheet-header { position:sticky; top:0; background:var(--deep2); z-index:1; display:flex; align-items:center; justify-content:space-between; padding:22px 28px 16px; border-bottom:1px solid rgba(201,169,110,.08); }
+  .add-habit-sheet-body { padding:20px 28px 40px; }
   .add-habit-x-btn { background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; line-height:1; padding:0; transition:color .3s; }
   .add-habit-x-btn:hover { color:var(--cream); }
   .add-habit-title { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:300; color:var(--cream); margin-bottom:20px; }
