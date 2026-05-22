@@ -611,8 +611,8 @@
   .habits-preview-empty { font-size:13px; font-weight:300; color:var(--muted); font-style:italic; text-align:center; padding:4px 0; }
 
   /* ── HABITS SCREEN ── */
-  #habits { padding-bottom:90px; overflow-y:auto; }
-  .habits-header { position:relative; z-index:1; padding:20px 32px 20px; border-bottom:1px solid rgba(201,169,110,.08); }
+  #habits { padding-bottom:100px; overflow-y:auto; }
+  .habits-header { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; padding:28px 32px 20px; border-bottom:1px solid rgba(201,169,110,.08); }
   .habits-header-date { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
   .habits-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--cream); letter-spacing:.05em; }
   .habits-list { position:relative; z-index:1; padding:24px 32px 0; display:flex; flex-direction:column; gap:10px; }
@@ -1065,16 +1065,15 @@
 
 <!-- HABITS -->
 <div id="habits" class="screen">
-  <div class="screen-logo-bar">
-    <button class="screen-logo-link" onclick="closeHabits()">Already Mine</button>
+  <div class="habits-header">
+    <div>
+      <div class="habits-header-date" id="habitsDate"></div>
+      <div class="habits-title">My Foundations</div>
+    </div>
     <button class="back-btn" onclick="closeHabits()" style="margin-top:0">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       Back
     </button>
-  </div>
-  <div class="habits-header">
-    <div class="habits-header-date" id="habitsDate"></div>
-    <div class="habits-title">My Foundations</div>
   </div>
   <div class="habits-empty" id="habitsEmpty">
     <div class="habits-empty-icon">◇</div>
