@@ -664,7 +664,12 @@
   .scan-step-num { font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold); opacity:.55; margin-bottom:20px; }
   .scan-title { font-family:'Cormorant Garamond',serif; font-size:clamp(30px,7vw,42px); font-weight:300; color:var(--cream); margin-bottom:32px; line-height:1.1; }
   .scan-prompt { font-family:'Jost',sans-serif; font-size:16px; font-weight:300; color:var(--soft); line-height:2; margin-bottom:24px; white-space:pre-line; }
-  .scan-cue { font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); opacity:.45; margin-bottom:52px; }
+  .scan-cue { font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); opacity:.45; margin-bottom:24px; }
+  .scan-note-wrap { width:100%; text-align:left; margin-bottom:36px; }
+  .scan-note-label { font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); opacity:.5; margin-bottom:8px; }
+  .scan-note-textarea { width:100%; background:rgba(201,169,110,.04); border:1px solid rgba(201,169,110,.12); color:var(--cream); font-family:'Jost',sans-serif; font-weight:300; font-size:14px; line-height:1.7; padding:14px 16px; resize:none; outline:none; transition:border-color .3s; }
+  .scan-note-textarea::placeholder { color:var(--muted); opacity:.5; font-style:italic; }
+  .scan-note-textarea:focus { border-color:rgba(201,169,110,.3); }
   .scan-continue-btn { padding:16px 52px; background:none; border:1px solid rgba(201,169,110,.3); color:var(--gold); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; transition:all .4s; position:relative; overflow:hidden; }
   .scan-continue-btn::before { content:''; position:absolute; inset:0; background:var(--gold); transform:translateX(-100%); transition:transform .4s ease; z-index:-1; }
   .scan-continue-btn:hover { color:var(--deep); }
@@ -1099,6 +1104,10 @@
       <div class="scan-title" id="scanTitle"></div>
       <div class="scan-prompt" id="scanPrompt"></div>
       <div class="scan-cue" id="scanCue"></div>
+      <div class="scan-note-wrap">
+        <div class="scan-note-label">Your notes</div>
+        <textarea class="scan-note-textarea" id="scanNoteArea" rows="4"></textarea>
+      </div>
     </div>
     <button id="scanActionBtn" class="scan-continue-btn" onclick="nextScanStep()">Continue</button>
   </div>
@@ -1571,6 +1580,8 @@ function resetUserState() {
   isPaidMember = false;
   habits = [];
   habitCompletions = {};
+  currentScanNotes = {};
+  bodyScanSessions = [];
   selectedMoodCategory = null;
   selectedMoodSub = null;
   dailyLoginChecked = false;
@@ -2976,15 +2987,17 @@ let habitCompletions = {};
 
 // ── BODY SCAN STATE ──
 const BODY_SCAN_STEPS = [
-  { title:'Arrive',          prompt:'Close your eyes if it feels right.\nTake a slow breath in... and let it go.\nYou\'re here now. That\'s enough.',                                                           cue:'Breathe in... and out...' },
-  { title:'Feel the ground', prompt:'Notice where your body meets the surface beneath you.\nFeel that support — steady, present, holding you.',                                                                   cue:'Nothing to change. Just notice.' },
-  { title:'Head & shoulders',prompt:'Bring your attention gently to the top of your head.\nSlowly scan downward — your forehead, jaw, neck, shoulders.\nNotice any tension, warmth, or stillness.',             cue:'Observe without trying to fix anything.' },
-  { title:'Chest & belly',   prompt:'Rest your awareness on your chest and belly.\nNotice the rise and fall as you breathe.\nAny tightness here? Openness? Heaviness? Just notice.',                           cue:'Your breath is always here.' },
-  { title:'Arms & hands',    prompt:'Let your attention travel down your arms,\nthrough your forearms, into your hands and fingers.\nWith each exhale, let a little tension soften.',                          cue:'You don\'t need to hold on.' },
-  { title:'Legs & feet',     prompt:'Move your awareness down through your hips,\nyour legs, and all the way to your feet.\nFeel them grounded — present, here.',                                              cue:'Fully arrived.' },
-  { title:'Return',          prompt:'Take one full, unhurried breath.\nNotice how you feel right now —\nnot how you want to feel, just how you actually are.',                                                  cue:'That awareness is already healing.' },
+  { title:'Arrive',          prompt:'Close your eyes if it feels right.\nTake a slow breath in... and let it go.\nYou\'re here now. That\'s enough.',                                                           cue:'Breathe in... and out...',          placeholder:'What do you notice as you arrive and settle in...' },
+  { title:'Feel the ground', prompt:'Notice where your body meets the surface beneath you.\nFeel that support — steady, present, holding you.',                                                                   cue:'Nothing to change. Just notice.',   placeholder:'How does the contact and support beneath you feel...' },
+  { title:'Head & shoulders',prompt:'Bring your attention gently to the top of your head.\nSlowly scan downward — your forehead, jaw, neck, shoulders.\nNotice any tension, warmth, or stillness.',             cue:'Observe without trying to fix anything.', placeholder:'Any tension, tightness, or ease in your head and shoulders...' },
+  { title:'Chest & belly',   prompt:'Rest your awareness on your chest and belly.\nNotice the rise and fall as you breathe.\nAny tightness here? Openness? Heaviness? Just notice.',                           cue:'Your breath is always here.',       placeholder:'What lives in your chest and belly right now...' },
+  { title:'Arms & hands',    prompt:'Let your attention travel down your arms,\nthrough your forearms, into your hands and fingers.\nWith each exhale, let a little tension soften.',                          cue:'You don\'t need to hold on.',       placeholder:'What do you feel in your arms and hands...' },
+  { title:'Legs & feet',     prompt:'Move your awareness down through your hips,\nyour legs, and all the way to your feet.\nFeel them grounded — present, here.',                                              cue:'Fully arrived.',                    placeholder:'How do your legs and feet feel right now...' },
+  { title:'Return',          prompt:'Take one full, unhurried breath.\nNotice how you feel right now —\nnot how you want to feel, just how you actually are.',                                                  cue:'That awareness is already healing.', placeholder:'How do you feel overall — body and mind...' },
 ];
 let currentScanStep = 0;
+let currentScanNotes = {};
+let bodyScanSessions = [];
 let countdownInterval = null;
 let journalHasChanges = false;
 let currentScreen = 'auth';
@@ -4081,6 +4094,7 @@ function updateHabitsHomePreview() {
 // ── BODY SCAN ──
 function openBodyScan() {
   currentScanStep = 0;
+  currentScanNotes = {};
   const nav = document.getElementById('globalBottomNav');
   if(nav) nav.style.display = 'none';
   showScreen('bodyScan');
@@ -4113,9 +4127,15 @@ function renderScanStep() {
   document.getElementById('scanPrompt').textContent = step.prompt;
   document.getElementById('scanCue').textContent = step.cue;
 
+  const noteArea = document.getElementById('scanNoteArea');
+  if(noteArea) {
+    noteArea.value = currentScanNotes[currentScanStep] || '';
+    noteArea.placeholder = step.placeholder;
+  }
+
   const btn = document.getElementById('scanActionBtn');
   if(btn) {
-    btn.textContent = isLast ? 'Complete' : 'Continue';
+    btn.textContent = isLast ? 'Save & Complete' : 'Continue';
     btn.className = isLast ? 'scan-complete-btn' : 'scan-continue-btn';
   }
 
@@ -4129,12 +4149,29 @@ function renderScanStep() {
 }
 
 function nextScanStep() {
+  const noteArea = document.getElementById('scanNoteArea');
+  if(noteArea) currentScanNotes[currentScanStep] = noteArea.value;
   if(currentScanStep < BODY_SCAN_STEPS.length - 1) {
     currentScanStep++;
     renderScanStep();
   } else {
-    closeBodyScan();
+    completeScan();
   }
+}
+
+function completeScan() {
+  const today = getLocalDateString();
+  const sections = BODY_SCAN_STEPS.map((step, i) => ({
+    title: step.title,
+    note: (currentScanNotes[i] || '').trim()
+  }));
+  if(sections.some(s => s.note)) {
+    bodyScanSessions.unshift({ date: today, sections });
+  }
+  currentScanNotes = {};
+  const nav = document.getElementById('globalBottomNav');
+  if(nav) nav.style.display = 'flex';
+  showScreen('journal');
 }
 </script>
 </body>
