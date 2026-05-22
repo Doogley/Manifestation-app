@@ -594,6 +594,95 @@
     .upgrade-headline{font-size:26px}
   }
 
+  /* ── HABITS PREVIEW (HOME) ── */
+  .habits-preview-wrap { position:relative; z-index:1; padding:16px 32px 0; }
+  .habits-preview-card { background:rgba(201,169,110,.03); border:1px solid rgba(201,169,110,.12); padding:20px 24px; cursor:pointer; transition:border-color .3s, background .3s; }
+  .habits-preview-card:hover { border-color:rgba(201,169,110,.25); background:rgba(201,169,110,.06); }
+  .habits-preview-summary { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .habits-preview-count { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300; color:var(--cream); }
+  .habits-preview-arrow { font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--gold); opacity:.7; }
+  .habits-preview-bar-track { height:1px; background:rgba(201,169,110,.1); margin-bottom:14px; }
+  .habits-preview-bar-fill { height:1px; background:var(--gold); transition:width .6s ease; }
+  .habits-preview-list { display:flex; flex-direction:column; gap:8px; }
+  .habits-preview-row { display:flex; align-items:center; gap:10px; font-size:13px; font-weight:300; color:var(--muted); letter-spacing:.02em; }
+  .habits-preview-row.done { color:var(--soft); }
+  .habits-preview-check { width:6px; height:6px; border-radius:50%; border:1px solid rgba(201,169,110,.25); flex-shrink:0; }
+  .habits-preview-row.done .habits-preview-check { background:var(--gold); border-color:var(--gold); }
+  .habits-preview-empty { font-size:13px; font-weight:300; color:var(--muted); font-style:italic; text-align:center; padding:4px 0; }
+
+  /* ── HABITS SCREEN ── */
+  #habits { padding-bottom:90px; overflow-y:auto; }
+  .habits-header { position:relative; z-index:1; padding:20px 32px 20px; border-bottom:1px solid rgba(201,169,110,.08); }
+  .habits-header-date { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+  .habits-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--cream); letter-spacing:.05em; }
+  .habits-list { position:relative; z-index:1; padding:24px 32px 0; display:flex; flex-direction:column; gap:10px; }
+  .habit-item { display:flex; align-items:center; gap:14px; padding:16px 20px; border:1px solid rgba(201,169,110,.12); background:rgba(201,169,110,.03); transition:border-color .3s; }
+  .habit-item.completed { border-color:rgba(201,169,110,.2); background:rgba(201,169,110,.06); }
+  .habit-check { width:24px; height:24px; border-radius:50%; border:1px solid rgba(201,169,110,.3); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:all .3s; background:none; color:transparent; font-size:12px; font-family:'Jost',sans-serif; }
+  .habit-item.completed .habit-check { background:var(--gold); border-color:var(--gold); color:var(--deep); }
+  .habit-icon { font-size:18px; flex-shrink:0; width:24px; text-align:center; }
+  .habit-name { flex:1; font-size:14px; font-weight:300; color:var(--soft); transition:color .3s; }
+  .habit-item.completed .habit-name { color:var(--muted); text-decoration:line-through; text-decoration-color:rgba(201,169,110,.3); }
+  .habit-delete-btn { background:none; border:none; color:rgba(255,255,255,.12); font-size:18px; cursor:pointer; padding:4px 0 4px 8px; transition:color .3s; line-height:1; }
+  .habit-delete-btn:hover { color:rgba(201,169,110,.4); }
+  .habits-add-wrap { position:relative; z-index:1; padding:20px 32px 0; }
+  .habits-add-btn { width:100%; padding:16px; background:none; border:1px solid rgba(201,169,110,.2); color:var(--gold); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; transition:all .3s; }
+  .habits-add-btn:hover { background:rgba(201,169,110,.06); border-color:rgba(201,169,110,.35); }
+  .habits-empty { position:relative; z-index:1; padding:60px 32px; text-align:center; }
+  .habits-empty-icon { font-family:'Cormorant Garamond',serif; font-size:36px; color:var(--gold); opacity:.25; margin-bottom:16px; }
+  .habits-empty-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--soft); margin-bottom:8px; }
+  .habits-empty-sub { font-size:13px; font-weight:300; color:var(--muted); line-height:1.7; }
+  .add-habit-panel { display:none; position:fixed; inset:0; background:rgba(10,8,5,.88); z-index:200; align-items:flex-end; justify-content:center; backdrop-filter:blur(8px); }
+  .add-habit-panel.open { display:flex; }
+  .add-habit-sheet { width:100%; max-width:520px; max-height:80vh; overflow-y:auto; background:var(--deep2); border-top:1px solid rgba(201,169,110,.2); padding:28px 28px 40px; animation:fadeUp .3s ease forwards; }
+  .add-habit-title { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:300; color:var(--cream); margin-bottom:20px; }
+  .add-habit-label { font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:12px; }
+  .preset-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:24px; }
+  .preset-btn { display:flex; align-items:center; gap:10px; padding:12px 14px; background:rgba(201,169,110,.03); border:1px solid rgba(201,169,110,.1); color:var(--muted); font-family:'Jost',sans-serif; font-size:13px; cursor:pointer; transition:all .3s; text-align:left; }
+  .preset-btn:hover { border-color:var(--gold); color:var(--soft); background:rgba(201,169,110,.06); }
+  .preset-btn.used { opacity:.25; cursor:default; pointer-events:none; }
+  .preset-icon { font-size:16px; flex-shrink:0; }
+  .add-habit-custom-row { display:flex; gap:10px; align-items:center; margin-bottom:16px; }
+  .add-habit-input { flex:1; background:rgba(201,169,110,.04); border:1px solid rgba(201,169,110,.2); color:var(--cream); font-family:'Jost',sans-serif; font-size:14px; padding:12px 14px; outline:none; transition:border-color .3s; }
+  .add-habit-input:focus { border-color:rgba(201,169,110,.4); }
+  .add-habit-input::placeholder { color:var(--muted); opacity:.6; }
+  .add-habit-confirm-btn { padding:12px 18px; background:none; border:1px solid rgba(201,169,110,.3); color:var(--gold); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; white-space:nowrap; transition:all .3s; }
+  .add-habit-close-btn { width:100%; padding:14px; background:none; border:1px solid rgba(201,169,110,.1); color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:all .3s; margin-top:4px; }
+  .add-habit-close-btn:hover { border-color:rgba(201,169,110,.25); color:var(--cream); }
+
+  /* ── BODY SCAN ── */
+  #bodyScan { align-items:center; justify-content:center; position:relative; }
+  .scan-close-wrap { position:absolute; top:0; left:0; right:0; display:flex; justify-content:flex-end; padding:24px 28px; z-index:1; }
+  .scan-close-btn { background:none; border:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:color .3s; }
+  .scan-close-btn:hover { color:var(--cream); }
+  .scan-inner { position:relative; z-index:1; width:100%; max-width:420px; padding:100px 40px 60px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .scan-progress { display:flex; gap:7px; margin-bottom:56px; }
+  .scan-dot { width:6px; height:6px; border-radius:50%; background:rgba(201,169,110,.15); transition:background .4s; }
+  .scan-dot.active { background:var(--gold); }
+  .scan-dot.done { background:rgba(201,169,110,.3); }
+  .scan-step-wrap { width:100%; }
+  .scan-step-num { font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold); opacity:.55; margin-bottom:20px; }
+  .scan-title { font-family:'Cormorant Garamond',serif; font-size:clamp(30px,7vw,42px); font-weight:300; color:var(--cream); margin-bottom:32px; line-height:1.1; }
+  .scan-prompt { font-family:'Jost',sans-serif; font-size:16px; font-weight:300; color:var(--soft); line-height:2; margin-bottom:24px; white-space:pre-line; }
+  .scan-cue { font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); opacity:.45; margin-bottom:52px; }
+  .scan-continue-btn { padding:16px 52px; background:none; border:1px solid rgba(201,169,110,.3); color:var(--gold); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; transition:all .4s; position:relative; overflow:hidden; }
+  .scan-continue-btn::before { content:''; position:absolute; inset:0; background:var(--gold); transform:translateX(-100%); transition:transform .4s ease; z-index:-1; }
+  .scan-continue-btn:hover { color:var(--deep); }
+  .scan-continue-btn:hover::before { transform:translateX(0); }
+  .scan-complete-btn { padding:16px 52px; background:var(--gold); border:none; color:var(--deep); font-family:'Jost',sans-serif; font-weight:400; font-size:12px; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; transition:opacity .3s; }
+  .scan-complete-btn:hover { opacity:.9; }
+  .body-scan-entry { margin-top:18px; padding-top:16px; border-top:1px solid rgba(201,169,110,.06); text-align:center; }
+  .body-scan-entry-btn { background:none; border:none; color:var(--gold); font-family:'Jost',sans-serif; font-size:11px; font-weight:300; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; opacity:.65; transition:opacity .3s; display:inline-flex; align-items:center; gap:8px; }
+  .body-scan-entry-btn:hover { opacity:1; }
+  .body-scan-entry-sub { font-size:11px; font-weight:300; color:var(--muted); margin-top:5px; font-style:italic; }
+
+  @media(max-width:480px){
+    .habits-preview-wrap,.habits-header,.habits-list,.habits-add-wrap,.habits-empty{padding-left:20px;padding-right:20px}
+    .add-habit-sheet{padding:24px 20px 36px}
+    .preset-grid{grid-template-columns:1fr}
+    .scan-inner{padding:90px 24px 56px}
+  }
+
 </style>
 </head>
 <body>
@@ -786,6 +875,12 @@
     <div class="library-header"><div class="library-count" id="libraryCount">1 of 30 unlocked · 800+ with membership</div></div>
     <div class="library-grid" id="libraryGrid"></div>
   </div>
+  <div class="habits-preview-wrap">
+    <div class="section-label">My Habits</div>
+    <div class="habits-preview-card" id="habitsPreviewCard" onclick="openHabits()">
+      <div class="habits-preview-empty">Tap to build your daily habit stack</div>
+    </div>
+  </div>
   </div>
 </div>
 
@@ -864,7 +959,11 @@
     <div class="journal-section-title">Mood Check-in</div>
     <div class="journal-section-sub">Start broad, then narrow it down.</div>
     <div id="moodExpandedGrid"></div>
-    <div class="mood-selected-display" id="moodSelectedDisplay"></div>
+    <div class="mood-selected-display"></div>
+    <div class="body-scan-entry">
+      <button class="body-scan-entry-btn" onclick="openBodyScan()">✦ &nbsp;Go deeper — Body Scan</button>
+      <div class="body-scan-entry-sub">A gentle guided body awareness practice</div>
+    </div>
   </div>
 
   <!-- Gratitude -->
@@ -948,6 +1047,60 @@
       </div>
       <button class="cal-entry-close" onclick="closeCalEntryModal()">Close</button>
     </div>
+  </div>
+</div>
+
+<!-- HABITS -->
+<div id="habits" class="screen">
+  <div class="screen-logo-bar">
+    <button class="screen-logo-link" onclick="closeHabits()">Already Mine</button>
+    <button class="back-btn" onclick="closeHabits()" style="margin-top:0">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </button>
+  </div>
+  <div class="habits-header">
+    <div class="habits-header-date" id="habitsDate"></div>
+    <div class="habits-title">My Habits</div>
+  </div>
+  <div class="habits-empty" id="habitsEmpty">
+    <div class="habits-empty-icon">◇</div>
+    <div class="habits-empty-title">No habits yet</div>
+    <div class="habits-empty-sub">Add habits below to start tracking your daily practice.</div>
+  </div>
+  <div class="habits-list" id="habitsList" style="display:none"></div>
+  <div class="habits-add-wrap">
+    <button class="habits-add-btn" onclick="showAddHabitPanel()">+ Add a Habit</button>
+  </div>
+  <div class="add-habit-panel" id="addHabitPanel" onclick="closeAddHabitOutside(event)">
+    <div class="add-habit-sheet">
+      <div class="add-habit-title">Add a Habit</div>
+      <div class="add-habit-label">Choose a preset</div>
+      <div class="preset-grid" id="presetGrid"></div>
+      <div class="add-habit-label">Or write your own</div>
+      <div class="add-habit-custom-row">
+        <input class="add-habit-input" id="customHabitInput" type="text" placeholder="e.g. Stretch for 10 minutes" maxlength="60" onkeydown="if(event.key==='Enter')addCustomHabit()">
+        <button class="add-habit-confirm-btn" onclick="addCustomHabit()">+ Add</button>
+      </div>
+      <button class="add-habit-close-btn" onclick="closeAddHabitPanel()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- BODY SCAN -->
+<div id="bodyScan" class="screen">
+  <div class="scan-close-wrap">
+    <button class="scan-close-btn" onclick="closeBodyScan()">✕ Close</button>
+  </div>
+  <div class="scan-inner">
+    <div class="scan-progress" id="scanProgress"></div>
+    <div class="scan-step-wrap" id="scanStepWrap">
+      <div class="scan-step-num" id="scanStepNum"></div>
+      <div class="scan-title" id="scanTitle"></div>
+      <div class="scan-prompt" id="scanPrompt"></div>
+      <div class="scan-cue" id="scanCue"></div>
+    </div>
+    <button id="scanActionBtn" class="scan-continue-btn" onclick="nextScanStep()">Continue</button>
   </div>
 </div>
 
@@ -1416,6 +1569,8 @@ function resetUserState() {
   summaryGenerated = false;
   adminMode = false;
   isPaidMember = false;
+  habits = [];
+  habitCompletions = {};
   selectedMoodCategory = null;
   selectedMoodSub = null;
   dailyLoginChecked = false;
@@ -2157,6 +2312,7 @@ async function buildHome(){
 
   buildLibrary();
   applyMembershipState();
+  updateHabitsHomePreview();
   updateCountdown();
   if(countdownInterval) clearInterval(countdownInterval);
   countdownInterval = setInterval(updateCountdown, 1000);
@@ -2799,6 +2955,36 @@ function toRoman(n) {
 let currentCinders = 50;
 let isPaidMember = false;
 let dailyLoginChecked = false;
+
+// ── HABITS STATE ──
+const HABIT_PRESETS = [
+  {icon:'💧', name:'Drink 8 glasses of water'},
+  {icon:'🚶', name:'Walk 10,000 steps'},
+  {icon:'📖', name:'Read 20 pages'},
+  {icon:'🧘', name:'Meditate 10 minutes'},
+  {icon:'💪', name:'Exercise 30 minutes'},
+  {icon:'😴', name:'Sleep 8 hours'},
+  {icon:'🥗', name:'Eat a nourishing meal'},
+  {icon:'🌿', name:'Spend time in nature'},
+  {icon:'📵', name:'Limit social media'},
+  {icon:'🙏', name:'Practice gratitude'},
+  {icon:'💊', name:'Take vitamins'},
+  {icon:'✍️', name:'Write freely'},
+];
+let habits = [];
+let habitCompletions = {};
+
+// ── BODY SCAN STATE ──
+const BODY_SCAN_STEPS = [
+  { title:'Arrive',          prompt:'Close your eyes if it feels right.\nTake a slow breath in... and let it go.\nYou\'re here now. That\'s enough.',                                                           cue:'Breathe in... and out...' },
+  { title:'Feel the ground', prompt:'Notice where your body meets the surface beneath you.\nFeel that support — steady, present, holding you.',                                                                   cue:'Nothing to change. Just notice.' },
+  { title:'Head & shoulders',prompt:'Bring your attention gently to the top of your head.\nSlowly scan downward — your forehead, jaw, neck, shoulders.\nNotice any tension, warmth, or stillness.',             cue:'Observe without trying to fix anything.' },
+  { title:'Chest & belly',   prompt:'Rest your awareness on your chest and belly.\nNotice the rise and fall as you breathe.\nAny tightness here? Openness? Heaviness? Just notice.',                           cue:'Your breath is always here.' },
+  { title:'Arms & hands',    prompt:'Let your attention travel down your arms,\nthrough your forearms, into your hands and fingers.\nWith each exhale, let a little tension soften.',                          cue:'You don\'t need to hold on.' },
+  { title:'Legs & feet',     prompt:'Move your awareness down through your hips,\nyour legs, and all the way to your feet.\nFeel them grounded — present, here.',                                              cue:'Fully arrived.' },
+  { title:'Return',          prompt:'Take one full, unhurried breath.\nNotice how you feel right now —\nnot how you want to feel, just how you actually are.',                                                  cue:'That awareness is already healing.' },
+];
+let currentScanStep = 0;
 let countdownInterval = null;
 let journalHasChanges = false;
 let currentScreen = 'auth';
@@ -3771,6 +3957,185 @@ function dismissModal() {
   document.getElementById('modalOverlay').classList.remove('open');
 }
 function closeModal(e){ if(e.target===document.getElementById('modalOverlay')) dismissModal(); }
+
+// ── HABITS ──
+function openHabits() {
+  showScreen('habits');
+  const dateEl = document.getElementById('habitsDate');
+  if(dateEl) dateEl.textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}).toUpperCase();
+  renderHabits();
+}
+
+function closeHabits() {
+  showScreen('home');
+  setTabByName('today');
+  buildHome();
+}
+
+function renderHabits() {
+  const today = getLocalDateString();
+  const completed = new Set(habitCompletions[today] || []);
+  const listEl = document.getElementById('habitsList');
+  const emptyEl = document.getElementById('habitsEmpty');
+  if(!listEl) return;
+  if(habits.length === 0) {
+    listEl.style.display = 'none';
+    if(emptyEl) emptyEl.style.display = 'block';
+  } else {
+    if(emptyEl) emptyEl.style.display = 'none';
+    listEl.style.display = 'flex';
+    listEl.innerHTML = '';
+    habits.forEach(h => {
+      const done = completed.has(h.id);
+      const item = document.createElement('div');
+      item.className = 'habit-item' + (done ? ' completed' : '');
+      item.innerHTML =
+        `<button class="habit-check" onclick="toggleHabitComplete('${h.id}')">${done ? '✓' : ''}</button>` +
+        `<span class="habit-icon">${h.icon}</span>` +
+        `<span class="habit-name">${escapeHtml(h.name)}</span>` +
+        `<button class="habit-delete-btn" onclick="deleteHabit('${h.id}')">×</button>`;
+      listEl.appendChild(item);
+    });
+  }
+  updateHabitsHomePreview();
+}
+
+function toggleHabitComplete(id) {
+  const today = getLocalDateString();
+  if(!habitCompletions[today]) habitCompletions[today] = [];
+  const idx = habitCompletions[today].indexOf(id);
+  if(idx === -1) habitCompletions[today].push(id);
+  else habitCompletions[today].splice(idx, 1);
+  renderHabits();
+}
+
+function deleteHabit(id) {
+  habits = habits.filter(h => h.id !== id);
+  Object.keys(habitCompletions).forEach(date => {
+    habitCompletions[date] = habitCompletions[date].filter(hid => hid !== id);
+  });
+  renderHabits();
+}
+
+function showAddHabitPanel() {
+  const grid = document.getElementById('presetGrid');
+  if(grid) {
+    const usedNames = new Set(habits.map(h => h.name));
+    grid.innerHTML = HABIT_PRESETS.map(p =>
+      `<button class="preset-btn${usedNames.has(p.name) ? ' used' : ''}" onclick="addPresetHabit('${p.icon}','${escapeHtml(p.name).replace(/'/g,'&#39;')}')">` +
+      `<span class="preset-icon">${p.icon}</span>${escapeHtml(p.name)}</button>`
+    ).join('');
+  }
+  document.getElementById('customHabitInput').value = '';
+  document.getElementById('addHabitPanel').classList.add('open');
+}
+
+function closeAddHabitPanel() {
+  document.getElementById('addHabitPanel').classList.remove('open');
+}
+
+function closeAddHabitOutside(e) {
+  if(e.target === document.getElementById('addHabitPanel')) closeAddHabitPanel();
+}
+
+function addPresetHabit(icon, name) {
+  if(habits.some(h => h.name === name)) return;
+  habits.push({id: Date.now().toString(), icon, name});
+  closeAddHabitPanel();
+  renderHabits();
+}
+
+function addCustomHabit() {
+  const input = document.getElementById('customHabitInput');
+  const name = input.value.trim();
+  if(!name) return;
+  if(habits.some(h => h.name === name)) { input.value = ''; return; }
+  habits.push({id: Date.now().toString(), icon:'✦', name});
+  closeAddHabitPanel();
+  renderHabits();
+}
+
+function updateHabitsHomePreview() {
+  const card = document.getElementById('habitsPreviewCard');
+  if(!card) return;
+  const today = getLocalDateString();
+  const completed = new Set(habitCompletions[today] || []);
+  const total = habits.length;
+  const done = habits.filter(h => completed.has(h.id)).length;
+  if(total === 0) {
+    card.innerHTML = '<div class="habits-preview-empty">Tap to build your daily habit stack</div>';
+    return;
+  }
+  const pct = Math.round((done / total) * 100);
+  const preview = habits.slice(0, 3).map(h => {
+    const isDone = completed.has(h.id);
+    return `<div class="habits-preview-row${isDone ? ' done' : ''}"><div class="habits-preview-check"></div>${h.icon} ${escapeHtml(h.name)}</div>`;
+  }).join('');
+  const more = total > 3 ? `<div style="font-size:11px;color:var(--muted);letter-spacing:.08em;margin-top:6px">+${total - 3} more</div>` : '';
+  card.innerHTML =
+    `<div class="habits-preview-summary"><div class="habits-preview-count">${done} of ${total} done today</div><div class="habits-preview-arrow">See all →</div></div>` +
+    `<div class="habits-preview-bar-track"><div class="habits-preview-bar-fill" style="width:${pct}%"></div></div>` +
+    `<div class="habits-preview-list">${preview}</div>${more}`;
+}
+
+// ── BODY SCAN ──
+function openBodyScan() {
+  currentScanStep = 0;
+  const nav = document.getElementById('globalBottomNav');
+  if(nav) nav.style.display = 'none';
+  showScreen('bodyScan');
+  renderScanStep();
+}
+
+function closeBodyScan() {
+  const nav = document.getElementById('globalBottomNav');
+  if(nav) nav.style.display = 'flex';
+  showScreen('journal');
+}
+
+function renderScanStep() {
+  const step = BODY_SCAN_STEPS[currentScanStep];
+  const total = BODY_SCAN_STEPS.length;
+  const isLast = currentScanStep === total - 1;
+
+  const progressEl = document.getElementById('scanProgress');
+  if(progressEl) {
+    progressEl.innerHTML = BODY_SCAN_STEPS.map((_,i) => {
+      let cls = 'scan-dot';
+      if(i === currentScanStep) cls += ' active';
+      else if(i < currentScanStep) cls += ' done';
+      return `<div class="${cls}"></div>`;
+    }).join('');
+  }
+
+  document.getElementById('scanStepNum').textContent = `Step ${currentScanStep + 1} of ${total}`;
+  document.getElementById('scanTitle').textContent = step.title;
+  document.getElementById('scanPrompt').textContent = step.prompt;
+  document.getElementById('scanCue').textContent = step.cue;
+
+  const btn = document.getElementById('scanActionBtn');
+  if(btn) {
+    btn.textContent = isLast ? 'Complete' : 'Continue';
+    btn.className = isLast ? 'scan-complete-btn' : 'scan-continue-btn';
+  }
+
+  const wrap = document.getElementById('scanStepWrap');
+  if(wrap) {
+    wrap.style.cssText = 'opacity:0;transform:translateY(16px)';
+    requestAnimationFrame(() => {
+      wrap.style.cssText = 'opacity:1;transform:translateY(0);transition:opacity .5s ease,transform .5s ease';
+    });
+  }
+}
+
+function nextScanStep() {
+  if(currentScanStep < BODY_SCAN_STEPS.length - 1) {
+    currentScanStep++;
+    renderScanStep();
+  } else {
+    closeBodyScan();
+  }
+}
 </script>
 </body>
 </html>
