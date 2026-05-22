@@ -2982,18 +2982,18 @@ let dailyLoginChecked = false;
 
 // ── HABITS STATE ──
 const HABIT_PRESETS = [
-  {icon:'💧', name:'Drink 8 glasses of water'},
-  {icon:'🚶', name:'Walk 10,000 steps'},
-  {icon:'📖', name:'Read 20 pages'},
-  {icon:'🧘', name:'Meditate 10 minutes'},
-  {icon:'💪', name:'Exercise 30 minutes'},
-  {icon:'😴', name:'Sleep 8 hours'},
-  {icon:'🥗', name:'Eat a nourishing meal'},
-  {icon:'🌿', name:'Spend time in nature'},
-  {icon:'📵', name:'Limit social media'},
-  {icon:'🙏', name:'Practice gratitude'},
-  {icon:'💊', name:'Take vitamins'},
-  {icon:'✍️', name:'Write freely'},
+  'Drink 8 glasses of water',
+  'Walk 10,000 steps',
+  'Read 20 pages',
+  'Meditate 10 minutes',
+  'Exercise 30 minutes',
+  'Sleep 8 hours',
+  'Eat a nourishing meal',
+  'Spend time in nature',
+  'Limit social media',
+  'Practice gratitude',
+  'Take vitamins',
+  'Write freely',
 ];
 let habits = [];
 let habitCompletions = {};
@@ -4017,7 +4017,6 @@ function renderHabits() {
       item.className = 'habit-item' + (done ? ' completed' : '');
       item.innerHTML =
         `<button class="habit-check" onclick="toggleHabitComplete('${h.id}')">${done ? '✓' : ''}</button>` +
-        `<span class="habit-icon">${h.icon}</span>` +
         `<span class="habit-name">${escapeHtml(h.name)}</span>` +
         `<button class="habit-delete-btn" onclick="deleteHabit('${h.id}')">×</button>`;
       listEl.appendChild(item);
@@ -4048,8 +4047,8 @@ function showAddHabitPanel() {
   if(grid) {
     const usedNames = new Set(habits.map(h => h.name));
     grid.innerHTML = HABIT_PRESETS.map(p =>
-      `<button class="preset-btn${usedNames.has(p.name) ? ' used' : ''}" onclick="addPresetHabit('${p.icon}','${escapeHtml(p.name).replace(/'/g,'&#39;')}')">` +
-      `<span class="preset-icon">${p.icon}</span>${escapeHtml(p.name)}</button>`
+      `<button class="preset-btn${usedNames.has(p) ? ' used' : ''}" onclick="addPresetHabit('${escapeHtml(p).replace(/'/g,'&#39;')}')">` +
+      `${escapeHtml(p)}</button>`
     ).join('');
   }
   document.getElementById('customHabitInput').value = '';
@@ -4064,9 +4063,9 @@ function closeAddHabitOutside(e) {
   if(e.target === document.getElementById('addHabitPanel')) closeAddHabitPanel();
 }
 
-function addPresetHabit(icon, name) {
+function addPresetHabit(name) {
   if(habits.some(h => h.name === name)) return;
-  habits.push({id: Date.now().toString(), icon, name});
+  habits.push({id: Date.now().toString(), name});
   closeAddHabitPanel();
   renderHabits();
 }
@@ -4076,7 +4075,7 @@ function addCustomHabit() {
   const name = input.value.trim();
   if(!name) return;
   if(habits.some(h => h.name === name)) { input.value = ''; return; }
-  habits.push({id: Date.now().toString(), icon:'✦', name});
+  habits.push({id: Date.now().toString(), name});
   closeAddHabitPanel();
   renderHabits();
 }
