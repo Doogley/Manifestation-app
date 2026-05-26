@@ -1767,12 +1767,11 @@ async function loadUserProfile() {
   // Load habits and affirmation history from Supabase
   if(currentUser) {
     const todayStr = getLocalDateString();
-    const [{ data: habitsData }, { data: completionsData }] = await Promise.all([
+    const [{ data: habitsData }, { data: completionsData }, { data: histData }] = await Promise.all([
       db.from('habits').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: true }),
       db.from('habit_completions').select('habit_id, completed_date').eq('user_id', currentUser.id),
+      db.from('user_affirmations').select('affirmation_id, affirmation_text, affirmation_cat').eq('user_id', currentUser.id),
     ]);
-    const { data: histData, error: histError } = await db.from('user_affirmations').select('affirmation_id, affirmation_text, affirmation_cat').eq('user_id', currentUser.id);
-    if(histError) console.error('user_affirmations error:', histError);
     if(habitsData) {
       habits = habitsData.map(h => ({ id: h.id, name: h.name, frequency: h.frequency || 'daily' }));
     }
