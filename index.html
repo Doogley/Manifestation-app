@@ -1728,6 +1728,20 @@ async function loadUserProfile() {
       }));
     }
   }
+  // Load habits from Supabase
+  if(currentUser) {
+    const todayStr = getLocalDateString();
+    const [{ data: habitsData }, { data: completionsData }] = await Promise.all([
+      db.from('habits').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: true }),
+      db.from('habit_completions').select('habit_id').eq('user_id', currentUser.id).eq('completed_date', todayStr),
+    ]);
+    if(habitsData) {
+      habits = habitsData.map(h => ({ id: h.id, name: h.name, frequency: h.frequency || 'daily' }));
+    }
+    if(completionsData && completionsData.length > 0) {
+      habitCompletions[todayStr] = completionsData.map(c => c.habit_id);
+    }
+  }
  
   // Check if user already unlocked today's affirmation
   const today = getLocalDateString();
@@ -4061,23 +4075,31 @@ function renderHabits() {
   updateHabitsHomePreview();
 }
 
-function toggleHabitComplete(id) {
+async function toggleHabitComplete(id) {
   const h = habits.find(x => x.id === id);
   const freq = h ? (h.frequency || 'daily') : 'daily';
-  const key = freq === 'weekly' ? getWeekKey() : getLocalDateString();
+  const completedDate = freq === 'weekly' ? getWeekKey() : getLocalDateString();
+  const key = completedDate;
   if(!habitCompletions[key]) habitCompletions[key] = [];
   const idx = habitCompletions[key].indexOf(id);
-  if(idx === -1) habitCompletions[key].push(id);
+  const marking = idx === -1;
+  if(marking) habitCompletions[key].push(id);
   else habitCompletions[key].splice(idx, 1);
   renderHabits();
+  if(marking) {
+    await db.from('habit_completions').insert({ user_id: currentUser.id, habit_id: id, completed_date: completedDate });
+  } else {
+    await db.from('habit_completions').delete().eq('habit_id', id).eq('completed_date', completedDate).eq('user_id', currentUser.id);
+  }
 }
 
-function deleteHabit(id) {
+async function deleteHabit(id) {
   habits = habits.filter(h => h.id !== id);
   Object.keys(habitCompletions).forEach(date => {
     habitCompletions[date] = habitCompletions[date].filter(hid => hid !== id);
   });
   renderHabits();
+  await db.from('habits').delete().eq('id', id).eq('user_id', currentUser.id);
 }
 
 function showAddHabitPanel() {
@@ -4103,19 +4125,25 @@ function closeAddHabitOutside(e) {
   if(e.target === document.getElementById('addHabitPanel')) closeAddHabitPanel();
 }
 
-function addPresetHabit(name) {
+async function addPresetHabit(name) {
   if(habits.some(h => h.name === name)) return;
-  habits.push({id: Date.now().toString(), name, frequency: selectedHabitFrequency});
+  if(!isPaidMember && habits.length >= 3) { openUpgrade(); return; }
+  const { data, error } = await db.from('habits').insert({ user_id: currentUser.id, name, frequency: selectedHabitFrequency }).select().single();
+  if(error || !data) return;
+  habits.push({ id: data.id, name: data.name, frequency: data.frequency || 'daily' });
   closeAddHabitPanel();
   renderHabits();
 }
 
-function addCustomHabit() {
+async function addCustomHabit() {
   const input = document.getElementById('customHabitInput');
   const name = input.value.trim();
   if(!name) return;
   if(habits.some(h => h.name === name)) { input.value = ''; return; }
-  habits.push({id: Date.now().toString(), name, frequency: selectedHabitFrequency});
+  if(!isPaidMember && habits.length >= 3) { openUpgrade(); return; }
+  const { data, error } = await db.from('habits').insert({ user_id: currentUser.id, name, frequency: selectedHabitFrequency }).select().single();
+  if(error || !data) return;
+  habits.push({ id: data.id, name: data.name, frequency: data.frequency || 'daily' });
   closeAddHabitPanel();
   renderHabits();
 }
@@ -4134,7 +4162,7 @@ function updateHabitsHomePreview() {
   const pct = Math.round((done / total) * 100);
   const preview = habits.slice(0, 3).map(h => {
     const isDone = completed.has(h.id);
-    return `<div class="habits-preview-row${isDone ? ' done' : ''}"><div class="habits-preview-check"></div>${h.icon} ${escapeHtml(h.name)}</div>`;
+    return `<div class="habits-preview-row${isDone ? ' done' : ''}"><div class="habits-preview-check"></div>${escapeHtml(h.name)}</div>`;
   }).join('');
   const more = total > 3 ? `<div style="font-size:11px;color:var(--muted);letter-spacing:.08em;margin-top:6px">+${total - 3} more</div>` : '';
   card.innerHTML =
