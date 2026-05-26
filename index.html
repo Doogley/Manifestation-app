@@ -1634,6 +1634,7 @@ function resetUserState() {
   summaryGenerated = false;
   adminMode = false;
   isPaidMember = false;
+  cinderBonuses = new Set();
   habits = [];
   habitCompletions = {};
   currentScanNotes = {};
@@ -1731,6 +1732,7 @@ async function loadUserProfile() {
  userRealName = data.real_name || 'Friend';
   userNickname = data.nickname || '';
   currentCinders = data.cinders ?? 0;
+  cinderBonuses = new Set(JSON.parse(data.cinder_bonuses || '[]'));
   answers.intention = data.intention || 'abundance';
   answers.tone = data.tone || 'gentle';
   answers.timing = data.timing || 'morning';
@@ -2191,6 +2193,7 @@ async function goToHome(){
     }).eq('id', currentUser.id);
     if(!alreadyUnlockedToday) awardCinders(10, 'Affirmation unlocked');
   }
+  awardFirstTimeCinders('onboarding_complete');
   const seq = getUserAffirmationSequence();
   const firstEntry = seq[0];
   todayAffirmation = firstEntry ? firstEntry.text : affirmations[answers.intention || 'abundance'][answers.tone || 'gentle'];
@@ -2920,6 +2923,7 @@ async function saveJournal(){
     } else {
       await db.from('journal_entries').insert(entryData);
       awardCinders(20, 'Journal entry saved');
+      awardFirstTimeCinders('first_journal');
     }
     dailyActions.journalSaved = true;
     if(selectedMoodCategory) dailyActions.moodCheckedIn = true;
@@ -3025,7 +3029,7 @@ const badgeCategories = [
 ];
 
 const baseNames = ['Ember','Spark','Flame','Radiant','Luminous','Transcendent'];
-const baseThresholds = [0,500,2000,5000,10000,18000];
+const baseThresholds = [0,200,800,2500,6000,12000];
 
 function getLevelInfo(xp) {
   // Build prestige levels dynamically
@@ -3064,6 +3068,7 @@ function toRoman(n) {
 
 let currentCinders = 50;
 let isPaidMember = false;
+let cinderBonuses = new Set();
 let dailyLoginChecked = false;
 
 // ── HABITS STATE ──
@@ -3220,6 +3225,7 @@ async function addIntention() {
     if(data) newIntention.id = data.id;
   }
   intentions.push(newIntention);
+  awardFirstTimeCinders('first_intention');
   input.value = '';
   renderIntentions();
 }
@@ -3244,6 +3250,7 @@ async function useExampleIntention(btn) {
     if(data) newIntention.id = data.id;
   }
   intentions.push(newIntention);
+  awardFirstTimeCinders('first_intention');
   renderIntentions();
   btn.style.borderColor = 'var(--gold)';
   btn.style.color = 'var(--gold)';
@@ -4021,6 +4028,16 @@ async function awardCinders(amount, reason) {
   }
 }
 
+async function awardFirstTimeCinders(action) {
+  if(!currentUser || cinderBonuses.has(action)) return;
+  cinderBonuses.add(action);
+  const amounts = { first_journal:50, first_intention:25, first_foundation:25, onboarding_complete:50 };
+  const labels = { first_journal:'First journal entry', first_intention:'First intention set', first_foundation:'First foundation added', onboarding_complete:'Journey begins' };
+  if(!amounts[action]) return;
+  db.from('profiles').update({ cinder_bonuses: JSON.stringify([...cinderBonuses]) }).eq('id', currentUser.id).then(()=>{});
+  awardCinders(amounts[action], labels[action]);
+}
+
 // ── WEEKLY MANTRA ──
 let weeklyMantra = '';
 let lastMantraDate = '';
@@ -4280,6 +4297,7 @@ async function addPresetHabit(name) {
   const { data, error } = await db.from('habits').insert({ user_id: currentUser.id, name, frequency: selectedHabitFrequency }).select().single();
   if(error || !data) return;
   habits.push({ id: data.id, name: data.name, frequency: data.frequency || 'daily' });
+  awardFirstTimeCinders('first_foundation');
   closeAddHabitPanel();
   renderHabits();
 }
@@ -4293,6 +4311,7 @@ async function addCustomHabit() {
   const { data, error } = await db.from('habits').insert({ user_id: currentUser.id, name, frequency: selectedHabitFrequency }).select().single();
   if(error || !data) return;
   habits.push({ id: data.id, name: data.name, frequency: data.frequency || 'daily' });
+  awardFirstTimeCinders('first_foundation');
   closeAddHabitPanel();
   renderHabits();
 }
