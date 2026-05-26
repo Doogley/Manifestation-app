@@ -725,6 +725,18 @@
     .scan-inner{padding:90px 24px 56px}
   }
 
+  /* ── FEATURE TOGGLES ── */
+  .customize-row { display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid rgba(201,169,110,.07); }
+  .customize-row:last-child { border-bottom:none; }
+  .customize-row-label { font-size:14px; font-weight:300; color:var(--soft); }
+  .customize-row-sub { font-size:11px; font-weight:300; color:var(--muted); margin-top:2px; }
+  .toggle-pill { position:relative; width:44px; height:24px; flex-shrink:0; }
+  .toggle-pill input { opacity:0; width:0; height:0; position:absolute; }
+  .toggle-pill-track { position:absolute; inset:0; border-radius:12px; background:rgba(201,169,110,.12); border:1px solid rgba(201,169,110,.2); cursor:pointer; transition:background .3s,border-color .3s; }
+  .toggle-pill input:checked + .toggle-pill-track { background:rgba(201,169,110,.35); border-color:var(--gold); }
+  .toggle-pill-knob { position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:var(--muted); transition:transform .3s,background .3s; pointer-events:none; }
+  .toggle-pill input:checked ~ .toggle-pill-knob { transform:translateX(20px); background:var(--gold); }
+
 </style>
 </head>
 <body>
@@ -1423,8 +1435,80 @@
     </div>
   </div>
 
+  <!-- Customize My App (paid members only) -->
+  <div class="profile-section" id="customizeSection" style="display:none;animation-delay:.46s">
+    <div class="profile-section-title">Customize My App</div>
+    <div style="font-size:12px;font-weight:300;color:var(--muted);letter-spacing:.04em;margin-bottom:16px">Show or hide sections from your home and journal screens.</div>
+    <div class="customize-row">
+      <div>
+        <div class="customize-row-label">Foundations</div>
+        <div class="customize-row-sub">Your daily habit tracker on the home screen</div>
+      </div>
+      <label class="toggle-pill">
+        <input type="checkbox" id="toggle_foundations" checked onchange="saveFeatureToggle('foundations', this.checked)">
+        <div class="toggle-pill-track"></div>
+        <div class="toggle-pill-knob"></div>
+      </label>
+    </div>
+    <div class="customize-row">
+      <div>
+        <div class="customize-row-label">Daily Practice</div>
+        <div class="customize-row-sub">Your daily progress card on the home screen</div>
+      </div>
+      <label class="toggle-pill">
+        <input type="checkbox" id="toggle_daily_practice" checked onchange="saveFeatureToggle('daily_practice', this.checked)">
+        <div class="toggle-pill-track"></div>
+        <div class="toggle-pill-knob"></div>
+      </label>
+    </div>
+    <div class="customize-row">
+      <div>
+        <div class="customize-row-label">Weekly Mantra</div>
+        <div class="customize-row-sub">Your personal mantra card on the home screen</div>
+      </div>
+      <label class="toggle-pill">
+        <input type="checkbox" id="toggle_mantra" checked onchange="saveFeatureToggle('mantra', this.checked)">
+        <div class="toggle-pill-track"></div>
+        <div class="toggle-pill-knob"></div>
+      </label>
+    </div>
+    <div class="customize-row">
+      <div>
+        <div class="customize-row-label">Body Scan</div>
+        <div class="customize-row-sub">The body scan entry point in your journal</div>
+      </div>
+      <label class="toggle-pill">
+        <input type="checkbox" id="toggle_body_scan" checked onchange="saveFeatureToggle('body_scan', this.checked)">
+        <div class="toggle-pill-track"></div>
+        <div class="toggle-pill-knob"></div>
+      </label>
+    </div>
+    <div class="customize-row">
+      <div>
+        <div class="customize-row-label">Intentions</div>
+        <div class="customize-row-sub">Your manifestation intentions in your journal</div>
+      </div>
+      <label class="toggle-pill">
+        <input type="checkbox" id="toggle_intentions" checked onchange="saveFeatureToggle('intentions', this.checked)">
+        <div class="toggle-pill-track"></div>
+        <div class="toggle-pill-knob"></div>
+      </label>
+    </div>
+    <div class="customize-row">
+      <div>
+        <div class="customize-row-label">Monthly Reflection</div>
+        <div class="customize-row-sub">Your AI-generated monthly summary in profile</div>
+      </div>
+      <label class="toggle-pill">
+        <input type="checkbox" id="toggle_monthly_summary" checked onchange="saveFeatureToggle('monthly_summary', this.checked)">
+        <div class="toggle-pill-track"></div>
+        <div class="toggle-pill-knob"></div>
+      </label>
+    </div>
+  </div>
+
   <!-- What This Month Held -->
-  <div class="profile-section" style="animation-delay:.48s">
+  <div class="profile-section" id="profileMonthlySummarySection" style="animation-delay:.48s">
     <div class="profile-section-title">Monthly Reflection</div>
     <div style="position:relative;padding:24px;background:linear-gradient(135deg,rgba(201,169,110,.06) 0%,rgba(201,169,110,.02) 100%);border:1px solid rgba(201,169,110,.15);">
       <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:var(--cream);margin-bottom:8px;">What This Month Held</div>
@@ -1635,6 +1719,7 @@ function resetUserState() {
   adminMode = false;
   isPaidMember = false;
   cinderBonuses = new Set();
+  featureToggles = { foundations: true, body_scan: true, mantra: true, daily_practice: true, intentions: true, monthly_summary: true };
   habits = [];
   habitCompletions = {};
   currentScanNotes = {};
@@ -1744,6 +1829,7 @@ async function loadUserProfile() {
   weeklyMantra = data.mantra || '';
   lastMantraDate = data.last_mantra_date || '';
   isPaidMember     = data.is_paid_member    || false;
+  featureToggles = { ...featureToggles, ...(data.feature_toggles || {}) };
   inGracePeriod    = data.in_grace_period   || false;
   graceStreakBefore = data.grace_streak_before || 0;
   graceDaysCompleted = data.grace_days_completed || 0;
@@ -2274,6 +2360,7 @@ async function buildHome(){
     await new Promise(r=>setTimeout(r,100));
     if(!document.getElementById('home').classList.contains('active')) return;
   }
+  applyFeatureToggles();
   const h=new Date().getHours();
   document.getElementById('greetingTime').textContent=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
   document.getElementById('greetingName').textContent = userNickname || userRealName;
@@ -2812,6 +2899,7 @@ function updateLastSavedTime() {
 }
 
 async function openJournal(){
+  applyFeatureToggles();
   switchJournalView('today');
   clearJournalFields();
   journalHasChanges = false;
@@ -3073,6 +3161,7 @@ function toRoman(n) {
 let currentCinders = 50;
 let isPaidMember = false;
 let cinderBonuses = new Set();
+let featureToggles = { foundations: true, body_scan: true, mantra: true, daily_practice: true, intentions: true, monthly_summary: true };
 let dailyLoginChecked = false;
 
 // ── HABITS STATE ──
@@ -3701,6 +3790,7 @@ async function openProfile() {
 
 async function buildProfile() {
   applyMembershipState();
+  applyFeatureToggles();
   // Name display — show nickname if set, otherwise real name
   const displayName = userNickname || userRealName;
   const profileInitialEl = document.getElementById('profileInitial');
@@ -3809,6 +3899,16 @@ async function buildProfile() {
             <div class="profile-badge-tier">${b.tier}</div>
           </div>
         </div>`).join('');
+
+  // Customize section — paid members only; sync toggle states to current featureToggles
+  const customizeSection = document.getElementById('customizeSection');
+  if(customizeSection) {
+    customizeSection.style.display = (isPaidMember || adminMode) ? '' : 'none';
+    Object.keys(featureToggles).forEach(key => {
+      const el = document.getElementById('toggle_' + key);
+      if(el) el.checked = featureToggles[key] !== false;
+    });
+  }
 }
 
 async function handleProfilePic(input) {
@@ -4022,6 +4122,28 @@ function showCindersToast(amount, reason) {
     toast.classList.remove('show');
     toast.classList.add('hide');
   }, 2500);
+}
+
+async function saveFeatureToggle(feature, value) {
+  featureToggles[feature] = value;
+  if(currentUser) {
+    db.from('profiles').update({ feature_toggles: featureToggles }).eq('id', currentUser.id).then(() => {});
+  }
+  applyFeatureToggles();
+}
+
+function applyFeatureToggles() {
+  const show = (sel, visible) => {
+    document.querySelectorAll(sel).forEach(el => { el.style.display = visible ? '' : 'none'; });
+  };
+  show('.habits-preview-wrap', featureToggles.foundations !== false);
+  show('.body-scan-entry', featureToggles.body_scan !== false);
+  show('.mantra-card-wrap', featureToggles.mantra !== false);
+  show('.practice-wrap', featureToggles.daily_practice !== false);
+  const intentionsSection = document.querySelector('#intentionsList')?.closest('.journal-section');
+  if(intentionsSection) intentionsSection.style.display = featureToggles.intentions !== false ? '' : 'none';
+  const monthlySection = document.getElementById('profileMonthlySummarySection');
+  if(monthlySection) monthlySection.style.display = featureToggles.monthly_summary !== false ? '' : 'none';
 }
 
 async function awardCinders(amount, reason) {
