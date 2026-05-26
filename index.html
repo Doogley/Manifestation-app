@@ -725,6 +725,10 @@
     .scan-inner{padding:90px 24px 56px}
   }
 
+  /* ── TOOLTIP BUTTON ── */
+  .tooltip-btn { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; border:1px solid rgba(201,169,110,.45); color:var(--gold); font-family:'Jost',sans-serif; font-size:10px; font-weight:300; cursor:pointer; background:none; opacity:.65; transition:opacity .3s; flex-shrink:0; line-height:1; margin-left:6px; padding:0; }
+  .tooltip-btn:hover { opacity:1; }
+
   /* ── FEATURE TOGGLES ── */
   .customize-row { display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid rgba(201,169,110,.07); }
   .customize-row:last-child { border-bottom:none; }
@@ -882,7 +886,7 @@
 
   <!-- My Foundations -->
   <div class="habits-preview-wrap">
-    <div class="section-label">My Foundations</div>
+    <div class="section-label">My Foundations<button class="tooltip-btn" onclick="showTooltip('My Foundations','Small daily rituals that build the life you are calling in. Each foundation you hold builds a streak — consistency is where transformation happens.')">?</button></div>
     <div style="font-size:11px;font-weight:300;color:var(--muted);letter-spacing:.04em;margin-top:-10px;margin-bottom:14px;font-style:italic">Consistency is the bridge between intention and reality</div>
     <div class="habits-preview-card" id="habitsPreviewCard" onclick="openHabits()">
       <div class="habits-preview-empty">Tap to build your daily foundation stack</div>
@@ -891,7 +895,7 @@
 
   <!-- Daily Practice -->
   <div class="practice-wrap">
-    <div class="section-label">Daily Practice</div>
+    <div class="section-label">Daily Practice<button class="tooltip-btn" onclick="showTooltip('Daily Practice','Complete these actions each day to earn Cinders — your experience points. Cinders unlock new ranks as your practice deepens.')">?</button></div>
     <div class="practice-card">
       <div class="practice-progress"><span class="practice-progress-count" id="practiceCount">0</span> of 4 complete</div>
       <div class="practice-item">
@@ -919,7 +923,7 @@
 
   <!-- Weekly Mantra -->
   <div class="mantra-card-wrap">
-    <div class="section-label">My Weekly Mantra</div>
+    <div class="section-label">My Weekly Mantra<button class="tooltip-btn" onclick="showTooltip('My Weekly Mantra','Your personal declaration for the week — written in your own words. Unlike your daily affirmation which is given to you, your mantra is what you choose to stand on.')">?</button></div>
     <div class="mantra-card">
       <div class="mantra-card-label">
         <span>This week I declare</span>
@@ -1018,7 +1022,10 @@
     <div id="moodExpandedGrid"></div>
     <div class="mood-selected-display"></div>
     <div class="body-scan-entry">
-      <button class="body-scan-entry-btn" onclick="openBodyScan()">✦ &nbsp;Go deeper — Body Scan</button>
+      <div style="display:inline-flex;align-items:center;gap:8px">
+        <button class="body-scan-entry-btn" onclick="openBodyScan()">✦ &nbsp;Go deeper — Body Scan</button>
+        <button class="tooltip-btn" onclick="showTooltip('Body Scan','A guided practice to bring awareness into your body. After your mood check-in, the body scan helps you feel where your emotions live — not just name them.')">?</button>
+      </div>
       <div class="body-scan-entry-sub">A gentle guided body awareness practice</div>
     </div>
   </div>
@@ -1036,7 +1043,7 @@
 
   <!-- Manifestation Intentions -->
   <div class="journal-section" style="animation-delay:.42s">
-    <div class="journal-section-title">My Intentions</div>
+    <div class="journal-section-title">My Intentions<button class="tooltip-btn" onclick="showTooltip('My Intentions','What you are actively calling into your life. Set them and hold them — they stay until you mark them as received. Free members can hold 3 at a time.')">?</button></div>
     <div class="journal-section-sub">Set your intentions and hold them until they're yours. They stay until you mark them received.</div>
     <div style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.7;margin-bottom:14px;padding:12px 16px;background:rgba(201,169,110,.03);border-left:2px solid rgba(201,169,110,.2);">
       An intention is something you believe is already on its way to you. Write it as if it's coming — not as a wish, but as a truth you're stepping into.
@@ -1196,7 +1203,10 @@
   <div class="level-card">
     <div class="level-card-top">
       <div class="level-name" id="levelName">Ember</div>
-      <div class="level-num">Level <span id="levelNum">1</span></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="level-num">Level <span id="levelNum">1</span></div>
+        <button class="tooltip-btn" onclick="showTooltip('Your Frequency','Cinders are earned by showing up daily — revealing your affirmation, journaling, setting your mantra, and completing your foundations. As they accumulate your rank rises.')">?</button>
+      </div>
     </div>
     <div class="cinders-track"><div class="cinders-fill" id="cindersFill" style="width:5%"></div></div>
     <div class="cinders-label"><span id="cindersCurrent">50</span> / <span id="cindersNext">500</span> Cinders to <span id="nextLevelName">Spark</span></div>
@@ -1439,6 +1449,17 @@
   <div class="profile-section" id="customizeSection" style="display:none;animation-delay:.46s">
     <div class="profile-section-title">Customize My App</div>
     <div style="font-size:12px;font-weight:300;color:var(--muted);letter-spacing:.04em;margin-bottom:16px">Show or hide sections from your home and journal screens.</div>
+    <div class="customize-row">
+      <div>
+        <div class="customize-row-label">Help Tips</div>
+        <div class="customize-row-sub">Show helpful ? icons explaining each feature</div>
+      </div>
+      <label class="toggle-pill">
+        <input type="checkbox" id="toggle_tooltips" checked onchange="saveFeatureToggle('tooltips', this.checked)">
+        <div class="toggle-pill-track"></div>
+        <div class="toggle-pill-knob"></div>
+      </label>
+    </div>
     <div class="customize-row">
       <div>
         <div class="customize-row-label">Foundations</div>
@@ -1719,7 +1740,7 @@ function resetUserState() {
   adminMode = false;
   isPaidMember = false;
   cinderBonuses = new Set();
-  featureToggles = { foundations: true, body_scan: true, mantra: true, daily_practice: true, intentions: true, monthly_summary: true };
+  featureToggles = { foundations: true, body_scan: true, mantra: true, daily_practice: true, intentions: true, monthly_summary: true, tooltips: true };
   habits = [];
   habitCompletions = {};
   currentScanNotes = {};
@@ -3161,7 +3182,7 @@ function toRoman(n) {
 let currentCinders = 50;
 let isPaidMember = false;
 let cinderBonuses = new Set();
-let featureToggles = { foundations: true, body_scan: true, mantra: true, daily_practice: true, intentions: true, monthly_summary: true };
+let featureToggles = { foundations: true, body_scan: true, mantra: true, daily_practice: true, intentions: true, monthly_summary: true, tooltips: true };
 let dailyLoginChecked = false;
 
 // ── HABITS STATE ──
@@ -4144,6 +4165,11 @@ function applyFeatureToggles() {
   if(intentionsSection) intentionsSection.style.display = featureToggles.intentions !== false ? '' : 'none';
   const monthlySection = document.getElementById('profileMonthlySummarySection');
   if(monthlySection) monthlySection.style.display = featureToggles.monthly_summary !== false ? '' : 'none';
+  document.querySelectorAll('.tooltip-btn').forEach(el => { el.style.display = featureToggles.tooltips !== false ? '' : 'none'; });
+}
+
+function showTooltip(title, text) {
+  openModal(title, text, '');
 }
 
 async function awardCinders(amount, reason) {
