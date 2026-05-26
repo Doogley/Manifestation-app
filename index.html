@@ -1587,6 +1587,7 @@ function resetUserState() {
   saved = false;
   savedAffirmationText = '';
   savedAffirmationCat = '';
+  affirmationHistory = {};
   intentions = [];
   weeklyMantra = '';
   lastMantraDate = '';
@@ -1728,18 +1729,25 @@ async function loadUserProfile() {
       }));
     }
   }
-  // Load habits from Supabase
+  // Load habits and affirmation history from Supabase
   if(currentUser) {
     const todayStr = getLocalDateString();
-    const [{ data: habitsData }, { data: completionsData }] = await Promise.all([
+    const [{ data: habitsData }, { data: completionsData }, { data: histData }] = await Promise.all([
       db.from('habits').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: true }),
       db.from('habit_completions').select('habit_id').eq('user_id', currentUser.id).eq('completed_date', todayStr),
+      db.from('user_affirmations').select('affirmation_id, affirmation_text, affirmation_cat').eq('user_id', currentUser.id),
     ]);
     if(habitsData) {
       habits = habitsData.map(h => ({ id: h.id, name: h.name, frequency: h.frequency || 'daily' }));
     }
     if(completionsData && completionsData.length > 0) {
       habitCompletions[todayStr] = completionsData.map(c => c.habit_id);
+    }
+    if(histData) {
+      affirmationHistory = {};
+      histData.forEach(r => {
+        affirmationHistory[r.affirmation_id] = { text: r.affirmation_text, cat: r.affirmation_cat };
+      });
     }
   }
  
@@ -2066,6 +2074,7 @@ const affirmationLibrary = [
 
 let currentQuestion=0,answers={},selectedOption=null,todayAffirmation='',todayCategory='',saved=false;
 let savedAffirmationText='',savedAffirmationCat='';
+let affirmationHistory = {}; // map of day number -> { text, cat } from user_affirmations table
 
 const noNavScreens = ['loading','auth','splash','onboarding','reveal','grace','monthlySummary'];
 function _navigateToScreen(id){
@@ -2153,6 +2162,14 @@ async function goToHome(){
   const firstEntry = seq[0];
   todayAffirmation = firstEntry ? firstEntry.text : affirmations[answers.intention || 'abundance'][answers.tone || 'gentle'];
   todayCategory = firstEntry ? firstEntry.cat : catLabels[answers.intention || 'abundance'];
+  affirmationHistory[1] = { text: todayAffirmation, cat: todayCategory };
+  if(currentUser) {
+    db.from('user_affirmations').upsert({
+      user_id: currentUser.id, affirmation_id: 1,
+      affirmation_text: todayAffirmation, affirmation_cat: todayCategory,
+      unlocked_date: getLocalDateString(),
+    }, { onConflict: 'user_id,affirmation_id' }).then(() => {});
+  }
   buildHome();
   showScreen('home');
   setTabByName('today');
@@ -2400,6 +2417,12 @@ async function unlockTodaysAffirmation() {
       return;
     }
     awardCinders(10, 'Affirmation unlocked');
+    affirmationHistory[unlockedCount] = { text: todayAffirmation, cat: todayCategory };
+    db.from('user_affirmations').upsert({
+      user_id: currentUser.id, affirmation_id: unlockedCount,
+      affirmation_text: todayAffirmation, affirmation_cat: todayCategory,
+      unlocked_date: today,
+    }, { onConflict: 'user_id,affirmation_id' }).then(() => {});
   }
   dailyActions.affirmationUnlocked = true;
   document.getElementById('affirmationLocked').style.display = 'none';
@@ -2431,8 +2454,11 @@ function buildLibrary(){
   grid.appendChild(t);
 
   // Previously unlocked days (1 through unlockedCount-1)
+  const _seq=getUserAffirmationSequence();
   for(let d=unlockedCount-1;d>=1;d--){
-    const aff=affirmationLibrary[d-1];
+    const hist=affirmationHistory[d];
+    const fallback=_seq[(d-1)%_seq.length]||affirmationLibrary[d-1];
+    const aff=hist||fallback;
     if(!aff) continue;
     const tile=document.createElement('div');
     tile.className='lib-tile';
@@ -3407,19 +3433,27 @@ function buildLibraryScreen(filter) {
     (isAdmin || a.id <= unlockedCount + 7)
   );
 
+  const _libSeq = getUserAffirmationSequence();
   filtered.forEach((aff, i) => {
     const tile = document.createElement('div');
     const isToday = aff.id === unlockedCount;
     const isUnlocked = isAdmin || aff.id <= unlockedCount;
 
     if(isToday) {
+      const hist = affirmationHistory[aff.id];
+      const dText = hist ? hist.text : todayAffirmation;
+      const dCat = hist ? hist.cat : todayCategory;
       tile.className = 'library-screen-tile today-tile';
-      tile.innerHTML = `<div class="lib-screen-day">✦ Day ${aff.id} · Today</div><div class="lib-screen-text">${aff.text}</div><div class="lib-screen-cat">${aff.cat}</div>`;
-      tile.onclick = () => openModal(`Day ${aff.id} · Today`, aff.text, aff.cat);
+      tile.innerHTML = `<div class="lib-screen-day">✦ Day ${aff.id} · Today</div><div class="lib-screen-text">${dText}</div><div class="lib-screen-cat">${dCat}</div>`;
+      tile.onclick = () => openModal(`Day ${aff.id} · Today`, dText, dCat);
     } else if(isUnlocked) {
+      const hist = affirmationHistory[aff.id];
+      const fallback = _libSeq[(aff.id - 1) % _libSeq.length] || aff;
+      const dText = hist ? hist.text : fallback.text;
+      const dCat = hist ? hist.cat : fallback.cat;
       tile.className = 'library-screen-tile';
-      tile.innerHTML = `<div class="lib-screen-day">Day ${aff.id}</div><div class="lib-screen-text">${aff.text}</div><div class="lib-screen-cat">${aff.cat}</div>`;
-      tile.onclick = () => openModal(`Day ${aff.id}`, aff.text, aff.cat);
+      tile.innerHTML = `<div class="lib-screen-day">Day ${aff.id}</div><div class="lib-screen-text">${dText}</div><div class="lib-screen-cat">${dCat}</div>`;
+      tile.onclick = () => openModal(`Day ${aff.id}`, dText, dCat);
     } else {
       tile.className = 'library-screen-tile locked-tile';
       tile.innerHTML = `<div style="filter:blur(5px);font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:rgba(255,255,255,.07);line-height:1.5;margin-bottom:8px">${aff.text}</div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2)">Day ${aff.id}</div></div>`;
