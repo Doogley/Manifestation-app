@@ -1732,7 +1732,11 @@ async function loadUserProfile() {
  userRealName = data.real_name || 'Friend';
   userNickname = data.nickname || '';
   currentCinders = data.cinders ?? 0;
-  cinderBonuses = new Set(JSON.parse(data.cinder_bonuses || '[]'));
+  try {
+    cinderBonuses = new Set(JSON.parse(data.cinder_bonuses || '[]'));
+  } catch(e) {
+    cinderBonuses = new Set();
+  }
   answers.intention = data.intention || 'abundance';
   answers.tone = data.tone || 'gentle';
   answers.timing = data.timing || 'morning';
