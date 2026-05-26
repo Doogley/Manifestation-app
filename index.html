@@ -616,15 +616,27 @@
   .habits-header-date { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
   .habits-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--cream); letter-spacing:.05em; }
   .habits-list { position:relative; z-index:1; padding:24px 32px 0; display:flex; flex-direction:column; gap:10px; }
-  .habit-item { display:flex; align-items:center; gap:14px; padding:16px 20px; border:1px solid rgba(201,169,110,.12); background:rgba(201,169,110,.03); transition:border-color .3s; }
-  .habit-item.completed { border-color:rgba(201,169,110,.2); background:rgba(201,169,110,.06); }
-  .habit-check { width:24px; height:24px; border-radius:50%; border:1px solid rgba(201,169,110,.3); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:all .3s; background:none; color:transparent; font-size:12px; font-family:'Jost',sans-serif; }
+  .habit-item { display:flex; align-items:flex-start; gap:14px; padding:18px 20px; border:1px solid rgba(201,169,110,.12); background:rgba(201,169,110,.03); transition:border-color .4s, background .4s; }
+  .habit-item.completed { border-color:rgba(201,169,110,.22); background:rgba(201,169,110,.05); }
+  .habit-check { width:26px; height:26px; border-radius:50%; border:1px solid rgba(201,169,110,.3); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:all .35s; background:none; color:transparent; font-size:12px; font-family:'Jost',sans-serif; margin-top:1px; }
   .habit-item.completed .habit-check { background:var(--gold); border-color:var(--gold); color:var(--deep); }
-  .habit-icon { font-size:18px; flex-shrink:0; width:24px; text-align:center; }
-  .habit-name { flex:1; font-size:14px; font-weight:300; color:var(--soft); transition:color .3s; }
-  .habit-item.completed .habit-name { color:var(--muted); text-decoration:line-through; text-decoration-color:rgba(201,169,110,.3); }
-  .habit-delete-btn { background:none; border:none; color:rgba(255,255,255,.12); font-size:18px; cursor:pointer; padding:4px 0 4px 8px; transition:color .3s; line-height:1; }
-  .habit-delete-btn:hover { color:rgba(201,169,110,.4); }
+  .habit-body { flex:1; min-width:0; }
+  .habit-name { font-size:14px; font-weight:300; color:var(--soft); transition:color .3s; letter-spacing:.01em; display:block; margin-bottom:10px; }
+  .habit-item.completed .habit-name { color:var(--muted); }
+  .habit-week-dots { display:flex; gap:6px; align-items:flex-end; }
+  .week-dot-wrap { display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .week-dot { width:5px; height:5px; border-radius:50%; background:rgba(201,169,110,.1); border:1px solid rgba(201,169,110,.18); transition:background .3s; flex-shrink:0; }
+  .week-dot.done { background:var(--gold); border-color:var(--gold); }
+  .week-dot.today-dot { border-color:rgba(201,169,110,.45); }
+  .week-dot.future { background:transparent; border-color:rgba(201,169,110,.07); }
+  .week-dot.inactive-dot { opacity:.2; }
+  .week-dot-label { font-size:8px; letter-spacing:.02em; color:rgba(201,169,110,.22); }
+  .habit-streak-wrap { display:flex; flex-direction:column; align-items:center; flex-shrink:0; padding-top:1px; min-width:28px; }
+  .habit-streak-num { font-family:'Cormorant Garamond',serif; font-size:19px; font-weight:300; color:var(--gold); line-height:1; }
+  .habit-streak-zero .habit-streak-num { color:rgba(201,169,110,.18); font-size:14px; }
+  .habit-streak-label { font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); opacity:.5; }
+  .habit-delete-btn { background:none; border:none; color:rgba(255,255,255,.1); font-size:18px; cursor:pointer; padding:0 0 0 6px; transition:color .3s; line-height:1; flex-shrink:0; margin-top:2px; }
+  .habit-delete-btn:hover { color:rgba(201,169,110,.35); }
   .habits-add-wrap { position:relative; z-index:1; padding:20px 32px 0; }
   .habits-add-btn { width:100%; padding:16px; background:none; border:1px solid rgba(201,169,110,.2); color:var(--gold); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; transition:all .3s; }
   .habits-add-btn:hover { background:rgba(201,169,110,.06); border-color:rgba(201,169,110,.35); }
@@ -656,10 +668,22 @@
   .freq-picker { display:flex; gap:8px; margin-bottom:24px; }
   .freq-pill { flex:1; padding:9px 6px; border:1px solid rgba(201,169,110,.15); background:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:11px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:all .2s; text-align:center; }
   .freq-pill.active { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.06); }
-  .habit-meta { display:flex; flex-direction:column; flex:1; gap:3px; }
-  .habit-freq-label { font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); opacity:.55; }
-  .habit-item.inactive { opacity:.35; }
+  .habit-freq-label { font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); opacity:.45; display:block; margin-top:6px; }
+  .habit-weekly-label { font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); opacity:.4; margin-top:4px; }
+  .habit-item.inactive { opacity:.3; }
   .habit-item.inactive .habit-check { pointer-events:none; }
+  .habits-all-complete { position:relative; z-index:1; margin:20px 32px 0; padding:18px 24px; background:rgba(201,169,110,.05); border:1px solid rgba(201,169,110,.18); text-align:center; animation:fadeIn .5s ease forwards; }
+  .habits-all-complete-title { font-family:'Cormorant Garamond',serif; font-size:19px; font-weight:300; color:var(--gold); margin-bottom:4px; letter-spacing:.04em; }
+  .habits-all-complete-sub { font-size:11px; font-weight:300; color:var(--muted); letter-spacing:.06em; }
+  .habits-preview-momentum { font-size:12px; font-weight:300; color:var(--muted); font-style:italic; margin-bottom:12px; letter-spacing:.02em; }
+  .habits-preview-habit-row { display:flex; align-items:center; gap:10px; margin-bottom:7px; }
+  .habits-preview-habit-row:last-child { margin-bottom:0; }
+  .habits-preview-habit-name { flex:1; font-size:13px; font-weight:300; color:var(--muted); letter-spacing:.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .habits-preview-habit-name.done { color:var(--soft); }
+  .habits-preview-check.done { background:var(--gold); border-color:var(--gold); }
+  .habits-preview-habit-dots { display:flex; gap:3px; flex-shrink:0; }
+  .habits-preview-dot { width:4px; height:4px; border-radius:50%; background:rgba(201,169,110,.12); border:1px solid rgba(201,169,110,.15); }
+  .habits-preview-dot.done { background:var(--gold); border-color:var(--gold); }
 
   /* ── BODY SCAN ── */
   #bodyScan { align-items:center; justify-content:center; position:relative; }
@@ -693,7 +717,8 @@
   .body-scan-entry-sub { font-size:11px; font-weight:300; color:var(--muted); margin-top:5px; font-style:italic; }
 
   @media(max-width:480px){
-    .habits-preview-wrap,.habits-header,.habits-list,.habits-add-wrap,.habits-empty{padding-left:20px;padding-right:20px}
+    .habits-preview-wrap,.habits-header,.habits-list,.habits-add-wrap,.habits-empty,.habits-all-complete{padding-left:20px;padding-right:20px}
+    .habits-all-complete{margin-left:0;margin-right:0}
     .add-habit-sheet-header{padding:18px 20px 14px}
     .add-habit-sheet-body{padding:16px 20px 36px}
     .preset-grid{grid-template-columns:1fr}
@@ -1081,6 +1106,10 @@
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       Back
     </button>
+  </div>
+  <div id="habitsAllComplete" class="habits-all-complete" style="display:none">
+    <div class="habits-all-complete-title">All foundations held ✦</div>
+    <div class="habits-all-complete-sub">Your practice is complete. Return tomorrow.</div>
   </div>
   <div class="habits-empty" id="habitsEmpty">
     <div class="habits-empty-icon">◇</div>
@@ -1734,14 +1763,18 @@ async function loadUserProfile() {
     const todayStr = getLocalDateString();
     const [{ data: habitsData }, { data: completionsData }, { data: histData }] = await Promise.all([
       db.from('habits').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: true }),
-      db.from('habit_completions').select('habit_id').eq('user_id', currentUser.id).eq('completed_date', todayStr),
+      db.from('habit_completions').select('habit_id, completed_date').eq('user_id', currentUser.id),
       db.from('user_affirmations').select('affirmation_id, affirmation_text, affirmation_cat').eq('user_id', currentUser.id),
     ]);
     if(habitsData) {
       habits = habitsData.map(h => ({ id: h.id, name: h.name, frequency: h.frequency || 'daily' }));
     }
-    if(completionsData && completionsData.length > 0) {
-      habitCompletions[todayStr] = completionsData.map(c => c.habit_id);
+    if(completionsData) {
+      habitCompletions = {};
+      completionsData.forEach(c => {
+        if(!habitCompletions[c.completed_date]) habitCompletions[c.completed_date] = [];
+        habitCompletions[c.completed_date].push(c.habit_id);
+      });
     }
     if(histData) {
       affirmationHistory = {};
@@ -3060,6 +3093,53 @@ function getWeekKey() {
   return 'week_' + d.toISOString().slice(0, 10);
 }
 
+function _ds(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function getHabitWeekDots(habitId, freq) {
+  if(freq === 'weekly') return null;
+  const today = new Date();
+  const todayDow = today.getDay();
+  const daysToMon = todayDow === 0 ? -6 : 1 - todayDow;
+  const todayStr = getLocalDateString();
+  const labels = ['M','T','W','T','F','S','S'];
+  return Array.from({length:7}, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() + daysToMon + i);
+    const ds = _ds(d);
+    const isFuture = ds > todayStr;
+    const isToday = ds === todayStr;
+    const isWeekend = i >= 5;
+    const done = !isFuture && (habitCompletions[ds] || []).includes(habitId);
+    return { label: labels[i], done, isFuture, isToday, inactive: freq === 'weekdays' && isWeekend };
+  });
+}
+
+function computeHabitStreak(habitId, freq) {
+  function wkFor(d) {
+    const dow = d.getDay();
+    const mon = new Date(d);
+    mon.setDate(d.getDate() + (dow === 0 ? -6 : 1 - dow));
+    return 'week_' + _ds(mon);
+  }
+  let d = new Date();
+  let streak = 0;
+  if(freq === 'weekly') {
+    for(let w = 0; w < 54; w++) {
+      if((habitCompletions[wkFor(d)] || []).includes(habitId)) { streak++; d.setDate(d.getDate()-7); }
+      else break;
+    }
+    return streak;
+  }
+  for(let i = 0; i < 365; i++) {
+    if(freq === 'weekdays' && [0,6].includes(d.getDay())) { d.setDate(d.getDate()-1); continue; }
+    if((habitCompletions[_ds(d)] || []).includes(habitId)) { streak++; d.setDate(d.getDate()-1); }
+    else break;
+  }
+  return streak;
+}
+
 function selectFreq(freq, el) {
   selectedHabitFrequency = freq;
   document.querySelectorAll('.freq-pill').forEach(p => p.classList.remove('active'));
@@ -4082,30 +4162,57 @@ function renderHabits() {
   const isWeekend = [0, 6].includes(new Date().getDay());
   const listEl = document.getElementById('habitsList');
   const emptyEl = document.getElementById('habitsEmpty');
+  const allCompleteEl = document.getElementById('habitsAllComplete');
   if(!listEl) return;
   if(habits.length === 0) {
     listEl.style.display = 'none';
     if(emptyEl) emptyEl.style.display = 'block';
-  } else {
-    if(emptyEl) emptyEl.style.display = 'none';
-    listEl.style.display = 'flex';
-    listEl.innerHTML = '';
-    habits.forEach(h => {
-      const freq = h.frequency || 'daily';
-      const done = freq === 'weekly' ? weekCompletions.has(h.id) : todayCompletions.has(h.id);
-      const inactive = freq === 'weekdays' && isWeekend;
-      const freqLabel = freq !== 'daily'
-        ? `<span class="habit-freq-label">${freq === 'weekdays' ? 'Weekdays' : 'Weekly'}</span>`
-        : '';
-      const item = document.createElement('div');
-      item.className = 'habit-item' + (done ? ' completed' : '') + (inactive ? ' inactive' : '');
-      item.innerHTML =
-        `<button class="habit-check" onclick="toggleHabitComplete('${h.id}')">${done ? '✓' : ''}</button>` +
-        `<span class="habit-meta"><span class="habit-name">${escapeHtml(h.name)}</span>${freqLabel}</span>` +
-        `<button class="habit-delete-btn" onclick="deleteHabit('${h.id}')">×</button>`;
-      listEl.appendChild(item);
-    });
+    if(allCompleteEl) allCompleteEl.style.display = 'none';
+    updateHabitsHomePreview();
+    return;
   }
+  if(emptyEl) emptyEl.style.display = 'none';
+  listEl.style.display = 'flex';
+  listEl.innerHTML = '';
+  const applicable = habits.filter(h => !(h.frequency === 'weekdays' && isWeekend));
+  const allDone = applicable.length > 0 && applicable.every(h => {
+    const freq = h.frequency || 'daily';
+    return (freq === 'weekly' ? weekCompletions : todayCompletions).has(h.id);
+  });
+  if(allCompleteEl) allCompleteEl.style.display = allDone ? 'block' : 'none';
+  habits.forEach(h => {
+    const freq = h.frequency || 'daily';
+    const done = (freq === 'weekly' ? weekCompletions : todayCompletions).has(h.id);
+    const inactive = freq === 'weekdays' && isWeekend;
+    const streak = computeHabitStreak(h.id, freq);
+    const dots = getHabitWeekDots(h.id, freq);
+    let dotsHtml = '';
+    if(dots) {
+      dotsHtml = `<div class="habit-week-dots">` + dots.map(d => {
+        let cls = 'week-dot';
+        if(d.done) cls += ' done';
+        else if(d.isFuture) cls += ' future';
+        else if(d.isToday) cls += ' today-dot';
+        if(d.inactive) cls += ' inactive-dot';
+        return `<div class="week-dot-wrap"><div class="${cls}"></div><div class="week-dot-label">${d.label}</div></div>`;
+      }).join('') + `</div>`;
+    } else {
+      dotsHtml = `<div class="habit-weekly-label">This week</div>`;
+    }
+    const streakHtml = streak > 0
+      ? `<div class="habit-streak-wrap"><div class="habit-streak-num">${streak}</div><div class="habit-streak-label">${freq === 'weekly' ? 'wks' : 'days'}</div></div>`
+      : `<div class="habit-streak-wrap habit-streak-zero"><div class="habit-streak-num">—</div></div>`;
+    const freqLabelHtml = freq !== 'daily'
+      ? `<span class="habit-freq-label">${freq === 'weekdays' ? 'Weekdays' : 'Weekly'}</span>` : '';
+    const item = document.createElement('div');
+    item.className = 'habit-item' + (done ? ' completed' : '') + (inactive ? ' inactive' : '');
+    item.innerHTML =
+      `<button class="habit-check" onclick="toggleHabitComplete('${h.id}')">${done ? '✓' : ''}</button>` +
+      `<div class="habit-body"><span class="habit-name">${escapeHtml(h.name)}</span>${dotsHtml}${freqLabelHtml}</div>` +
+      streakHtml +
+      `<button class="habit-delete-btn" onclick="deleteHabit('${h.id}')">×</button>`;
+    listEl.appendChild(item);
+  });
   updateHabitsHomePreview();
 }
 
@@ -4119,6 +4226,14 @@ async function toggleHabitComplete(id) {
   const marking = idx === -1;
   if(marking) habitCompletions[key].push(id);
   else habitCompletions[key].splice(idx, 1);
+  if(marking && currentUser) {
+    const newStreak = computeHabitStreak(id, freq);
+    const milestones = {7:25, 21:50, 30:100};
+    if(milestones[newStreak]) {
+      const unit = freq === 'weekly' ? 'week' : 'day';
+      awardCinders(milestones[newStreak], `✦ ${newStreak}-${unit} streak: ${h ? h.name : 'Foundation'}`);
+    }
+  }
   renderHabits();
   if(marking) {
     await db.from('habit_completions').insert({ user_id: currentUser.id, habit_id: id, completed_date: completedDate });
@@ -4186,22 +4301,41 @@ function updateHabitsHomePreview() {
   const card = document.getElementById('habitsPreviewCard');
   if(!card) return;
   const today = getLocalDateString();
-  const completed = new Set(habitCompletions[today] || []);
+  const weekKey = getWeekKey();
   const total = habits.length;
-  const done = habits.filter(h => completed.has(h.id)).length;
   if(total === 0) {
-    card.innerHTML = '<div class="habits-preview-empty">Tap to add your foundations</div>';
+    card.innerHTML = '<div class="habits-preview-empty">Tap to build your daily foundation stack</div>';
     return;
   }
+  const completed = new Set(habitCompletions[today] || []);
+  const weekCompleted = new Set(habitCompletions[weekKey] || []);
+  const done = habits.filter(h => {
+    const freq = h.frequency || 'daily';
+    return (freq === 'weekly' ? weekCompleted : completed).has(h.id);
+  }).length;
   const pct = Math.round((done / total) * 100);
+  const phrase = pct === 0 ? 'Begin with one intentional act' :
+    pct < 50 ? 'Your practice is alive' :
+    pct < 100 ? 'The current is with you' :
+    'All foundations held ✦';
   const preview = habits.slice(0, 3).map(h => {
-    const isDone = completed.has(h.id);
-    return `<div class="habits-preview-row${isDone ? ' done' : ''}"><div class="habits-preview-check"></div>${escapeHtml(h.name)}</div>`;
+    const freq = h.frequency || 'daily';
+    const isDone = (freq === 'weekly' ? weekCompleted : completed).has(h.id);
+    const dots = getHabitWeekDots(h.id, freq);
+    const dotsHtml = dots ? dots.map(d =>
+      `<div class="habits-preview-dot${d.done ? ' done' : ''}"></div>`
+    ).join('') : '';
+    return `<div class="habits-preview-habit-row">` +
+      `<div class="habits-preview-check${isDone ? ' done' : ''}"></div>` +
+      `<div class="habits-preview-habit-name${isDone ? ' done' : ''}">${escapeHtml(h.name)}</div>` +
+      `<div class="habits-preview-habit-dots">${dotsHtml}</div>` +
+      `</div>`;
   }).join('');
-  const more = total > 3 ? `<div style="font-size:11px;color:var(--muted);letter-spacing:.08em;margin-top:6px">+${total - 3} more</div>` : '';
+  const more = total > 3 ? `<div style="font-size:11px;color:var(--muted);letter-spacing:.08em;margin-top:8px">+${total - 3} more</div>` : '';
   card.innerHTML =
-    `<div class="habits-preview-summary"><div class="habits-preview-count">${done} of ${total} done today</div><div class="habits-preview-arrow">See all →</div></div>` +
+    `<div class="habits-preview-summary"><div class="habits-preview-count">${done} of ${total} held today</div><div class="habits-preview-arrow">See all →</div></div>` +
     `<div class="habits-preview-bar-track"><div class="habits-preview-bar-fill" style="width:${pct}%"></div></div>` +
+    `<div class="habits-preview-momentum">${phrase}</div>` +
     `<div class="habits-preview-list">${preview}</div>${more}`;
 }
 
