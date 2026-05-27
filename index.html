@@ -3003,11 +3003,17 @@ async function toggleSaveByDay(dayNum, text, cat) {
     await db.from('saved_affirmations').insert({ user_id: currentUser.id, affirmation_day: dayNum, affirmation_text: text, affirmation_cat: cat });
     savedAffirmationIds.add(dayNum);
   }
+  const isSaved = savedAffirmationIds.has(dayNum);
   document.querySelectorAll(`.lib-heart[data-day="${dayNum}"]`).forEach(h => {
-    const isSaved = savedAffirmationIds.has(dayNum);
     h.textContent = isSaved ? '♥︎' : '♡';
     h.classList.toggle('saved', isSaved);
   });
+  const saveBtn = document.getElementById('saveBtn');
+  if (saveBtn && dayNum === unlockedCount) {
+    saveBtn.textContent = isSaved ? '♥︎  Saved' : '♡  Save';
+    saveBtn.classList.toggle('active', isSaved);
+    saved = isSaved;
+  }
 }
 function shareAffirmation(){if(navigator.share){navigator.share({title:'Already Mine',text:todayAffirmation,url:window.location.href}).then(()=>showCindersToast(0,'✦ Shared')).catch(()=>{});}else{navigator.clipboard.writeText(todayAffirmation).then(()=>showCindersToast(0,'✦ Copied to clipboard')).catch(()=>showCindersToast(0,'Could not copy — try again'));}}
 function setTab(el){document.querySelectorAll('#globalBottomNav .nav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
