@@ -2471,8 +2471,7 @@ async function buildHome(){
             }).eq('id', currentUser.id);
           } else {
             // First visit today during grace — show grace screen
-            showGracePeriod(graceStreakBefore, graceDaysCompleted);
-            return;
+            return enterGracePeriod(graceStreakBefore, graceDaysCompleted);
           }
         } else if(streakData.last_streak_date === today) {
           streakCount = streakData.streak_count;
@@ -2495,8 +2494,7 @@ async function buildHome(){
             grace_days_completed: 0,
             grace_last_date:    null
           }).eq('id', currentUser.id);
-          showGracePeriod(graceStreakBefore, 0);
-          return;
+          return enterGracePeriod(graceStreakBefore, 0);
         } else {
           // No streak history yet (brand new user) — start at 1
           streakCount = 1;
@@ -3508,6 +3506,41 @@ async function removeIntention(i) {
 }
 
 // ── GRACE PERIOD ──
+async function enterGracePeriod(streakBefore, daysCompleted) {
+  const today = getLocalDateString();
+  graceDaysCompleted = daysCompleted + 1;
+  graceLastDate = today;
+  if(graceDaysCompleted >= 3) {
+    streakCount = streakBefore;
+    comebackCount++;
+    inGracePeriod = false;
+    if(currentUser) {
+      await db.from('profiles').update({
+        streak_count: streakCount,
+        last_streak_date: today,
+        in_grace_period: false,
+        grace_streak_before: 0,
+        grace_days_completed: 0,
+        grace_last_date: null,
+        comeback_count: comebackCount
+      }).eq('id', currentUser.id);
+    }
+    awardCinders(25, 'Streak restored');
+    showScreen('home');
+    setTabByName('today');
+    buildHome();
+  } else {
+    if(currentUser) {
+      await db.from('profiles').update({
+        grace_days_completed: graceDaysCompleted,
+        grace_last_date: today,
+        last_streak_date: today
+      }).eq('id', currentUser.id);
+    }
+    showGracePeriod(streakBefore, graceDaysCompleted);
+  }
+}
+
 function showGracePeriod(streakBefore, daysCompleted) {
   document.getElementById('graceStreakNum').textContent = streakBefore;
   for(let i=1; i<=3; i++) {
@@ -3531,32 +3564,7 @@ function showGracePeriod(streakBefore, daysCompleted) {
   showScreen('grace');
 }
 
-async function restoreFromGrace() {
-  const today = getLocalDateString();
-  if(!currentUser) { buildHome(); return; }
-  graceDaysCompleted++;
-  graceLastDate = today;
-  if(graceDaysCompleted >= 3) {
-    // Restore streak to what it was before the miss
-    streakCount = graceStreakBefore;
-    comebackCount++;
-    inGracePeriod = false;
-    await db.from('profiles').update({
-      streak_count: streakCount,
-      last_streak_date: today,
-      in_grace_period: false,
-      grace_streak_before: 0,
-      grace_days_completed: 0,
-      grace_last_date: null,
-      comeback_count: comebackCount
-    }).eq('id', currentUser.id);
-    awardCinders(25, 'Streak restored');
-  } else {
-    await db.from('profiles').update({
-      grace_days_completed: graceDaysCompleted,
-      grace_last_date: today
-    }).eq('id', currentUser.id);
-  }
+function restoreFromGrace() {
   showScreen('home');
   setTabByName('today');
   buildHome();
