@@ -689,7 +689,7 @@
 
   /* ── BODY SCAN ── */
   #bodyScan { align-items:center; justify-content:center; position:relative; }
-  .scan-close-wrap { position:absolute; top:0; left:0; right:0; display:flex; justify-content:flex-end; padding:24px 28px; z-index:1; }
+  .scan-close-wrap { position:absolute; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:center; padding:24px 28px; z-index:1; }
   .scan-close-btn { background:none; border:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:color .3s; }
   .scan-close-btn:hover { color:var(--cream); }
   .scan-inner { position:relative; z-index:1; width:100%; max-width:420px; padding:100px 40px 60px; display:flex; flex-direction:column; align-items:center; text-align:center; }
@@ -714,8 +714,8 @@
   .scan-complete-btn { padding:16px 52px; background:var(--gold); border:none; color:var(--deep); font-family:'Jost',sans-serif; font-weight:400; font-size:12px; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; transition:opacity .3s; }
   .scan-complete-btn:hover { opacity:.9; }
   .body-scan-entry { margin-top:18px; padding-top:16px; border-top:1px solid rgba(201,169,110,.06); text-align:center; }
-  .body-scan-entry-btn { background:none; border:none; color:var(--gold); font-family:'Jost',sans-serif; font-size:11px; font-weight:300; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; opacity:.65; transition:opacity .3s; display:inline-flex; align-items:center; gap:8px; }
-  .body-scan-entry-btn:hover { opacity:1; }
+  .body-scan-entry-btn { background:none; border:1px solid rgba(201,169,110,.3); color:var(--gold); font-family:'Jost',sans-serif; font-size:11px; font-weight:300; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; transition:all .3s; display:flex; align-items:center; justify-content:center; gap:8px; padding:13px 20px; flex:1; }
+  .body-scan-entry-btn:hover { border-color:var(--gold); background:rgba(201,169,110,.06); }
   .body-scan-entry-sub { font-size:11px; font-weight:300; color:var(--muted); margin-top:5px; font-style:italic; }
 
   @media(max-width:480px){
@@ -1024,8 +1024,8 @@
     <div id="moodExpandedGrid"></div>
     <div class="mood-selected-display"></div>
     <div class="body-scan-entry">
-      <div style="display:inline-flex;align-items:center;gap:8px">
-        <button class="body-scan-entry-btn" onclick="openBodyScan()">✦ &nbsp;Go deeper — Body Scan</button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="body-scan-entry-btn" onclick="openBodyScan()">✦ &nbsp;Body Scan — Go Deeper</button>
         <button class="tooltip-btn" onclick="showTooltip('Body Scan','A guided practice to bring awareness into your body. After your mood check-in, the body scan helps you feel where your emotions live — not just name them.')">?</button>
       </div>
       <div class="body-scan-entry-sub">A gentle guided body awareness practice</div>
@@ -1171,6 +1171,9 @@
 <!-- BODY SCAN -->
 <div id="bodyScan" class="screen">
   <div class="scan-close-wrap">
+    <button id="scanBackBtn" class="back-btn" style="margin-top:0;visibility:hidden" onclick="prevScanStep()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Back
+    </button>
     <button class="scan-close-btn" onclick="closeBodyScan()">✕ Close</button>
   </div>
   <div class="scan-inner">
@@ -4924,12 +4927,24 @@ function renderScanStep() {
     btn.className = isLast ? 'scan-complete-btn' : 'scan-continue-btn';
   }
 
+  const backBtn = document.getElementById('scanBackBtn');
+  if(backBtn) backBtn.style.visibility = currentScanStep === 0 ? 'hidden' : 'visible';
+
   const wrap = document.getElementById('scanStepWrap');
   if(wrap) {
     wrap.style.cssText = 'opacity:0;transform:translateY(16px)';
     requestAnimationFrame(() => {
       wrap.style.cssText = 'opacity:1;transform:translateY(0);transition:opacity .5s ease,transform .5s ease';
     });
+  }
+}
+
+function prevScanStep() {
+  const noteArea = document.getElementById('scanNoteArea');
+  if(noteArea) currentScanNotes[currentScanStep] = noteArea.value;
+  if(currentScanStep > 0) {
+    currentScanStep--;
+    renderScanStep();
   }
 }
 
