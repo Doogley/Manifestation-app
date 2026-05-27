@@ -380,33 +380,35 @@
   .cinders-fill { height:2px; background:var(--gold); transition:width 1s ease; }
   .cinders-label { font-size:11px; letter-spacing:.1em; color:var(--muted); }
 
+  /* Badge circle visual */
+  .badge-circle { position:relative; width:70px; height:74px; flex-shrink:0; }
+  .badge-crown { position:absolute; top:-3px; left:50%; transform:translateX(-50%); width:22px; height:10px; z-index:2; }
+  .badge-arc { position:absolute; top:0; left:0; width:100%; height:100%; overflow:visible; }
+  .badge-circle-icon { position:absolute; top:50%; left:50%; transform:translate(-50%,-56%); font-size:20px; line-height:1; pointer-events:none; }
+  .badge-circle.tier-v { filter:drop-shadow(0 0 5px rgba(201,169,110,.55)); }
+  .badge-item.locked-badge .badge-circle { filter:grayscale(1) blur(1px) opacity(0.4); pointer-events:none; }
+
   /* Badge category section */
   .badge-section { position:relative; z-index:1; padding:24px 32px 0; }
   .badge-section-title { font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; display:flex; align-items:center; gap:12px; }
   .badge-section-title::after { content:''; flex:1; height:1px; background:rgba(201,169,110,.15); }
 
-  /* Badge grid */
-  .badge-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-
-  .badge-item { display:flex; flex-direction:column; align-items:center; gap:8px; padding:16px 8px; border:1px solid rgba(201,169,110,.1); background:rgba(201,169,110,.03); cursor:pointer; transition:all .3s; position:relative; }
-  .badge-item.earned { border-color:rgba(201,169,110,.25); background:rgba(201,169,110,.07); animation:glowPulse 5s ease-in-out infinite; }
-  .badge-item.locked-badge { opacity:.4; cursor:default; }
-  .badge-item:hover.earned { border-color:rgba(201,169,110,.4); }
-
-  .badge-icon { width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-family:'Cormorant Garamond',serif; letter-spacing:-2px; position:relative; }
-  .badge-item.earned .badge-icon { background:radial-gradient(circle,rgba(201,169,110,.2) 0%,rgba(201,169,110,.05) 100%); border:1px solid rgba(201,169,110,.3); color:var(--gold); }
-  .badge-item.locked-badge .badge-icon { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); color:rgba(255,255,255,.2); }
-
-  .badge-name { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--soft); text-align:center; line-height:1.3; }
-  .badge-item.locked-badge .badge-name { color:var(--muted); }
-  .badge-tier { font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); opacity:.6; }
-  .badge-item.locked-badge .badge-tier { opacity:.3; }
+  /* Badge grid — 5 tiers per row */
+  .badge-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; }
+  .badge-item { display:flex; flex-direction:column; align-items:center; gap:5px; padding:10px 2px 8px; cursor:pointer; transition:transform .2s; position:relative; }
+  .badge-item.earned:hover { transform:translateY(-2px); }
+  .badge-item.locked-badge { cursor:pointer; }
+  .badge-pin-dot { position:absolute; top:4px; right:4px; width:5px; height:5px; border-radius:50%; background:var(--gold); display:none; }
+  .badge-item.pinned .badge-pin-dot { display:block; }
+  .badge-name { font-size:8px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); text-align:center; line-height:1.3; max-width:64px; }
+  .badge-item.earned .badge-name { color:var(--soft); }
 
   /* Badge modal */
-  .badge-modal-icon { font-size:40px; font-family:'Cormorant Garamond',serif; color:var(--gold); margin-bottom:16px; letter-spacing:-2px; }
-  .badge-modal-tier { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
-  .badge-modal-name { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300; color:var(--cream); margin-bottom:16px; }
-  .badge-modal-desc { font-size:14px; font-weight:300; color:var(--soft); line-height:1.7; margin-bottom:32px; }
+  .badge-modal-circle-wrap { display:flex; justify-content:center; margin-bottom:8px; }
+  .badge-modal-tier { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; margin-top:10px; }
+  .badge-modal-name { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300; color:var(--cream); margin-bottom:12px; }
+  .badge-modal-desc { font-size:14px; font-weight:300; color:var(--soft); line-height:1.7; margin-bottom:24px; }
+  .badge-modal-req { font-size:13px; font-weight:300; color:var(--muted); line-height:1.6; font-style:italic; margin-bottom:24px; }
 
   /* ── STREAK GRACE PERIOD ── */
   #grace { align-items:center; justify-content:center; text-align:center; padding:60px 32px; }
@@ -485,12 +487,7 @@
   .profile-fav-text { font-family:'Jost',sans-serif; font-size:14px; font-weight:300; color:var(--soft); line-height:1.7; padding-left:8px; }
   .profile-fav-none { font-size:13px; font-weight:300; color:var(--muted); font-style:italic; }
 
-  .profile-recent-badges { display:flex; gap:10px; flex-wrap:wrap; }
-  .profile-badge-pill { display:flex; align-items:center; gap:8px; padding:8px 14px; border:1px solid rgba(201,169,110,.2); background:rgba(201,169,110,.06); }
-  .profile-badge-icon { font-family:'Cormorant Garamond',serif; font-size:16px; color:var(--gold); }
-  .profile-badge-info { display:flex; flex-direction:column; }
-  .profile-badge-name { font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--cream); }
-  .profile-badge-tier { font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .profile-pinned-badges { display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start; }
 
   .profile-pref-row { display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid rgba(201,169,110,.06); }
   .profile-pref-row:last-child { border-bottom:none; }
@@ -562,12 +559,13 @@
   .upgrade-fine-print p { font-size:11px; font-weight:300; color:var(--muted); line-height:1.7; }
 
   @media(max-width:480px){
-    .badges-header,.level-card,.badge-section{padding-left:20px;padding-right:20px}
-    .level-card{margin-left:20px;margin-right:20px}
-    .badge-grid{gap:8px}
-    .badge-item{padding:12px 6px}
-    .badge-icon{width:40px;height:40px;font-size:18px}
-    .badge-name{font-size:9px}
+    .badges-header,.level-card,.badge-section{padding-left:16px;padding-right:16px}
+    .level-card{margin-left:16px;margin-right:16px}
+    .badge-grid{gap:2px}
+    .badge-item{padding:8px 1px 6px}
+    .badge-circle{width:52px;height:56px}
+    .badge-circle-icon{font-size:15px}
+    .badge-name{font-size:7px;max-width:50px}
   }
   @media(max-width:480px){
     .question-container,.onboarding-header{padding-left:24px;padding-right:24px}
@@ -1389,10 +1387,10 @@
     </div>
   </div>
 
-  <!-- Recent Badges -->
+  <!-- Pinned Badges -->
   <div class="profile-section" style="animation-delay:.4s">
-    <div class="profile-section-title">Recent Achievements</div>
-    <div class="profile-recent-badges" id="profileRecentBadges"></div>
+    <div class="profile-section-title">My Badges</div>
+    <div id="profileRecentBadges"></div>
   </div>
 
   <!-- Preferences -->
@@ -1681,6 +1679,12 @@ let graceDaysCompleted = 0;
 let graceLastDate = '';
 let comebackCount = 0;
 let journalEntryCount = 0;
+let intentionsReceivedCount = 0;
+let bodyScanCount = 0;
+let moodCheckinCount = 0;
+let mantraWeekCount = 0;
+let foundationDaysCount = 0;
+let pinnedBadges = [];
 // ── AUTH FUNCTIONS ──
 function switchAuthTab(tab) {
   const loginForm = document.getElementById('loginForm');
@@ -1737,6 +1741,12 @@ function resetUserState() {
   graceLastDate = '';
   comebackCount = 0;
   journalEntryCount = 0;
+  intentionsReceivedCount = 0;
+  bodyScanCount = 0;
+  moodCheckinCount = 0;
+  mantraWeekCount = 0;
+  foundationDaysCount = 0;
+  pinnedBadges = [];
   unlockedCount = 1;
   userNickname = '';
   userRealName = '';
@@ -1859,7 +1869,13 @@ async function loadUserProfile() {
   graceStreakBefore = data.grace_streak_before || 0;
   graceDaysCompleted = data.grace_days_completed || 0;
   graceLastDate    = data.grace_last_date   || '';
-  comebackCount    = data.comeback_count    || 0;
+  comebackCount             = data.comeback_count             || 0;
+  intentionsReceivedCount   = data.intentions_received_count  || 0;
+  bodyScanCount             = data.body_scan_count            || 0;
+  moodCheckinCount          = data.mood_checkin_count         || 0;
+  mantraWeekCount           = data.mantra_week_count          || 0;
+  foundationDaysCount       = data.foundation_days_count      || 0;
+  try { pinnedBadges = JSON.parse(data.pinned_badges || '[]'); } catch(e) { pinnedBadges = []; }
   applyMembershipState();
   // Load intentions from Supabase
   if(currentUser) {
@@ -3397,61 +3413,91 @@ function handleSubscribe(){
 }
 
 // ── BADGE DATA ──
+const BADGE_YEAR_COLORS = { 1:'#c9a96e', 2:'#b0b8c1', 3:'#e8d5c4' };
+
 const badgeCategories = [
-  {
-    name: 'Streak', id: 'streak',
-    badges: [
-      { id:'streak7', icon:'☽', name:'7 Day Streak', tier:'Intention', desc:'You showed up for 7 days in a row. The seed is planted.', earned:false },
-      { id:'streak30', icon:'☽◌', name:'30 Day Streak', tier:'Belief', desc:'30 days of intention. You are awakening to your power.', earned:false },
-      { id:'streak90', icon:'☽○', name:'90 Day Streak', tier:'Alignment', desc:'90 days. Your practice is blooming into something real.', earned:false },
-      { id:'streak180', icon:'☽◎', name:'180 Day Streak', tier:'Momentum', desc:'Half a year of daily devotion. You are radiant.', earned:false },
-      { id:'streak365', icon:'☽✦', name:'365 Day Streak', tier:'Transcendent', desc:'A full year. You have transcended foundation and become.', earned:false },
-    ]
-  },
-  {
-    name: 'Journal', id: 'journal',
-    badges: [
-      { id:'journal1', icon:'✦', name:'First Entry', tier:'Intention', desc:'You wrote your first journal entry. Your story begins.', earned:false },
-      { id:'journal30', icon:'✦✦', name:'30 Entries', tier:'Belief', desc:'30 reflections written. You are learning to listen within.', earned:false },
-      { id:'journal100', icon:'✦◌', name:'100 Entries', tier:'Alignment', desc:'100 entries. Your inner world is rich and alive.', earned:false },
-      { id:'journal365', icon:'✦◎', name:'365 Entries', tier:'Momentum', desc:'A year of daily reflection. You know yourself deeply.', earned:false },
-    ]
-  },
-  {
-    name: 'Affirmations', id: 'affirmations',
-    badges: [
-      { id:'aff1', icon:'◎', name:'First Unlock', tier:'Intention', desc:'Your first affirmation unlocked. The door is open.', earned:false },
-      { id:'aff30', icon:'◎◌', name:'30 Unlocked', tier:'Belief', desc:'30 affirmations in your library. You are awakening.', earned:false },
-      { id:'aff100', icon:'◎○', name:'100 Unlocked', tier:'Alignment', desc:'100 affirmations. Your library is coming alive.', earned:false },
-      { id:'aff300', icon:'◎◎', name:'300 Unlocked', tier:'Momentum', desc:'300 affirmations. Your collection is radiant.', earned:false },
-      { id:'aff800', icon:'∞', name:'Full Library', tier:'Transcendent', desc:'You have unlocked every affirmation. You are eternal.', earned:false },
-    ]
-  },
-  {
-    name: 'Manifestation', id: 'manifestation',
-    badges: [
-      { id:'man1', icon:'❋', name:'First Received', tier:'Intention', desc:'Your first intention marked as received. It works.', earned:false },
-      { id:'man5', icon:'❋◌', name:'5 Received', tier:'Belief', desc:'Five intentions manifested. You are in the flow.', earned:false },
-      { id:'man10', icon:'❋○', name:'10 Received', tier:'Alignment', desc:'Ten manifestations. You are becoming what you believe.', earned:false },
-      { id:'man25', icon:'❋✦', name:'25 Received', tier:'Momentum', desc:'25 intentions brought to life. You are radiant.', earned:false },
-    ]
-  },
-  {
-    name: 'Mood', id: 'mood',
-    badges: [
-      { id:'mood1', icon:'↑', name:'First Shift', tier:'Intention', desc:'Your mood shifted after an affirmation. It is working.', earned:false },
-      { id:'mood7', icon:'↑↑', name:'7 Day Lift', tier:'Belief', desc:'7 days of mood improvement. You are rising.', earned:false },
-      { id:'mood30', icon:'↑◎', name:'30 Day Glow', tier:'Alignment', desc:'30 days trending upward. Your light is showing.', earned:false },
-    ]
-  },
-  {
-    name: 'Comeback', id: 'comeback',
-    badges: [
-      { id:'come1', icon:'∞', name:'Comeback', tier:'Belief', desc:'You missed a day but came back and restored your streak. That is strength.', earned:false },
-      { id:'come3', icon:'∞✦', name:'Triple Return', tier:'Alignment', desc:'Three comebacks. You never stay down for long.', earned:false },
-    ]
-  }
+  { name:'Streak', id:'streak', icon:'☽', badges:[
+    { id:'s1', tier:'I',   name:'First Flame',     desc:'Seven days of showing up. The practice has taken root.',                          req:'Reach a 7 day streak',      earned:false },
+    { id:'s2', tier:'II',  name:'Steady Light',    desc:'Thirty days of intention. You are awakening to your power.',                      req:'Reach a 30 day streak',     earned:false },
+    { id:'s3', tier:'III', name:'Committed',       desc:'Ninety days. Your practice is blooming into something real.',                     req:'Reach a 90 day streak',     earned:false },
+    { id:'s4', tier:'IV',  name:'Devoted',         desc:'Half a year of daily devotion. You are radiant with consistency.',                req:'Reach a 180 day streak',    earned:false },
+    { id:'s5', tier:'V',   name:'Year of Becoming',desc:'A full year. You have transcended foundation and become the practice.',           req:'Reach a 365 day streak',    earned:false },
+  ]},
+  { name:'Journal', id:'journal', icon:'✦', badges:[
+    { id:'j1', tier:'I',   name:'First Word',      desc:'You wrote your first journal entry. Your inner voice has a home.',                req:'Write 1 journal entry',     earned:false },
+    { id:'j2', tier:'II',  name:'Ten Reflections', desc:'Ten entries written. You are learning to listen within.',                         req:'Write 10 journal entries',  earned:false },
+    { id:'j3', tier:'III', name:'Deep Practice',   desc:'Thirty reflections. Your inner world is rich and alive.',                         req:'Write 30 journal entries',  earned:false },
+    { id:'j4', tier:'IV',  name:'Inner Author',    desc:'One hundred entries. You know the architecture of your own mind.',                req:'Write 100 journal entries', earned:false },
+    { id:'j5', tier:'V',   name:'Chronicle',       desc:'Two hundred entries. You are a faithful witness to your own becoming.',           req:'Write 200 journal entries', earned:false },
+  ]},
+  { name:'Affirmations', id:'affirmations', icon:'◎', badges:[
+    { id:'a1', tier:'I',   name:'First Unlock',    desc:'Your first affirmation unlocked. The door is open.',                             req:'Unlock 1 affirmation',      earned:false },
+    { id:'a2', tier:'II',  name:'Growing Library', desc:'Thirty affirmations. You are building a treasury of truth.',                      req:'Unlock 30 affirmations',    earned:false },
+    { id:'a3', tier:'III', name:'Abundant',        desc:'One hundred affirmations. Your library is alive with possibility.',               req:'Unlock 100 affirmations',   earned:false },
+    { id:'a4', tier:'IV',  name:'Overflowing',     desc:'Two hundred affirmations. The words have shaped who you are.',                    req:'Unlock 200 affirmations',   earned:false },
+    { id:'a5', tier:'V',   name:'Embodied',        desc:'Three hundred sixty-five affirmations. You have lived them all.',                 req:'Unlock 365 affirmations',   earned:false },
+  ]},
+  { name:'Manifestation', id:'manifestation', icon:'❋', badges:[
+    { id:'m1', tier:'I',   name:'First Received',  desc:'Your first intention marked as received. It works.',                             req:'Mark 1 intention as received', earned:false },
+    { id:'m2', tier:'II',  name:'In Flow',         desc:'Five intentions manifested. You are in the current.',                            req:'Receive 5 intentions',      earned:false },
+    { id:'m3', tier:'III', name:'Magnetic',        desc:'Fifteen manifestations. What you call in, comes.',                               req:'Receive 15 intentions',     earned:false },
+    { id:'m4', tier:'IV',  name:'Living Proof',    desc:'Thirty intentions received. Your life is the evidence.',                         req:'Receive 30 intentions',     earned:false },
+    { id:'m5', tier:'V',   name:'Manifestor',      desc:'Fifty intentions brought to life. You know this is real.',                       req:'Receive 50 intentions',     earned:false },
+  ]},
+  { name:'Foundations', id:'foundations', icon:'◇', badges:[
+    { id:'f1', tier:'I',   name:'Laid Down',       desc:'You added your first foundation. The ground is set.',                            req:'Add 1 foundation',          earned:false },
+    { id:'f2', tier:'II',  name:'Seven Pillars',   desc:'Seven days of foundation completion. Ritual is forming.',                        req:'Complete foundations 7 days',  earned:false },
+    { id:'f3', tier:'III', name:'Solid Ground',    desc:'Thirty days of showing up for your foundations. You mean it.',                   req:'Complete foundations 30 days', earned:false },
+    { id:'f4', tier:'IV',  name:'Unshakeable',     desc:'Ninety days. Your foundations have become your nature.',                         req:'Complete foundations 90 days', earned:false },
+    { id:'f5', tier:'V',   name:'Architect',       desc:'One hundred eighty days. You have built something real from nothing.',           req:'Complete foundations 180 days',earned:false },
+  ]},
+  { name:'Mantra', id:'mantra', icon:'∿', badges:[
+    { id:'mt1', tier:'I',   name:'First Declaration', desc:'You set your first mantra. Your word went out into the world.',               req:'Set 1 weekly mantra',       earned:false },
+    { id:'mt2', tier:'II',  name:'Intentional',       desc:'Four weeks of mantra setting. You are learning to direct your week.',         req:'Set mantras for 4 weeks',   earned:false },
+    { id:'mt3', tier:'III', name:'Wordsmith',          desc:'Twelve weeks of weekly declarations. The practice is forming you.',          req:'Set mantras for 12 weeks',  earned:false },
+    { id:'mt4', tier:'IV',  name:'Voice of Intention', desc:'Half a year of weekly mantras. Your words carry real weight.',              req:'Set mantras for 26 weeks',  earned:false },
+    { id:'mt5', tier:'V',   name:'Year of the Word',   desc:'A full year of weekly declarations. You have lived by what you say.',       req:'Set mantras for 52 weeks',  earned:false },
+  ]},
+  { name:'Body Scan', id:'bodyscan', icon:'○', badges:[
+    { id:'bs1', tier:'I',   name:'First Arrival',  desc:'You dropped in. Your body welcomed you.',                                        req:'Complete 1 body scan',      earned:false },
+    { id:'bs2', tier:'II',  name:'Present',        desc:'Five body scans. You are learning to inhabit yourself.',                         req:'Complete 5 body scans',     earned:false },
+    { id:'bs3', tier:'III', name:'Inhabited',      desc:'Twenty body scans. Your awareness lives in your body now.',                      req:'Complete 20 body scans',    earned:false },
+    { id:'bs4', tier:'IV',  name:'Attuned',        desc:'Fifty scans. You read your body like a map.',                                   req:'Complete 50 body scans',    earned:false },
+    { id:'bs5', tier:'V',   name:'Somatic',        desc:'One hundred body scans. You are fluent in the language of your body.',           req:'Complete 100 body scans',   earned:false },
+  ]},
+  { name:'Saved', id:'saved', icon:'♡', badges:[
+    { id:'sv1', tier:'I',   name:'First Favorite', desc:'You saved your first affirmation. It chose you too.',                            req:'Save 1 affirmation',        earned:false },
+    { id:'sv2', tier:'II',  name:'Collector',      desc:'Five saved affirmations. You are building your personal canon.',                 req:'Save 5 affirmations',       earned:false },
+    { id:'sv3', tier:'III', name:'Curator',        desc:'Fifteen saved. You know exactly what resonates.',                                req:'Save 15 affirmations',      earned:false },
+    { id:'sv4', tier:'IV',  name:'Beloved Words',  desc:'Thirty affirmations held dear. These words are yours.',                         req:'Save 30 affirmations',      earned:false },
+    { id:'sv5', tier:'V',   name:'Sacred Library', desc:'Fifty affirmations saved. You have built a personal scripture.',                 req:'Save 50 affirmations',      earned:false },
+  ]},
+  { name:'Mood', id:'mood', icon:'◐', badges:[
+    { id:'md1', tier:'I',   name:'First Check-in', desc:'You checked in with how you feel. That is the beginning.',                       req:'Complete 1 mood check-in',   earned:false },
+    { id:'md2', tier:'II',  name:'Aware',          desc:'Ten mood check-ins. You are learning to witness yourself.',                      req:'Complete 10 mood check-ins', earned:false },
+    { id:'md3', tier:'III', name:'Attuned',        desc:'Thirty check-ins. Your emotional intelligence is growing.',                      req:'Complete 30 mood check-ins', earned:false },
+    { id:'md4', tier:'IV',  name:'Chronicler',     desc:'One hundred check-ins. You know the patterns of your inner weather.',            req:'Complete 100 mood check-ins',earned:false },
+    { id:'md5', tier:'V',   name:'Inner Witness',  desc:'Two hundred check-ins. You are a faithful observer of your own soul.',           req:'Complete 200 mood check-ins',earned:false },
+  ]},
 ];
+
+function renderBadgeCircle(icon, tier, earned, color) {
+  const locked = !earned;
+  const isV = tier === 'V';
+  const stroke = locked ? 'rgba(255,255,255,0.15)' : color;
+  const numFill = locked ? 'rgba(255,255,255,0.2)' : color;
+  const crownSvg = isV && !locked
+    ? `<svg class="badge-crown" viewBox="0 0 22 10" xmlns="http://www.w3.org/2000/svg"><path d="M1,10 L1,4 L6,7.5 L11,1 L16,7.5 L21,4 L21,10 Z" fill="${color}" opacity=".9"/></svg>`
+    : '';
+  return `<div class="badge-circle${isV && !locked ? ' tier-v' : ''}">
+    ${crownSvg}
+    <svg class="badge-arc" viewBox="0 0 70 74" xmlns="http://www.w3.org/2000/svg">
+      <path d="M 21,58 A 28,28 0 1,1 49,58" fill="none" stroke="${stroke}" stroke-width="2" stroke-linecap="round"/>
+      <text x="35" y="70" text-anchor="middle" fill="${numFill}" font-family="Jost,sans-serif" font-size="9" font-weight="300" letter-spacing="1">${tier}</text>
+    </svg>
+    <span class="badge-circle-icon" style="color:${locked ? 'rgba(255,255,255,0.25)' : color}">${icon}</span>
+  </div>`;
+}
 
 const baseNames = ['Ember','Spark','Flame','Radiant','Luminous','Transcendent'];
 const baseThresholds = [0,200,800,2500,6000,12000];
@@ -3610,16 +3656,53 @@ function openBadges() {
 }
 
 function openBadgeModal(badgeId) {
-  const badge = badgeCategories.flatMap(c => c.badges).find(b => b.id === badgeId);
-  if (!badge || !badge.earned) return;
-  document.getElementById('modalDay').innerHTML = `<div class="badge-modal-icon">${badge.icon}</div><div class="badge-modal-tier">${badge.tier}</div>`;
-  document.getElementById('modalText').innerHTML = `<div class="badge-modal-name">${badge.name}</div><div class="badge-modal-desc">${badge.desc}</div>`;
-  document.getElementById('modalCat').innerHTML = `
-    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <button onclick="dismissModal();openBadges();" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s">View All Badges</button>
-      <button onclick="dismissModal();openJournal();" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.15);color:var(--muted);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s">Open Journal</button>
-    </div>`;
+  const allBadges = badgeCategories.flatMap(c => c.badges.map(b => ({...b, catIcon: c.icon, catName: c.name})));
+  const badge = allBadges.find(b => b.id === badgeId);
+  if (!badge) return;
+
+  const color = '#c9a96e';
+  const isPinned = pinnedBadges.includes(badge.id);
+  document.getElementById('modalDay').innerHTML = renderBadgeCircle(badge.catIcon, badge.tier, badge.earned, color);
+
+  if (badge.earned) {
+    document.getElementById('modalText').innerHTML = `
+      <div style="font-size:15px;font-weight:400;color:var(--soft);margin-bottom:6px">${badge.name}</div>
+      <div style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.6">${badge.desc}</div>`;
+    const pinBorder = isPinned ? 'var(--gold)' : 'rgba(201,169,110,.3)';
+    const pinColor  = isPinned ? 'var(--gold)' : 'var(--muted)';
+    const pinLabel  = isPinned ? 'Unpin from Profile' : 'Pin to Profile';
+    document.getElementById('modalCat').innerHTML = `
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button onclick="togglePinBadge('${badge.id}')" style="padding:11px 22px;background:none;border:1px solid ${pinBorder};color:${pinColor};font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s">${pinLabel}</button>
+        <button onclick="dismissModal();openBadges();" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.15);color:var(--muted);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s">View All</button>
+      </div>`;
+  } else {
+    document.getElementById('modalText').innerHTML = `
+      <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">${badge.catName} · Tier ${badge.tier}</div>
+      <div style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.6">${badge.req}</div>`;
+    document.getElementById('modalCat').innerHTML = `
+      <button onclick="dismissModal();openBadges();" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.15);color:var(--muted);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s">View All Badges</button>`;
+  }
+
   document.getElementById('modalOverlay').classList.add('open');
+}
+
+async function togglePinBadge(badgeId) {
+  if (pinnedBadges.includes(badgeId)) {
+    pinnedBadges = pinnedBadges.filter(id => id !== badgeId);
+  } else {
+    if (pinnedBadges.length >= 3) {
+      dismissModal();
+      showCindersToast(0, 'You can pin up to 3 badges. Unpin one first.');
+      return;
+    }
+    pinnedBadges.push(badgeId);
+  }
+  if (currentUser) {
+    await db.from('profiles').update({ pinned_badges: JSON.stringify(pinnedBadges) }).eq('id', currentUser.id);
+  }
+  dismissModal();
+  buildBadgeScreen();
 }
 
 // ── INTENTIONS ──
@@ -3872,25 +3955,18 @@ function restoreFromGrace() {
 }
 
 function updateBadgeEarnedStates() {
-  const badgeEarned = {
-    streak7:   streakCount >= 7,
-    streak30:  streakCount >= 30,
-    streak90:  streakCount >= 90,
-    streak180: streakCount >= 180,
-    streak365: streakCount >= 365,
-    journal1:   journalEntryCount >= 1,
-    journal30:  journalEntryCount >= 30,
-    journal100: journalEntryCount >= 100,
-    aff1:   unlockedCount >= 1,
-    aff30:  unlockedCount >= 30,
-    aff100: unlockedCount >= 100,
-    come1:  comebackCount >= 1,
-    come3:  comebackCount >= 3,
+  const t = {
+    s1:streakCount>=7,    s2:streakCount>=30,    s3:streakCount>=90,   s4:streakCount>=180,  s5:streakCount>=365,
+    j1:journalEntryCount>=1, j2:journalEntryCount>=10, j3:journalEntryCount>=30, j4:journalEntryCount>=100, j5:journalEntryCount>=200,
+    a1:unlockedCount>=1,  a2:unlockedCount>=30,  a3:unlockedCount>=100, a4:unlockedCount>=200, a5:unlockedCount>=365,
+    m1:intentionsReceivedCount>=1,  m2:intentionsReceivedCount>=5,  m3:intentionsReceivedCount>=15,  m4:intentionsReceivedCount>=30,  m5:intentionsReceivedCount>=50,
+    f1:foundationDaysCount>=1,      f2:foundationDaysCount>=7,      f3:foundationDaysCount>=30,      f4:foundationDaysCount>=90,      f5:foundationDaysCount>=180,
+    mt1:mantraWeekCount>=1, mt2:mantraWeekCount>=4, mt3:mantraWeekCount>=12, mt4:mantraWeekCount>=26, mt5:mantraWeekCount>=52,
+    bs1:bodyScanCount>=1,   bs2:bodyScanCount>=5,   bs3:bodyScanCount>=20,   bs4:bodyScanCount>=50,   bs5:bodyScanCount>=100,
+    sv1:savedAffirmationIds.size>=1, sv2:savedAffirmationIds.size>=5, sv3:savedAffirmationIds.size>=15, sv4:savedAffirmationIds.size>=30, sv5:savedAffirmationIds.size>=50,
+    md1:moodCheckinCount>=1, md2:moodCheckinCount>=10, md3:moodCheckinCount>=30, md4:moodCheckinCount>=100, md5:moodCheckinCount>=200,
   };
-  badgeCategories.forEach(cat => cat.badges.forEach(b => {
-    if(b.id in badgeEarned) b.earned = badgeEarned[b.id];
-    else b.earned = false;
-  }));
+  badgeCategories.forEach(cat => cat.badges.forEach(b => { b.earned = !!t[b.id]; }));
 }
 
 // ── EMPTY STATES ──
@@ -3911,26 +3987,33 @@ function buildBadgeScreen() {
 
   const wrap = document.getElementById('badgeSectionsWrap');
   wrap.innerHTML = '';
+  const color = '#c9a96e';
 
-  // Empty state if nothing earned yet
-  if(totalEarned === 0) {
-    wrap.innerHTML = `<div class="empty-state" style="padding:40px 32px"><div class="empty-state-icon">◈</div><div class="empty-state-title">Your trophy room awaits</div><div class="empty-state-sub">Complete daily actions to earn your first badge. Every journey begins with a single step.</div></div>`;
-    return;
-  }
-
-  badgeCategories.forEach((cat,ci) => {
+  badgeCategories.forEach((cat, ci) => {
     const section = document.createElement('div');
     section.className = 'badge-section';
-    section.style.animationDelay = (0.2+ci*0.08)+'s';
-    section.innerHTML = `
-      <div class="badge-section-title">${cat.name}</div>
-      <div class="badge-grid">${cat.badges.map(b=>`
-        <div class="badge-item ${b.earned?'earned':'locked-badge'}" onclick="${b.earned?`openBadgeModal('${b.id}')`:''}">
-          <div class="badge-icon">${b.earned ? b.icon : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'}</div>
-          <div class="badge-name">${b.earned ? b.name : '???'}</div>
-          <div class="badge-tier">${b.tier}</div>
-        </div>`).join('')}
-      </div>`;
+    section.style.animationDelay = (0.2 + ci * 0.08) + 's';
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'badge-section-title';
+    titleEl.textContent = cat.icon + '  ' + cat.name;
+    section.appendChild(titleEl);
+
+    const grid = document.createElement('div');
+    grid.className = 'badge-grid';
+
+    cat.badges.forEach(b => {
+      const isPinned = pinnedBadges.includes(b.id);
+      const item = document.createElement('div');
+      item.className = 'badge-item' + (b.earned ? ' earned' : ' locked-badge') + (isPinned ? ' pinned' : '');
+      item.onclick = () => openBadgeModal(b.id);
+      item.innerHTML = renderBadgeCircle(cat.icon, b.tier, b.earned, color) +
+        `<div class="badge-pin-dot"></div>` +
+        `<div class="badge-name" style="font-size:9px;margin-top:4px;text-align:center;color:${b.earned ? 'var(--soft)' : 'rgba(255,255,255,0.2)'}">${b.earned ? b.name : '???'}</div>`;
+      grid.appendChild(item);
+    });
+
+    section.appendChild(grid);
     wrap.appendChild(section);
   });
 }
@@ -4277,20 +4360,28 @@ async function buildProfile() {
     }
   }
 
-  // Recent badges — clickable
+  // Pinned badges
   updateBadgeEarnedStates();
-  const earnedBadges = badgeCategories.flatMap(c=>c.badges).filter(b=>b.earned);
   const recentWrap = document.getElementById('profileRecentBadges');
-  recentWrap.innerHTML = earnedBadges.length === 0
-    ? '<div style="font-size:13px;font-weight:300;color:var(--muted);font-style:italic">Your earned badges will appear here.</div>'
-    : earnedBadges.slice(0,4).map(b=>`
-        <div class="profile-badge-pill" onclick="openBadgeModal('${b.id}')" style="cursor:pointer">
-          <div class="profile-badge-icon">${b.icon}</div>
-          <div class="profile-badge-info">
-            <div class="profile-badge-name">${b.name}</div>
-            <div class="profile-badge-tier">${b.tier}</div>
-          </div>
-        </div>`).join('');
+  const _badgeColor = '#c9a96e';
+  if (pinnedBadges.length === 0) {
+    const _earnedCount = badgeCategories.reduce((sum,cat)=>sum+cat.badges.filter(b=>b.earned).length,0);
+    recentWrap.innerHTML = _earnedCount === 0
+      ? '<div style="font-size:13px;font-weight:300;color:var(--muted);font-style:italic">Complete daily actions to earn your first badge.</div>'
+      : '<div style="font-size:13px;font-weight:300;color:var(--muted)">Pin up to 3 badges from <button onclick="openBadges()" style="background:none;border:none;color:var(--gold);font-family:\'Jost\',sans-serif;font-size:13px;font-weight:300;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:0">My Badges</button> to display here.</div>';
+  } else {
+    const _allBadges = badgeCategories.flatMap(c => c.badges.map(b => ({...b, catIcon: c.icon})));
+    recentWrap.innerHTML = `<div class="profile-pinned-badges">${
+      pinnedBadges.map(id => {
+        const b = _allBadges.find(x => x.id === id);
+        if (!b) return '';
+        return `<div onclick="openBadges()" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">
+          ${renderBadgeCircle(b.catIcon, b.tier, true, _badgeColor)}
+          <div style="font-size:10px;font-weight:300;color:var(--muted);text-align:center;max-width:60px;line-height:1.3">${b.name}</div>
+        </div>`;
+      }).join('')
+    }</div>`;
+  }
 
   // Customize section — paid members only; sync toggle states to current featureToggles
   const customizeSection = document.getElementById('customizeSection');
