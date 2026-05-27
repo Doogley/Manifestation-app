@@ -3660,25 +3660,36 @@ function buildLibraryScreen(filter) {
   grid.innerHTML = '';
 
   const isAdmin = adminMode;
+  const _libSeq = getUserAffirmationSequence();
+
+  // Always render today's tile first
+  const todayAff = affirmationLibrary.find(a => a.id === unlockedCount);
+  if(todayAff) {
+    const hist = affirmationHistory[todayAff.id];
+    const dText = hist ? hist.text : todayAffirmation;
+    const dCat = hist ? hist.cat : todayCategory;
+    const tile = document.createElement('div');
+    tile.className = 'library-screen-tile today-tile';
+    const crossCatNote = (filter !== 'all' && dCat !== filter)
+      ? `<div style="margin-top:8px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(201,169,110,.45)">Today · ${dCat}</div>`
+      : '';
+    tile.innerHTML = `<div class="lib-screen-day">✦ Day ${todayAff.id} · Today</div><div class="lib-screen-text">${dText}</div><div class="lib-screen-cat">${dCat}</div>${crossCatNote}`;
+    tile.onclick = () => openModal(`Day ${todayAff.id} · Today`, dText, dCat);
+    grid.appendChild(tile);
+  }
+
+  // Remaining tiles filtered by category, excluding today
   const filtered = affirmationLibrary.filter(a =>
+    a.id !== unlockedCount &&
     (filter === 'all' || a.cat === filter) &&
     (isAdmin || a.id <= unlockedCount + 7)
   );
 
-  const _libSeq = getUserAffirmationSequence();
-  filtered.forEach((aff, i) => {
+  filtered.forEach((aff) => {
     const tile = document.createElement('div');
-    const isToday = aff.id === unlockedCount;
     const isUnlocked = isAdmin || aff.id <= unlockedCount;
 
-    if(isToday) {
-      const hist = affirmationHistory[aff.id];
-      const dText = hist ? hist.text : todayAffirmation;
-      const dCat = hist ? hist.cat : todayCategory;
-      tile.className = 'library-screen-tile today-tile';
-      tile.innerHTML = `<div class="lib-screen-day">✦ Day ${aff.id} · Today</div><div class="lib-screen-text">${dText}</div><div class="lib-screen-cat">${dCat}</div>`;
-      tile.onclick = () => openModal(`Day ${aff.id} · Today`, dText, dCat);
-    } else if(isUnlocked) {
+    if(isUnlocked) {
       const hist = affirmationHistory[aff.id];
       const fallback = _libSeq[(aff.id - 1) % _libSeq.length] || aff;
       const dText = hist ? hist.text : fallback.text;
