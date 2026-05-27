@@ -442,6 +442,8 @@
   .lib-screen-text { font-family:'Jost',sans-serif; font-size:13px; font-weight:300; color:var(--soft); line-height:1.5; }
   .lib-screen-cat { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:8px; }
   .library-screen-tile.locked-tile::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent 0%,rgba(201,169,110,.03) 50%,transparent 100%); background-size:200% 100%; animation:shimmer 4s ease-in-out infinite; }
+  .lib-heart { position:absolute; top:8px; right:10px; background:none; border:none; color:rgba(201,169,110,.35); font-size:14px; cursor:pointer; padding:4px; line-height:1; transition:color .2s; }
+  .lib-heart:hover, .lib-heart.saved { color:var(--gold); }
 
   @media(max-width:480px){
     .library-screen-header,.library-screen-grid{padding-left:20px;padding-right:20px}
@@ -837,7 +839,7 @@
     <p class="reveal-message" id="revealMessage"></p>
     <div class="reveal-actions">
       <button class="btn-primary" onclick="goToHome()">Enter the App</button>
-      <button class="btn-ghost" onclick="saved=false;toggleSave();goToHome()">Save this affirmation</button>
+      <button class="btn-ghost" onclick="toggleSave();goToHome()">Save this affirmation</button>
     </div>
   </div>
 </div>
@@ -1380,7 +1382,7 @@
   <div class="profile-section" style="animation-delay:.35s">
     <div class="profile-section-title">Saved Affirmation</div>
     <div class="profile-fav-affirmation">
-      <div class="profile-fav-text" id="profileFavAffirmation">Tap the ♡ Save button on any affirmation to pin it here.</div>
+      <div id="profileFavAffirmation"></div>
     </div>
   </div>
 
@@ -1518,7 +1520,7 @@
     <div class="customize-row">
       <div>
         <div class="customize-row-label">Monthly Reflection</div>
-        <div class="customize-row-sub">Your AI-generated monthly summary in profile</div>
+        <div class="customize-row-sub">A personalized summary of your month — your moods, intentions, and growth.</div>
       </div>
       <label class="toggle-pill">
         <input type="checkbox" id="toggle_monthly_summary" checked onchange="saveFeatureToggle('monthly_summary', this.checked)">
@@ -1719,8 +1721,7 @@ function resetUserState() {
   todayAffirmation = '';
   todayCategory = '';
   saved = false;
-  savedAffirmationText = '';
-  savedAffirmationCat = '';
+  savedAffirmationIds = new Set();
   affirmationHistory = {};
   intentions = [];
   weeklyMantra = '';
@@ -1929,19 +1930,10 @@ async function loadUserProfile() {
     todayAffirmation = libEntry ? libEntry.text : affirmations[answers.intention][answers.tone];
     todayCategory = libEntry ? libEntry.cat : catLabels[answers.intention];
   }
-  // Only mark as saved if the stored affirmation matches today's — clears stale saves from previous days
-  savedAffirmationText = data.saved_affirmation_text || '';
-  savedAffirmationCat = data.saved_affirmation_cat || '';
-  if(savedAffirmationText && savedAffirmationText === todayAffirmation) {
-    saved = true;
-  } else {
-    saved = false;
-    if(savedAffirmationText) {
-      savedAffirmationText = '';
-      savedAffirmationCat = '';
-      await db.from('profiles').update({ saved_affirmation_text: null, saved_affirmation_cat: null }).eq('id', currentUser.id);
-    }
-  }
+  // Load saved affirmations from dedicated table
+  const { data: savedData } = await db.from('saved_affirmations').select('affirmation_day').eq('user_id', currentUser.id);
+  if(savedData) savedAffirmationIds = new Set(savedData.map(r => r.affirmation_day));
+  saved = savedAffirmationIds.has(unlockedCount);
   // Set nav avatar to initial by default; overridden below if avatar_url exists
   const navAvatarEl = document.getElementById('navAvatar');
   if(navAvatarEl) navAvatarEl.textContent = (userRealName || 'F')[0].toUpperCase();
@@ -2216,10 +2208,40 @@ const affirmationLibrary = [
   {id:198,text:"I trust the process even when I cannot see the progress.",cat:"Growth"},
   {id:199,text:"My dream is valid. My timing is perfect. My effort is enough.",cat:"Growth"},
   {id:200,text:"I am already everything I need to be. I am also still becoming more.",cat:"Growth"},
+  {id:201,text:"I parent with intention, not with fear.",cat:"Family"},
+  {id:202,text:"The cycle stops with me — and that is one of the most powerful things I will ever do.",cat:"Family"},
+  {id:203,text:"I am building a home where love is louder than fear.",cat:"Family"},
+  {id:204,text:"I show up imperfectly and I show up anyway — that is enough.",cat:"Family"},
+  {id:205,text:"My presence is the gift my family needs most.",cat:"Family"},
+  {id:206,text:"I am healing so the people I love inherit wholeness instead of wounds.",cat:"Family"},
+  {id:207,text:"The safety I create in my home is a legacy in itself.",cat:"Family"},
+  {id:208,text:"I choose the people who choose me back — and I call that family.",cat:"Family"},
+  {id:209,text:"I am not my parents' patterns. I am my own conscious choices.",cat:"Family"},
+  {id:210,text:"Every small moment of connection is a thread in something that lasts.",cat:"Family"},
+  {id:211,text:"I give my children what I needed — and what I never had.",cat:"Family"},
+  {id:212,text:"My home reflects the peace I have worked to build inside myself.",cat:"Family"},
+  {id:213,text:"I repair when I get it wrong. That is what love in practice looks like.",cat:"Family"},
+  {id:214,text:"The love I offer my family is rooted in who I am, not what I am afraid of.",cat:"Family"},
+  {id:215,text:"I belong to people who see me — and I let myself be seen.",cat:"Family"},
+  {id:216,text:"I am learning to receive love as easily as I give it.",cat:"Family"},
+  {id:217,text:"My family feels safe because I have made safety something I carry.",cat:"Family"},
+  {id:218,text:"I do not have to be perfect to be a deeply good parent.",cat:"Family"},
+  {id:219,text:"The wounds I am healing today will not be passed to the next generation.",cat:"Family"},
+  {id:220,text:"I create rituals that hold my family together — small ones, repeated with love.",cat:"Family"},
+  {id:221,text:"Blood does not define my family. Commitment and love do.",cat:"Family"},
+  {id:222,text:"I speak to my children the way I wish someone had spoken to me.",cat:"Family"},
+  {id:223,text:"I am present in the ordinary Tuesday — because that is where family is actually built.",cat:"Family"},
+  {id:224,text:"I am allowed to grieve the family I did not have while building the one I deserve.",cat:"Family"},
+  {id:225,text:"My love is steady. My children know they can count on it.",cat:"Family"},
+  {id:226,text:"I set boundaries with family because I want relationship, not resentment.",cat:"Family"},
+  {id:227,text:"The legacy I leave is written in how I made people feel at home.",cat:"Family"},
+  {id:228,text:"I am breaking old patterns with patience, awareness, and a willingness to change.",cat:"Family"},
+  {id:229,text:"My home holds both joy and hard conversations — because that is what real love holds.",cat:"Family"},
+  {id:230,text:"I am the person in my family's story who chose differently.",cat:"Family"},
 ];
 
 let currentQuestion=0,answers={},selectedOption=null,todayAffirmation='',todayCategory='',saved=false;
-let savedAffirmationText='',savedAffirmationCat='';
+let savedAffirmationIds = new Set();
 let affirmationHistory = {}; // map of day number -> { text, cat } from user_affirmations table
 
 const noNavScreens = ['loading','auth','splash','onboarding','reveal','grace','monthlySummary'];
@@ -2647,39 +2669,29 @@ function updateCountdown(){
 
 let savedCindersAwarded = false;
 async function toggleSave(){
-  saved=!saved;
-  const b=document.getElementById('saveBtn');
-  b.textContent=saved?'♥︎  Saved':'♡  Save';
-  b.classList.toggle('active',saved);
-  if(currentUser) {
-    if(saved) {
-      savedAffirmationText = todayAffirmation;
-      savedAffirmationCat = todayCategory;
-      await db.from('profiles').update({
-        saved_affirmation_text: todayAffirmation,
-        saved_affirmation_cat: todayCategory,
-      }).eq('id', currentUser.id);
-    } else {
-      savedAffirmationText = '';
-      savedAffirmationCat = '';
-      await db.from('profiles').update({
-        saved_affirmation_text: null,
-        saved_affirmation_cat: null,
-      }).eq('id', currentUser.id);
-    }
+  await toggleSaveByDay(unlockedCount, todayAffirmation, todayCategory);
+  saved = savedAffirmationIds.has(unlockedCount);
+  const b = document.getElementById('saveBtn');
+  if(b) {
+    b.textContent = saved ? '♥︎  Saved' : '♡  Save';
+    b.classList.toggle('active', saved);
   }
-  const favEl = document.getElementById('profileFavAffirmation');
-  if(favEl) {
-    if(saved && savedAffirmationText) {
-      favEl.textContent = savedAffirmationText;
-      favEl.style.cursor = 'pointer';
-      favEl.onclick = () => openModal('Saved Affirmation', savedAffirmationText, savedAffirmationCat);
-    } else {
-      favEl.textContent = 'Tap the ♡ Save button on any affirmation to pin it here.';
-      favEl.style.cursor = '';
-      favEl.onclick = null;
-    }
+}
+
+async function toggleSaveByDay(dayNum, text, cat) {
+  if(!currentUser) return;
+  if(savedAffirmationIds.has(dayNum)) {
+    await db.from('saved_affirmations').delete().eq('user_id', currentUser.id).eq('affirmation_day', dayNum);
+    savedAffirmationIds.delete(dayNum);
+  } else {
+    await db.from('saved_affirmations').insert({ user_id: currentUser.id, affirmation_day: dayNum, affirmation_text: text, affirmation_cat: cat });
+    savedAffirmationIds.add(dayNum);
   }
+  document.querySelectorAll(`.lib-heart[data-day="${dayNum}"]`).forEach(h => {
+    const isSaved = savedAffirmationIds.has(dayNum);
+    h.textContent = isSaved ? '♥︎' : '♡';
+    h.classList.toggle('saved', isSaved);
+  });
 }
 function shareAffirmation(){if(navigator.share){navigator.share({title:'Already Mine',text:todayAffirmation,url:window.location.href}).then(()=>showCindersToast(0,'✦ Shared')).catch(()=>{});}else{navigator.clipboard.writeText(todayAffirmation).then(()=>showCindersToast(0,'✦ Copied to clipboard')).catch(()=>showCindersToast(0,'Could not copy — try again'));}}
 function setTab(el){document.querySelectorAll('#globalBottomNav .nav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
@@ -3629,25 +3641,42 @@ function buildLibraryScreen(filter) {
   grid.innerHTML = '';
 
   const isAdmin = adminMode;
+  const _libSeq = getUserAffirmationSequence();
+
+  // Always render today's tile first
+  const todayAff = affirmationLibrary.find(a => a.id === unlockedCount);
+  if(todayAff) {
+    const hist = affirmationHistory[todayAff.id];
+    const dText = hist ? hist.text : todayAffirmation;
+    const dCat = hist ? hist.cat : todayCategory;
+    const tile = document.createElement('div');
+    tile.className = 'library-screen-tile today-tile';
+    const crossCatNote = (filter !== 'all' && dCat !== filter)
+      ? `<div style="margin-top:8px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(201,169,110,.45)">Today · ${dCat}</div>`
+      : '';
+    tile.innerHTML = `<div class="lib-screen-day">✦ Day ${todayAff.id} · Today</div><div class="lib-screen-text">${dText}</div><div class="lib-screen-cat">${dCat}</div>${crossCatNote}`;
+    tile.onclick = () => openModal(`Day ${todayAff.id} · Today`, dText, dCat);
+    const heartBtn = document.createElement('button');
+    heartBtn.className = 'lib-heart' + (savedAffirmationIds.has(todayAff.id) ? ' saved' : '');
+    heartBtn.dataset.day = todayAff.id;
+    heartBtn.textContent = savedAffirmationIds.has(todayAff.id) ? '♥︎' : '♡';
+    heartBtn.onclick = (e) => { e.stopPropagation(); toggleSaveByDay(todayAff.id, dText, dCat); };
+    tile.appendChild(heartBtn);
+    grid.appendChild(tile);
+  }
+
+  // Remaining tiles filtered by category, excluding today
   const filtered = affirmationLibrary.filter(a =>
+    a.id !== unlockedCount &&
     (filter === 'all' || a.cat === filter) &&
     (isAdmin || a.id <= unlockedCount + 7)
   );
 
-  const _libSeq = getUserAffirmationSequence();
-  filtered.forEach((aff, i) => {
+  filtered.forEach((aff) => {
     const tile = document.createElement('div');
-    const isToday = aff.id === unlockedCount;
     const isUnlocked = isAdmin || aff.id <= unlockedCount;
 
-    if(isToday) {
-      const hist = affirmationHistory[aff.id];
-      const dText = hist ? hist.text : todayAffirmation;
-      const dCat = hist ? hist.cat : todayCategory;
-      tile.className = 'library-screen-tile today-tile';
-      tile.innerHTML = `<div class="lib-screen-day">✦ Day ${aff.id} · Today</div><div class="lib-screen-text">${dText}</div><div class="lib-screen-cat">${dCat}</div>`;
-      tile.onclick = () => openModal(`Day ${aff.id} · Today`, dText, dCat);
-    } else if(isUnlocked) {
+    if(isUnlocked) {
       const hist = affirmationHistory[aff.id];
       const fallback = _libSeq[(aff.id - 1) % _libSeq.length] || aff;
       const dText = hist ? hist.text : fallback.text;
@@ -3655,6 +3684,12 @@ function buildLibraryScreen(filter) {
       tile.className = 'library-screen-tile';
       tile.innerHTML = `<div class="lib-screen-day">Day ${aff.id}</div><div class="lib-screen-text">${dText}</div><div class="lib-screen-cat">${dCat}</div>`;
       tile.onclick = () => openModal(`Day ${aff.id}`, dText, dCat);
+      const heartBtn = document.createElement('button');
+      heartBtn.className = 'lib-heart' + (savedAffirmationIds.has(aff.id) ? ' saved' : '');
+      heartBtn.dataset.day = aff.id;
+      heartBtn.textContent = savedAffirmationIds.has(aff.id) ? '♥︎' : '♡';
+      heartBtn.onclick = (e) => { e.stopPropagation(); toggleSaveByDay(aff.id, dText, dCat); };
+      tile.appendChild(heartBtn);
     } else {
       tile.className = 'library-screen-tile locked-tile';
       tile.innerHTML = `<div style="filter:blur(5px);font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:rgba(255,255,255,.07);line-height:1.5;margin-bottom:8px">${aff.text}</div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2)">Day ${aff.id}</div></div>`;
@@ -3821,7 +3856,7 @@ async function buildProfile() {
   document.getElementById('profileEditBtn').textContent = userNickname ? '✎ Edit nickname' : '✎ Add nickname';
 
   // Member since
-  const now = new Date();
+  const now = currentUser?.created_at ? new Date(currentUser.created_at) : new Date();
   const day = now.getDate();
   const ordinal = day + (['th','st','nd','rd'][((day%100-20)%10)||day%100>10?0:day%10]||'th');
   const monthYear = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
@@ -3883,12 +3918,36 @@ async function buildProfile() {
     }
   }
 
-  // Saved affirmation
-  if(savedAffirmationText) {
-    const favEl = document.getElementById('profileFavAffirmation');
-    favEl.textContent = savedAffirmationText;
-    favEl.style.cursor = 'pointer';
-    favEl.onclick = () => openModal('Saved Affirmation', savedAffirmationText, savedAffirmationCat);
+  // Saved affirmations list
+  const favEl = document.getElementById('profileFavAffirmation');
+  if(favEl) {
+    favEl.innerHTML = '';
+    if(savedAffirmationIds.size === 0) {
+      favEl.innerHTML = '<span style="font-family:\'Jost\',sans-serif;font-size:13px;font-weight:300;color:var(--muted);font-style:italic">Tap the ♡ on any affirmation to save it here.</span>';
+    } else if(currentUser) {
+      const { data: savedFull } = await db.from('saved_affirmations').select('affirmation_day,affirmation_text,affirmation_cat').eq('user_id', currentUser.id).order('affirmation_day', { ascending: false });
+      if(savedFull) {
+        savedFull.forEach(s => {
+          const row = document.createElement('div');
+          row.style.cssText = 'display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(201,169,110,.08)';
+          const textDiv = document.createElement('div');
+          textDiv.style.cssText = 'flex:1;font-family:\'Cormorant Garamond\',serif;font-size:14px;font-weight:300;color:var(--soft);line-height:1.6;cursor:pointer';
+          textDiv.onclick = () => openModal(`Day ${s.affirmation_day}`, s.affirmation_text, s.affirmation_cat);
+          const meta = document.createElement('div');
+          meta.style.cssText = 'font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px;font-family:\'Jost\',sans-serif';
+          meta.textContent = `Day ${s.affirmation_day} · ${s.affirmation_cat}`;
+          textDiv.textContent = s.affirmation_text;
+          textDiv.appendChild(meta);
+          const removeBtn = document.createElement('button');
+          removeBtn.style.cssText = 'background:none;border:none;color:rgba(201,169,110,.4);font-size:15px;cursor:pointer;padding:2px 4px;flex-shrink:0;line-height:1';
+          removeBtn.textContent = '✕';
+          removeBtn.onclick = async () => { await toggleSaveByDay(s.affirmation_day, s.affirmation_text, s.affirmation_cat); buildProfile(); };
+          row.appendChild(textDiv);
+          row.appendChild(removeBtn);
+          favEl.appendChild(row);
+        });
+      }
+    }
   }
 
   // Monthly reflection button
