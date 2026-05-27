@@ -2389,6 +2389,36 @@ const affirmationLibrary = [
   {id:378,text:"The strength I am building is not just physical. It runs all the way through me.",cat:"Health"},
   {id:379,text:"I choose clarity. I choose presence. I choose the version of my life where I feel good.",cat:"Health"},
   {id:380,text:"My body is on my side. I act like I believe that.",cat:"Health"},
+  {id:381,text:"Self-love is not something I earn when I improve. It is where I begin.",cat:"Love"},
+  {id:382,text:"I have standards and I hold them even when holding them feels lonely.",cat:"Love"},
+  {id:383,text:"I am healing the parts of me that confused intensity for love. I know the difference now.",cat:"Love"},
+  {id:384,text:"I love fully and I remain fully myself. Those two things are not in conflict.",cat:"Love"},
+  {id:385,text:"I am attracting love by being exactly who I am, not a version of who I think I should be.",cat:"Love"},
+  {id:386,text:"I let love in. Even now. Even after everything.",cat:"Love"},
+  {id:387,text:"The friendships in my life are deep, chosen, and built to last.",cat:"Love"},
+  {id:388,text:"I love the people I love through difficulty without losing the thread back to myself.",cat:"Love"},
+  {id:389,text:"I know my worth in relationships. I do not negotiate it.",cat:"Love"},
+  {id:390,text:"Love and need are different things. I am learning to want from fullness, not from fear.",cat:"Love"},
+  {id:391,text:"My attachment wounds are healing. I am capable of secure and steady love.",cat:"Love"},
+  {id:392,text:"I bring my whole self into my relationships and I find that is exactly what the right people want.",cat:"Love"},
+  {id:393,text:"I do not shrink myself to fit into a love that was not built for who I actually am.",cat:"Love"},
+  {id:394,text:"The love I have been looking for has been practicing finding me too.",cat:"Love"},
+  {id:395,text:"I am a good friend. I show up, I remember, I stay.",cat:"Love"},
+  {id:396,text:"I release the fear that loving someone means eventually losing them.",cat:"Love"},
+  {id:397,text:"A healthy relationship does not require me to disappear into it. It asks me to arrive fully.",cat:"Love"},
+  {id:398,text:"I communicate what I need. That is not neediness. That is intimacy.",cat:"Love"},
+  {id:399,text:"I have been hurt before and I chose to stay open. That is one of the bravest things about me.",cat:"Love"},
+  {id:400,text:"The love I give without expectation comes back to me in ways I could not have planned.",cat:"Love"},
+  {id:401,text:"I do not beg for what should be freely given.",cat:"Love"},
+  {id:402,text:"I am building a relationship with myself that I am proud to bring another person into.",cat:"Love"},
+  {id:403,text:"Real connection requires me to be seen. I let myself be seen.",cat:"Love"},
+  {id:404,text:"I choose people who choose me back, clearly and consistently.",cat:"Love"},
+  {id:405,text:"My past relationships were not failures. They were data. I have learned from all of them.",cat:"Love"},
+  {id:406,text:"The love I have for the people in my life is one of my greatest strengths.",cat:"Love"},
+  {id:407,text:"I release anxious love and I practice trusting the people who have earned my trust.",cat:"Love"},
+  {id:408,text:"I am not too much for the right person. I am exactly enough.",cat:"Love"},
+  {id:409,text:"Love in my life looks like safety, laughter, honesty, and showing up. That is what I build toward.",cat:"Love"},
+  {id:410,text:"I love generously and I receive love with the same open hands.",cat:"Love"},
 ];
 
 let currentQuestion=0,answers={},selectedOption=null,todayAffirmation='',todayCategory='',saved=false;
@@ -3800,7 +3830,6 @@ function buildLibraryScreen(filter) {
   grid.innerHTML = '';
 
   const isAdmin = adminMode;
-  const _libSeq = getUserAffirmationSequence();
 
   // Always render today's tile first
   const todayAff = affirmationLibrary.find(a => a.id === unlockedCount);
@@ -3837,9 +3866,8 @@ function buildLibraryScreen(filter) {
 
     if(isUnlocked) {
       const hist = affirmationHistory[aff.id];
-      const fallback = _libSeq[(aff.id - 1) % _libSeq.length] || aff;
-      const dText = hist ? hist.text : fallback.text;
-      const dCat = hist ? hist.cat : fallback.cat;
+      const dText = hist ? hist.text : aff.text;
+      const dCat = hist ? hist.cat : aff.cat;
       tile.className = 'library-screen-tile';
       tile.innerHTML = `<div class="lib-screen-day">Day ${aff.id}</div><div class="lib-screen-text">${dText}</div><div class="lib-screen-cat">${dCat}</div>`;
       tile.onclick = () => openModal(`Day ${aff.id}`, dText, dCat);
