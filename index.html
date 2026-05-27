@@ -2925,12 +2925,10 @@ function buildLibrary(){
   t.onclick=()=>openModal(`Day ${unlockedCount} · Today`,todayAffirmation,todayCategory);
   grid.appendChild(t);
 
-  // Previously unlocked days (1 through unlockedCount-1)
-  const _seq=getUserAffirmationSequence();
+  // Previously unlocked days (1 through unlockedCount-1), descending
   for(let d=unlockedCount-1;d>=1;d--){
     const hist=affirmationHistory[d];
-    const fallback=_seq[(d-1)%_seq.length]||affirmationLibrary[d-1];
-    const aff=hist||fallback;
+    const aff=hist||affirmationLibrary.find(a=>a.id===d);
     if(!aff) continue;
     const tile=document.createElement('div');
     tile.className='lib-tile';
@@ -3977,11 +3975,15 @@ function buildLibraryScreen(filter) {
   }
 
   // Remaining tiles filtered by category, excluding today
-  const filtered = affirmationLibrary.filter(a =>
+  // Unlocked: descending (most recent first); locked: ascending (soonest unlock first)
+  const _filtered = affirmationLibrary.filter(a =>
     a.id !== unlockedCount &&
     (filter === 'all' || a.cat === filter) &&
     (isAdmin || a.id <= unlockedCount + 7)
   );
+  const _unlocked = _filtered.filter(a => isAdmin || a.id < unlockedCount).sort((a,b) => b.id - a.id);
+  const _locked   = _filtered.filter(a => !isAdmin && a.id > unlockedCount).sort((a,b) => a.id - b.id);
+  const filtered  = [..._unlocked, ..._locked];
 
   filtered.forEach((aff) => {
     const tile = document.createElement('div');
