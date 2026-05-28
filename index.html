@@ -4298,6 +4298,9 @@ async function openProfile() {
 async function buildProfile() {
   applyMembershipState();
   applyFeatureToggles();
+  const todayNow = new Date();
+  const currentYear = todayNow.getFullYear();
+  const currentMonth = todayNow.getMonth() + 1;
   // Name display — show nickname if set, otherwise real name
   const displayName = userNickname || userRealName;
   const profileInitialEl = document.getElementById('profileInitial');
@@ -4406,9 +4409,22 @@ async function buildProfile() {
   const lockNotice = document.getElementById('monthlyLockNotice');
   if(reflBtn) {
     if(adminMode || isPaidMember) {
-      reflBtn.textContent = summaryGenerated ? 'Read This Month\'s Reflection' : 'View This Month\'s Reflection';
       reflBtn.onclick = openMonthlySummary;
       if(lockNotice) lockNotice.style.display = 'none';
+      // Check if a summary already exists for this month
+      if(currentUser) {
+        const { data: existingSummary } = await db.from('monthly_summaries')
+          .select('narrative')
+          .eq('user_id', currentUser.id)
+          .eq('year', currentYear)
+          .eq('month', currentMonth)
+          .maybeSingle();
+        reflBtn.textContent = existingSummary?.narrative
+          ? 'Read This Month\'s Reflection'
+          : 'What This Month Held';
+      } else {
+        reflBtn.textContent = 'What This Month Held';
+      }
     } else {
       reflBtn.textContent = 'Unlock with Membership';
       reflBtn.onclick = openUpgrade;
@@ -4552,13 +4568,7 @@ async function openMonthlySummary() {
   document.getElementById('summaryAffirmations').textContent = unlockedCount || 0;
   document.getElementById('summaryEntries').textContent = journalEntryCount || 0;
 
-  // Show loading, hide content
-  document.getElementById('summaryLoading').style.display = 'flex';
-  document.getElementById('summaryContent').style.display = 'none';
-
-  showScreen('monthlySummary');
-
-  // Check for a cached narrative for this month
+  // Check for a cached narrative before showing the screen
   if(currentUser) {
     const { data: cached } = await db.from('monthly_summaries')
       .select('narrative')
@@ -4569,11 +4579,18 @@ async function openMonthlySummary() {
 
     if(cached?.narrative) {
       document.getElementById('summaryNarrative').textContent = cached.narrative;
+      document.getElementById('summaryLoading').style.display = 'none';
+      document.getElementById('summaryContent').style.display = 'block';
+      showScreen('monthlySummary');
       await finishSummaryUI(year, month);
       return;
     }
   }
 
+  // No cache — show loading spinner and generate
+  document.getElementById('summaryLoading').style.display = 'flex';
+  document.getElementById('summaryContent').style.display = 'none';
+  showScreen('monthlySummary');
   generateSummary(year, month);
 }
 
