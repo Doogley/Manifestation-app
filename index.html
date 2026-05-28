@@ -880,7 +880,7 @@
 <div id="home" class="screen">
   <div class="home-nav" style="position:relative;z-index:1">
     <div class="nav-logo" id="navLogo" onclick="handleLogoTap()" style="cursor:pointer">Already Mine</div>
-    <div class="nav-streak" id="navCindersEl">✦ 0</div>
+    <div class="nav-streak" id="navCindersEl" onclick="openCindersModal()" style="cursor:pointer">✦ 0</div>
     <div class="nav-avatar" id="navAvatar" onclick="openProfile();setTabByName('profile')" style="cursor:pointer">✦</div>
   </div>
   <div class="home-greeting">
@@ -1716,6 +1716,35 @@ function formatCinders(count) {
 function updateNavCinders() {
   const el = document.getElementById('navCindersEl');
   if(el) el.textContent = '✦ ' + formatCinders(currentCinders);
+}
+
+function openCindersModal() {
+  const info = getLevelInfo(currentCinders);
+  const pct = info.pct;
+  let motivational;
+  if(pct < 25)       motivational = 'Your journey is just beginning.';
+  else if(pct < 50)  motivational = 'You are finding your rhythm.';
+  else if(pct < 75)  motivational = 'The momentum is building.';
+  else if(pct < 100) motivational = 'You are almost there.';
+  else               motivational = 'You have arrived.';
+
+  const fmtNum = n => n.toLocaleString();
+
+  currentModalType = 'info';
+  document.getElementById('modalDay').textContent = info.name;
+  document.getElementById('modalText').innerHTML = `
+    <div style="margin-top:8px">
+      <div style="height:2px;background:rgba(201,169,110,.12);width:100%;border-radius:1px;margin-bottom:8px">
+        <div style="height:2px;background:var(--gold);width:${pct}%;transition:width .8s ease;border-radius:1px"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+        <div style="font-family:'Jost',sans-serif;font-size:12px;font-weight:300;color:var(--muted);letter-spacing:.04em">${fmtNum(currentCinders)} / ${fmtNum(info.currentMax)} Cinders</div>
+        <div style="font-family:'Jost',sans-serif;font-size:11px;font-weight:300;color:rgba(201,169,110,.55);letter-spacing:.08em;text-transform:uppercase">Next: ${info.nextName}</div>
+      </div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;color:var(--soft);font-style:italic;text-align:center;line-height:1.6">${motivational}</div>
+    </div>`;
+  document.getElementById('modalCat').textContent = '';
+  document.getElementById('modalOverlay').classList.add('open');
 }
 
 function getLocalDateString() {
