@@ -2757,7 +2757,7 @@ async function buildHome(){
   }
 
   // Set day counters immediately — unlockedCount is already loaded from profile
-  document.getElementById('streakCount').textContent = unlockedCount;
+  document.getElementById('streakCount').textContent = streakCount || unlockedCount;
   const _dayCountEl = document.getElementById('homeDayCount');
   if(_dayCountEl) _dayCountEl.textContent = unlockedCount;
 
@@ -3373,6 +3373,10 @@ async function saveJournal(){
       awardFirstTimeCinders('first_journal');
     }
     dailyActions.journalSaved = true;
+    if(selectedMoodSub && !dailyActions.moodCheckedIn) {
+      moodCheckinCount++;
+      db.from('profiles').update({ mood_checkin_count: moodCheckinCount }).eq('id', currentUser.id).then(() => {});
+    }
     if(selectedMoodCategory) dailyActions.moodCheckedIn = true;
     updateDailyPractice();
   }
@@ -4692,7 +4696,8 @@ async function saveMantra() {
     const today = getLocalDateString();
     const thisMonday = getThisMonday();
     if(!lastMantraDate || lastMantraDate < thisMonday) {
-      await db.from('profiles').update({ last_mantra_date: today }).eq('id', currentUser.id);
+      mantraWeekCount++;
+      await db.from('profiles').update({ last_mantra_date: today, mantra_week_count: mantraWeekCount }).eq('id', currentUser.id);
       awardCinders(10, 'Weekly mantra set');
     }
     lastMantraDate = today;
@@ -4874,6 +4879,18 @@ async function toggleHabitComplete(id) {
   renderHabits();
   if(marking) {
     await db.from('habit_completions').insert({ user_id: currentUser.id, habit_id: id, completed_date: completedDate });
+    // Check if all daily/weekday habits are now complete for today
+    if(currentUser && freq !== 'weekly') {
+      const today = getLocalDateString();
+      const isWeekend = [0, 6].includes(new Date().getDay());
+      const applicable = habits.filter(h => !(h.frequency === 'weekdays' && isWeekend) && (h.frequency || 'daily') !== 'weekly');
+      const todayDone = new Set(habitCompletions[today] || []);
+      const allDone = applicable.length > 0 && applicable.every(h => todayDone.has(h.id));
+      if(allDone) {
+        foundationDaysCount++;
+        db.from('profiles').update({ foundation_days_count: foundationDaysCount }).eq('id', currentUser.id).then(() => {});
+      }
+    }
   } else {
     await db.from('habit_completions').delete().eq('habit_id', id).eq('completed_date', completedDate).eq('user_id', currentUser.id);
   }
@@ -5068,6 +5085,10 @@ function completeScan() {
     bodyScanSessions.unshift({ date: today, sections });
   }
   currentScanNotes = {};
+  bodyScanCount++;
+  if(currentUser) {
+    db.from('profiles').update({ body_scan_count: bodyScanCount }).eq('id', currentUser.id).then(() => {});
+  }
   const nav = document.getElementById('globalBottomNav');
   if(nav) nav.style.display = 'flex';
   showScreen('journal');
