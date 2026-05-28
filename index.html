@@ -4314,6 +4314,7 @@ function showAdminBanner(on) {
       <button onclick="adminTestGrace()" style="${btnStyle}">Test Grace</button>
       <button onclick="adminTestDay30()" style="${btnStyle}">Day 30 Limit</button>
       <button onclick="adminResetToday()" style="${btnStyle}">Reset Today</button>
+      <button onclick="adminShowReferralStats()" style="${btnStyle}">Referral Stats</button>
     `;
     document.body.appendChild(panel);
   }
@@ -4338,6 +4339,44 @@ async function adminResetToday() {
   dailyActions.affirmationUnlocked = false;
   dailyLoginChecked = false;
   buildHome();
+}
+
+async function adminShowReferralStats() {
+  currentModalType = 'info';
+  document.getElementById('modalDay').textContent = 'Referral Stats';
+  document.getElementById('modalText').innerHTML = '<div style="font-size:12px;color:var(--muted);letter-spacing:.05em">Loading...</div>';
+  document.getElementById('modalCat').textContent = '';
+  document.getElementById('modalOverlay').classList.add('open');
+
+  const { data, error } = await db.from('profiles').select('referral_code').not('referral_code', 'is', null);
+
+  if(error || !data?.length) {
+    document.getElementById('modalText').innerHTML = '<div style="font-size:13px;color:var(--muted);font-style:italic">No referral codes used yet.</div>';
+    return;
+  }
+
+  const counts = {};
+  data.forEach(row => { counts[row.referral_code] = (counts[row.referral_code] || 0) + 1; });
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const total = data.length;
+
+  const rows = sorted.map(([code, count]) => `
+    <tr>
+      <td style="padding:8px 12px;font-family:'Jost',sans-serif;font-size:13px;color:var(--cream);border-bottom:1px solid rgba(201,169,110,.1);letter-spacing:.05em">${code}</td>
+      <td style="padding:8px 12px;font-family:'Jost',sans-serif;font-size:13px;color:var(--gold);text-align:right;border-bottom:1px solid rgba(201,169,110,.1)">${count}</td>
+    </tr>`).join('');
+
+  document.getElementById('modalText').innerHTML = `
+    <table style="width:100%;border-collapse:collapse;margin-top:4px">
+      <thead>
+        <tr>
+          <th style="padding:6px 12px;font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left;border-bottom:1px solid rgba(201,169,110,.2)">Code</th>
+          <th style="padding:6px 12px;font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:right;border-bottom:1px solid rgba(201,169,110,.2)">Signups</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="font-family:'Jost',sans-serif;font-size:11px;color:var(--muted);text-align:right;margin-top:10px;letter-spacing:.05em">${total} total referral signup${total !== 1 ? 's' : ''}</div>`;
 }
 
 // ── PREFERENCES ──
