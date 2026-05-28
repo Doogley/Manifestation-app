@@ -1288,8 +1288,8 @@
     <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Unlimited Journaling</strong>Write as much as you want. No entry limits, ever.</div></div>
     <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Unlimited Intentions</strong>Free members can track 3 intentions. Members carry as many as they need.</div></div>
     <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Ad Free</strong>A clean, uninterrupted space for your practice.</div></div>
-    <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Streak Freeze</strong>One streak freeze per month — so a missed day never breaks your momentum.</div></div>
-    <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Shareable Milestone Cards</strong>Share your badge achievements as beautiful branded graphics.</div></div>
+    <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Unlimited Foundations</strong>Free members track up to 3 daily foundations. Members add as many as they need.</div></div>
+    <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Customize Your Practice</strong>Show or hide features to shape your daily practice exactly the way you want it.</div></div>
     <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Monthly Reflection Summary</strong>A curated look at your month — affirmations unlocked, moods tracked, intentions manifested.</div></div>
     <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Early Access</strong>Be first to receive new affirmation packs and features.</div></div>
   </div>
@@ -1301,8 +1301,8 @@
       <tr><td>Journal entries</td><td>30</td><td class="highlight-col">Unlimited</td></tr>
       <tr><td>Intentions</td><td>3</td><td class="highlight-col">Unlimited</td></tr>
       <tr><td>Ads</td><td class="compare-no">—</td><td class="compare-yes">Ad free</td></tr>
-      <tr><td>Streak freeze</td><td class="compare-no">—</td><td class="compare-yes">✦</td></tr>
-      <tr><td>Shareable cards</td><td class="compare-no">—</td><td class="compare-yes">✦</td></tr>
+      <tr><td>Foundations</td><td>3</td><td class="highlight-col">Unlimited</td></tr>
+      <tr><td>Customize practice</td><td class="compare-no">—</td><td class="compare-yes">✦</td></tr>
       <tr><td>Monthly summary</td><td class="compare-no">—</td><td class="compare-yes">✦</td></tr>
     </table>
   </div>
@@ -1771,6 +1771,7 @@ let comebackCount = 0;
 let journalEntryCount = 0;
 let intentionsReceivedCount = 0;
 let bodyScanCount = 0;
+let lastBodyScanDate = '';
 let moodCheckinCount = 0;
 let mantraWeekCount = 0;
 let foundationDaysCount = 0;
@@ -1858,6 +1859,7 @@ function resetUserState() {
   dailyActions.loginClaimed = false;
   dailyActions.affirmationUnlocked = false;
   dailyActions.journalSaved = false;
+  dailyActions.journalCindersClaimed = false;
   dailyActions.moodCheckedIn = false;
   dailyActions.mantraSetThisWeek = false;
   const mantraDisplay = document.getElementById('mantraDisplay');
@@ -2027,6 +2029,7 @@ async function loadUserProfile() {
     ]);
     if(todayJournal) {
       dailyActions.journalSaved = true;
+      dailyActions.journalCindersClaimed = true;
       if(todayJournal.mood_category) dailyActions.moodCheckedIn = true;
     }
     journalEntryCount = count ?? 0;
@@ -3543,8 +3546,13 @@ async function saveJournal(){
       await db.from('journal_entries').update(entryData).eq('id', existing.id);
     } else {
       await db.from('journal_entries').insert(entryData);
-      awardCinders(20, 'Journal entry saved');
-      awardFirstTimeCinders('first_journal');
+      journalEntryCount++;
+      db.from('profiles').update({ journal_entry_count: journalEntryCount }).eq('id', currentUser.id).then(() => {});
+      if(!dailyActions.journalCindersClaimed) {
+        dailyActions.journalCindersClaimed = true;
+        awardCinders(20, 'Journal entry saved');
+        awardFirstTimeCinders('first_journal');
+      }
     }
     dailyActions.journalSaved = true;
     if(selectedMoodSub && !dailyActions.moodCheckedIn) {
@@ -4054,10 +4062,12 @@ function discardPastIntentionChanges() {
 
 async function markReceived(i) {
   intentions[i].received = true;
+  intentionsReceivedCount++;
   if(currentUser) {
     await db.from('intentions')
       .update({ is_received: true })
       .eq('id', intentions[i].id);
+    db.from('profiles').update({ intentions_received_count: intentionsReceivedCount }).eq('id', currentUser.id).then(() => {});
   }
   renderIntentions();
 }
@@ -5144,7 +5154,7 @@ function selectSubMood(category, sub, el) {
 const LEGAL_CONTENT = {
   tos: {
     title: 'Terms of Service',
-    updated: 'Last updated: May 2025',
+    updated: 'Last updated: May 2026',
     sections: [
       { title: null, body: 'Already Mine is operated by Gutterglow LLC ("we", "us", "our").' },
       { title: '1. Acceptance', body: 'By downloading or using Already Mine you agree to these terms. If you do not agree, do not use the app.' },
@@ -5161,7 +5171,7 @@ const LEGAL_CONTENT = {
   },
   privacy: {
     title: 'Privacy Policy',
-    updated: 'Last updated: May 2025',
+    updated: 'Last updated: May 2026',
     sections: [
       { title: null, body: 'Already Mine is operated by Gutterglow LLC.' },
       { title: 'What we collect', list: [
@@ -5378,7 +5388,7 @@ function closeAddHabitOutside(e) {
 
 async function addPresetHabit(name) {
   if(habits.some(h => h.name === name)) return;
-  if(!isPaidMember && habits.length >= 3) { openUpgrade(); return; }
+  if(!isPaidMember && habits.length >= 3) { showCindersToast(0, 'Free members can track up to 3 foundations. Upgrade for unlimited.'); return; }
   const { data, error } = await db.from('habits').insert({ user_id: currentUser.id, name, frequency: selectedHabitFrequency }).select().single();
   if(error || !data) return;
   habits.push({ id: data.id, name: data.name, frequency: data.frequency || 'daily' });
@@ -5392,7 +5402,7 @@ async function addCustomHabit() {
   const name = input.value.trim();
   if(!name) return;
   if(habits.some(h => h.name === name)) { input.value = ''; return; }
-  if(!isPaidMember && habits.length >= 3) { openUpgrade(); return; }
+  if(!isPaidMember && habits.length >= 3) { showCindersToast(0, 'Free members can track up to 3 foundations. Upgrade for unlimited.'); return; }
   const { data, error } = await db.from('habits').insert({ user_id: currentUser.id, name, frequency: selectedHabitFrequency }).select().single();
   if(error || !data) return;
   habits.push({ id: data.id, name: data.name, frequency: data.frequency || 'daily' });
@@ -5533,9 +5543,12 @@ function completeScan() {
     bodyScanSessions.unshift({ date: today, sections });
   }
   currentScanNotes = {};
-  bodyScanCount++;
-  if(currentUser) {
-    db.from('profiles').update({ body_scan_count: bodyScanCount }).eq('id', currentUser.id).then(() => {});
+  if(lastBodyScanDate !== today) {
+    lastBodyScanDate = today;
+    bodyScanCount++;
+    if(currentUser) {
+      db.from('profiles').update({ body_scan_count: bodyScanCount }).eq('id', currentUser.id).then(() => {});
+    }
   }
   const nav = document.getElementById('globalBottomNav');
   if(nav) nav.style.display = 'flex';
