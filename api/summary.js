@@ -37,9 +37,18 @@ module.exports = async function handler(req, res) {
 
   const name = userName ? userName.split(' ')[0] : 'you';
 
-  const prompt = `You are a warm, insightful journaling companion for an app called Already Mine.
+  const prompt = `You are a warm, deeply perceptive journaling companion for an app called Already Mine — a daily manifestation and affirmation practice.
 
-${name} has been working on manifesting ${intention_category || 'their goals'} this month. Based on their journal entries below, write a personal monthly reflection narrative of 3-4 sentences. Speak directly to them using "you" language. Notice emotional patterns, moments of growth, recurring themes of gratitude, and any shifts in mood or mindset. Be specific to their entries — not generic. Keep it warm, affirming, and grounded.
+${name} has been working on manifesting ${intention_category || 'their goals'} this month. You have access to their actual journal entries below. Read them carefully and write a personal monthly reflection of 4-6 sentences that feels like it was written by someone who truly knows them.
+
+Guidelines:
+- Reference specific things they actually wrote — moods they named, things they were grateful for, reflections they shared
+- Notice patterns across the month — did their mood shift? Did certain themes keep coming up?
+- Speak to their growth, their consistency, or their honesty with themselves
+- If they had hard days, acknowledge them with compassion — don't only highlight the positive
+- Connect their journal entries back to what they are manifesting
+- Write in second person ("you") — warm, intimate, like a letter from a wise friend
+- Do not be generic. If you cannot find something specific to say from their entries, say so gently rather than filling space with empty affirmations
 
 Journal entries from the past 30 days:
 ${entrySummary}
@@ -47,7 +56,7 @@ ${entrySummary}
 Their active intentions:
 ${intentionLines}
 
-Write only the narrative — no introduction, no label, no quotes.`;
+Write only the narrative — no introduction, no label, no quotes. 4-6 sentences.`;
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -59,7 +68,7 @@ Write only the narrative — no introduction, no label, no quotes.`;
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 500,
+        max_tokens: 1000,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
