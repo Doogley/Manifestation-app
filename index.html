@@ -1577,6 +1577,7 @@
         <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Members only · 1 per month</span>
       </div>
       <button style="width:100%;padding:14px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;" id="monthlyReflectionBtn">Unlock Monthly Reflections</button>
+      <div id="reflNextNotice" style="display:none;font-size:11px;font-weight:300;color:var(--muted);text-align:center;margin-top:10px;letter-spacing:.05em;"></div>
     </div>
   </div>
 
@@ -3282,7 +3283,7 @@ async function getReflectionState() {
   }
   const nextFirst = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   const daysUntilNext = Math.ceil((nextFirst - now) / (1000 * 60 * 60 * 24));
-  return { available: false, daysUntilNext };
+  return { available: false, daysUntilNext, lastYear, lastMonth, lastMonthName: monthNames[lastMonth - 1] };
 }
 
 async function openMonthReflection(year, month) {
@@ -4491,12 +4492,14 @@ async function buildProfile() {
     if(adminMode || isPaidMember) {
       if(lockNotice) lockNotice.style.display = 'none';
       const rState = await getReflectionState();
+      const reflNextNotice = document.getElementById('reflNextNotice');
       if(rState.available && rState.generated) {
         reflBtn.textContent = `Read ${rState.monthName}'s Reflection`;
         reflBtn.onclick = openMonthlySummary;
         reflBtn.disabled = false;
         reflBtn.style.opacity = '';
         reflBtn.style.cursor = 'pointer';
+        if(reflNextNotice) reflNextNotice.style.display = 'none';
       } else if(rState.available) {
         const d = rState.daysLeft;
         reflBtn.textContent = `${d} day${d !== 1 ? 's' : ''} left to generate ${rState.monthName}'s Reflection`;
@@ -4504,13 +4507,40 @@ async function buildProfile() {
         reflBtn.disabled = false;
         reflBtn.style.opacity = '';
         reflBtn.style.cursor = 'pointer';
+        if(reflNextNotice) reflNextNotice.style.display = 'none';
       } else {
         const d = rState.daysUntilNext;
-        reflBtn.textContent = `Next reflection available in ${d} day${d !== 1 ? 's' : ''}`;
-        reflBtn.disabled = true;
-        reflBtn.style.opacity = '0.4';
-        reflBtn.style.cursor = 'default';
-        reflBtn.onclick = null;
+        const nextText = `Next reflection available in ${d} day${d !== 1 ? 's' : ''}`;
+        if(currentUser) {
+          const { data: lastSummary } = await db.from('monthly_summaries')
+            .select('narrative')
+            .eq('user_id', currentUser.id)
+            .eq('year', rState.lastYear)
+            .eq('month', rState.lastMonth)
+            .maybeSingle();
+          if(lastSummary?.narrative) {
+            reflBtn.textContent = `Read ${rState.lastMonthName}'s Reflection`;
+            reflBtn.disabled = false;
+            reflBtn.style.opacity = '';
+            reflBtn.style.cursor = 'pointer';
+            reflBtn.onclick = () => openMonthReflection(rState.lastYear, rState.lastMonth);
+            if(reflNextNotice) { reflNextNotice.textContent = nextText; reflNextNotice.style.display = ''; }
+          } else {
+            reflBtn.textContent = nextText;
+            reflBtn.disabled = true;
+            reflBtn.style.opacity = '0.4';
+            reflBtn.style.cursor = 'default';
+            reflBtn.onclick = null;
+            if(reflNextNotice) reflNextNotice.style.display = 'none';
+          }
+        } else {
+          reflBtn.textContent = nextText;
+          reflBtn.disabled = true;
+          reflBtn.style.opacity = '0.4';
+          reflBtn.style.cursor = 'default';
+          reflBtn.onclick = null;
+          if(reflNextNotice) reflNextNotice.style.display = 'none';
+        }
       }
     } else {
       reflBtn.textContent = 'Unlock Monthly Reflections';
