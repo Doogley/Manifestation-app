@@ -219,6 +219,18 @@
   .summary-note { padding:20px 0 0; text-align:center; }
   .summary-note p { font-size:11px; font-weight:300; color:var(--muted); line-height:1.7; font-style:italic; }
 
+  /* ── PAST REFLECTIONS ── */
+  .past-reflections-section { padding:28px 0 0; border-top:1px solid rgba(201,169,110,.08); margin-top:8px; }
+  .past-reflections-label { font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; display:flex; align-items:center; gap:12px; }
+  .past-reflections-label::after { content:''; flex:1; height:1px; background:rgba(201,169,110,.15); }
+  .past-reflection-row { border:1px solid rgba(201,169,110,.1); background:rgba(201,169,110,.02); margin-bottom:8px; }
+  .past-reflection-header { width:100%; display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:none; border:none; color:var(--soft); font-family:'Jost',sans-serif; font-size:13px; font-weight:300; letter-spacing:.04em; cursor:pointer; transition:color .3s; text-align:left; }
+  .past-reflection-header:hover { color:var(--cream); }
+  .past-reflection-chevron { font-size:10px; color:var(--muted); transition:transform .3s; flex-shrink:0; }
+  .past-reflection-row.open .past-reflection-chevron { transform:rotate(180deg); }
+  .past-reflection-body { display:none; padding:0 18px 18px; font-family:'Jost',sans-serif; font-size:14px; font-weight:300; color:var(--muted); line-height:1.85; }
+  .past-reflection-row.open .past-reflection-body { display:block; }
+
   @media(max-width:480px){
     .summary-header,.summary-content{padding-left:20px;padding-right:20px}
   }
@@ -1654,6 +1666,12 @@
     <!-- Note -->
     <div class="summary-note">
       <p>This reflection is generated from your journal entries and mood check-ins.<br>It refreshes at the start of each new month.</p>
+    </div>
+
+    <!-- Past Reflections -->
+    <div class="past-reflections-section" id="pastReflectionsSection" style="display:none">
+      <div class="past-reflections-label">Past Reflections</div>
+      <div id="pastReflectionsList"></div>
     </div>
 
   </div>
@@ -4523,8 +4541,10 @@ function toggleNicknameEdit() {
 // ── MONTHLY SUMMARY ──
 let summaryGenerated = false;
 
-function openMonthlySummary() {
+async function openMonthlySummary() {
   const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
   const monthName = now.toLocaleDateString('en-US', {month:'long'});
   document.getElementById('summaryMonthTitle').textContent = `${monthName}'s Reflection`;
 
@@ -4539,66 +4559,40 @@ function openMonthlySummary() {
 
   showScreen('monthlySummary');
 
-  generateSummary();
-}
-
-async function generateSummary() {
-  if(!currentUser) return;
-  let moodCounts = {};
-
-  try {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const fromDate = thirtyDaysAgo.toISOString().split('T')[0];
-
-    const { data: entries, error } = await db.from('journal_entries')
-      .select('*')
+  // Check for a cached narrative for this month
+  if(currentUser) {
+    const { data: cached } = await db.from('monthly_summaries')
+      .select('narrative')
       .eq('user_id', currentUser.id)
-      .gte('entry_date', fromDate)
-      .order('entry_date', { ascending: true });
+      .eq('year', year)
+      .eq('month', month)
+      .maybeSingle();
 
-    if (error) throw error;
-
-    if (entries && entries.length > 0) {
-      entries.forEach(e => {
-        if (e.mood_sub) moodCounts[e.mood_sub] = (moodCounts[e.mood_sub] || 0) + 1;
-      });
+    if(cached?.narrative) {
+      document.getElementById('summaryNarrative').textContent = cached.narrative;
+      await finishSummaryUI(year, month);
+      return;
     }
-
-    let entrySummary;
-    if (entries && entries.length > 0) {
-      entrySummary = entries.map(e => {
-        const parts = [`Date: ${e.entry_date}`];
-        if (e.mood_category || e.mood_sub) parts.push(`Mood: ${[e.mood_category, e.mood_sub].filter(Boolean).join(' – ')}`);
-        if (e.reflection) parts.push(`Reflection: ${e.reflection}`);
-        const gratitude = [e.gratitude_1, e.gratitude_2, e.gratitude_3].filter(Boolean);
-        if (gratitude.length) parts.push(`Gratitude: ${gratitude.join(', ')}`);
-        return parts.join('\n');
-      }).join('\n\n');
-    } else {
-      entrySummary = 'No journal entries recorded this month yet.';
-    }
-
-    const response = await fetch(SUMMARY_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        entries: entries || [],
-        intentions: intentions.map(i => i.text),
-        userName: userRealName || userNickname || '',
-        intention_category: intentionCategoryMap[answers.intention] || '',
-      }),
-    });
-
-    if (!response.ok) throw new Error(`Summary API error: ${response.status}`);
-    const data = await response.json();
-    document.getElementById('summaryNarrative').textContent = data.narrative || '';
-  } catch (err) {
-    document.getElementById('summaryNarrative').textContent = 'Unable to generate your summary right now. Please try again later.';
-    console.error('Summary generation error:', err);
   }
 
-  // Mood bars from real entry data only
+  generateSummary(year, month);
+}
+
+async function finishSummaryUI(year, month) {
+  // Mood bars — query this month's entries for mood data
+  const now = new Date();
+  const fromDate = `${year}-${String(month).padStart(2,'0')}-01`;
+  const { data: monthEntries } = await db.from('journal_entries')
+    .select('mood_sub')
+    .eq('user_id', currentUser.id)
+    .gte('entry_date', fromDate)
+    .lte('entry_date', `${year}-${String(month).padStart(2,'0')}-31`);
+
+  const moodCounts = {};
+  (monthEntries || []).forEach(e => {
+    if(e.mood_sub) moodCounts[e.mood_sub] = (moodCounts[e.mood_sub] || 0) + 1;
+  });
+
   const moodEntries = Object.entries(moodCounts).sort((a,b) => b[1]-a[1]).slice(0,6);
   if(moodEntries.length > 0) {
     const moods = moodEntries.map(([name, count]) => ({ name, count }));
@@ -4613,7 +4607,7 @@ async function generateSummary() {
     document.getElementById('summaryMoodBars').innerHTML = `<div style="font-size:13px;font-weight:300;color:var(--muted);font-style:italic;padding:8px 0">No mood check-ins recorded this month. Add them in your journal entries.</div>`;
   }
 
-  // Intentions — real data only
+  // Intentions
   if(intentions.length > 0) {
     document.getElementById('summaryIntentionsList').innerHTML = intentions.map(i=>`
       <div class="summary-intention-item">
@@ -4624,10 +4618,88 @@ async function generateSummary() {
     document.getElementById('summaryIntentionsList').innerHTML = `<div style="font-size:13px;font-weight:300;color:var(--muted);font-style:italic;padding:8px 0">No intentions set this month. Add them in your journal to track what you're calling in.</div>`;
   }
 
+  // Past reflections
+  await loadPastReflections(year, month);
+
   // Show content, hide loading
   document.getElementById('summaryLoading').style.display = 'none';
   document.getElementById('summaryContent').style.display = 'block';
   summaryGenerated = true;
+}
+
+async function loadPastReflections(currentYear, currentMonth) {
+  if(!currentUser) return;
+  const { data: past } = await db.from('monthly_summaries')
+    .select('year, month, narrative')
+    .eq('user_id', currentUser.id)
+    .order('year', { ascending: false })
+    .order('month', { ascending: false });
+
+  const filtered = (past || []).filter(r => !(r.year === currentYear && r.month === currentMonth));
+  const section = document.getElementById('pastReflectionsSection');
+  const list = document.getElementById('pastReflectionsList');
+  if(!filtered.length) { section.style.display = 'none'; return; }
+
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  list.innerHTML = filtered.map((r, i) => `
+    <div class="past-reflection-row" id="pastRow${i}">
+      <button class="past-reflection-header" onclick="togglePastReflection(${i})">
+        <span>${monthNames[r.month - 1]} ${r.year}</span>
+        <span class="past-reflection-chevron">▾</span>
+      </button>
+      <div class="past-reflection-body">${r.narrative}</div>
+    </div>`).join('');
+  section.style.display = '';
+}
+
+function togglePastReflection(i) {
+  document.getElementById(`pastRow${i}`).classList.toggle('open');
+}
+
+async function generateSummary(year, month) {
+  if(!currentUser) return;
+
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const fromDate = thirtyDaysAgo.toISOString().split('T')[0];
+
+    const { data: entries, error } = await db.from('journal_entries')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .gte('entry_date', fromDate)
+      .order('entry_date', { ascending: true });
+
+    if (error) throw error;
+
+    const response = await fetch(SUMMARY_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        entries: entries || [],
+        intentions: intentions.map(i => i.text),
+        userName: userRealName || userNickname || '',
+        intention_category: intentionCategoryMap[answers.intention] || '',
+      }),
+    });
+
+    if (!response.ok) throw new Error(`Summary API error: ${response.status}`);
+    const data = await response.json();
+    const narrativeText = data.narrative || '';
+    document.getElementById('summaryNarrative').textContent = narrativeText;
+
+    // Save to Supabase so we don't regenerate this month
+    if(narrativeText && currentUser) {
+      db.from('monthly_summaries')
+        .insert({ user_id: currentUser.id, year, month, narrative: narrativeText })
+        .then(() => {});
+    }
+  } catch (err) {
+    document.getElementById('summaryNarrative').textContent = 'Unable to generate your summary right now. Please try again later.';
+    console.error('Summary generation error:', err);
+  }
+
+  await finishSummaryUI(year, month);
 }
 
 // ── CINDERS TOAST ──
