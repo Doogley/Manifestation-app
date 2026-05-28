@@ -1620,15 +1620,15 @@
     <!-- Stats -->
     <div class="summary-stat-row">
       <div class="summary-stat">
-        <div class="summary-stat-num" id="summaryDays">30</div>
+        <div class="summary-stat-num" id="summaryDays">—</div>
         <div class="summary-stat-label">Days Active</div>
       </div>
       <div class="summary-stat">
-        <div class="summary-stat-num" id="summaryAffirmations">30</div>
+        <div class="summary-stat-num" id="summaryAffirmations">—</div>
         <div class="summary-stat-label">Affirmations Unlocked</div>
       </div>
       <div class="summary-stat">
-        <div class="summary-stat-num" id="summaryEntries">12</div>
+        <div class="summary-stat-num" id="summaryEntries">—</div>
         <div class="summary-stat-label">Journal Entries</div>
       </div>
     </div>
@@ -4527,6 +4527,11 @@ function openMonthlySummary() {
   const now = new Date();
   const monthName = now.toLocaleDateString('en-US', {month:'long'});
   document.getElementById('summaryMonthTitle').textContent = `${monthName}'s Reflection`;
+
+  // Populate stats with real data
+  document.getElementById('summaryDays').textContent = streakCount || unlockedCount || 0;
+  document.getElementById('summaryAffirmations').textContent = unlockedCount || 0;
+  document.getElementById('summaryEntries').textContent = journalEntryCount || 0;
 
   // Show loading, hide content
   document.getElementById('summaryLoading').style.display = 'flex';
