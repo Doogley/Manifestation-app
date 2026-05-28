@@ -1735,6 +1735,7 @@ let bodyScanCount = 0;
 let moodCheckinCount = 0;
 let mantraWeekCount = 0;
 let foundationDaysCount = 0;
+let lastFoundationDate = '';
 let pinnedBadges = [];
 // ── AUTH FUNCTIONS ──
 function switchAuthTab(tab) {
@@ -1797,6 +1798,7 @@ function resetUserState() {
   moodCheckinCount = 0;
   mantraWeekCount = 0;
   foundationDaysCount = 0;
+  lastFoundationDate = '';
   pinnedBadges = [];
   unlockedCount = 1;
   userNickname = '';
@@ -2001,8 +2003,11 @@ async function loadUserProfile() {
     todayCategory = libEntry ? libEntry.cat : catLabels[answers.intention];
   }
   // Load saved affirmations from dedicated table
-  const { data: savedData } = await db.from('saved_affirmations').select('affirmation_day').eq('user_id', currentUser.id);
-  if(savedData) savedAffirmationIds = new Set(savedData.map(r => r.affirmation_day));
+  const { data: savedData } = await db.from('saved_affirmations').select('affirmation_day,affirmation_text,affirmation_cat').eq('user_id', currentUser.id);
+  if(savedData) {
+    savedAffirmationIds = new Set(savedData.map(r => r.affirmation_day));
+    savedData.forEach(r => { savedAffirmationsData[r.affirmation_day] = { text: r.affirmation_text, cat: r.affirmation_cat }; });
+  }
   saved = savedAffirmationIds.has(unlockedCount);
   // Set nav avatar to initial by default; overridden below if avatar_url exists
   const navAvatarEl = document.getElementById('navAvatar');
@@ -2612,6 +2617,7 @@ const affirmationLibrary = [
 
 let currentQuestion=0,answers={},selectedOption=null,todayAffirmation='',todayCategory='',saved=false;
 let savedAffirmationIds = new Set();
+let savedAffirmationsData = {}; // map of day number -> { text, cat } for saved affirmations
 let affirmationHistory = {}; // map of day number -> { text, cat } from user_affirmations table
 
 const noNavScreens = ['loading','auth','splash','onboarding','reveal','grace','monthlySummary'];
@@ -3049,9 +3055,11 @@ async function toggleSaveByDay(dayNum, text, cat) {
   if(savedAffirmationIds.has(dayNum)) {
     await db.from('saved_affirmations').delete().eq('user_id', currentUser.id).eq('affirmation_day', dayNum);
     savedAffirmationIds.delete(dayNum);
+    delete savedAffirmationsData[dayNum];
   } else {
     await db.from('saved_affirmations').insert({ user_id: currentUser.id, affirmation_day: dayNum, affirmation_text: text, affirmation_cat: cat });
     savedAffirmationIds.add(dayNum);
+    savedAffirmationsData[dayNum] = { text, cat };
   }
   const isSaved = savedAffirmationIds.has(dayNum);
   document.querySelectorAll(`.lib-heart[data-day="${dayNum}"]`).forEach(h => {
@@ -4168,8 +4176,26 @@ function buildLibraryScreen(filter) {
   filter = filter || currentLibraryFilter;
   const grid = document.getElementById('libraryScreenGrid');
   grid.innerHTML = '';
-
   const isAdmin = adminMode;
+
+  const sectionLabelStyle = 'grid-column:1/-1;font-family:\'Jost\',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;padding:12px 0 6px;';
+
+  function makeUnlockedTile(id, label, dText, dCat, isToday) {
+    const tile = document.createElement('div');
+    tile.className = 'library-screen-tile' + (isToday ? ' today-tile' : '');
+    const crossCatNote = (isToday && filter !== 'all' && dCat !== filter)
+      ? `<div style="margin-top:8px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(201,169,110,.45)">Today · ${dCat}</div>`
+      : '';
+    tile.innerHTML = `<div class="lib-screen-day">${label}</div><div class="lib-screen-text">${dText}</div><div class="lib-screen-cat">${dCat}</div>${crossCatNote}`;
+    tile.onclick = () => openModal(label, dText, dCat);
+    const heartBtn = document.createElement('button');
+    heartBtn.className = 'lib-heart' + (savedAffirmationIds.has(id) ? ' saved' : '');
+    heartBtn.dataset.day = id;
+    heartBtn.textContent = savedAffirmationIds.has(id) ? '♥︎' : '♡';
+    heartBtn.onclick = (e) => { e.stopPropagation(); toggleSaveByDay(id, dText, dCat); };
+    tile.appendChild(heartBtn);
+    return tile;
+  }
 
   // Always render today's tile first
   const todayAff = affirmationLibrary.find(a => a.id === unlockedCount);
@@ -4177,66 +4203,101 @@ function buildLibraryScreen(filter) {
     const hist = affirmationHistory[todayAff.id];
     const dText = hist ? hist.text : todayAffirmation;
     const dCat = hist ? hist.cat : todayCategory;
-    const tile = document.createElement('div');
-    tile.className = 'library-screen-tile today-tile';
-    const crossCatNote = (filter !== 'all' && dCat !== filter)
-      ? `<div style="margin-top:8px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(201,169,110,.45)">Today · ${dCat}</div>`
-      : '';
-    tile.innerHTML = `<div class="lib-screen-day">✦ Day ${todayAff.id} · Today</div><div class="lib-screen-text">${dText}</div><div class="lib-screen-cat">${dCat}</div>${crossCatNote}`;
-    tile.onclick = () => openModal(`Day ${todayAff.id} · Today`, dText, dCat);
-    const heartBtn = document.createElement('button');
-    heartBtn.className = 'lib-heart' + (savedAffirmationIds.has(todayAff.id) ? ' saved' : '');
-    heartBtn.dataset.day = todayAff.id;
-    heartBtn.textContent = savedAffirmationIds.has(todayAff.id) ? '♥︎' : '♡';
-    heartBtn.onclick = (e) => { e.stopPropagation(); toggleSaveByDay(todayAff.id, dText, dCat); };
-    tile.appendChild(heartBtn);
-    grid.appendChild(tile);
+    grid.appendChild(makeUnlockedTile(todayAff.id, `✦ Day ${todayAff.id} · Today`, dText, dCat, true));
   }
 
-  // Remaining tiles filtered by category, excluding today
-  // Unlocked: descending (most recent first); locked: ascending (soonest unlock first)
-  const _filtered = affirmationLibrary.filter(a =>
-    a.id !== unlockedCount &&
-    (filter === 'all' || a.cat === filter) &&
-    (isAdmin || a.id <= unlockedCount + 7)
-  );
-  const _unlocked = _filtered.filter(a => isAdmin || a.id < unlockedCount).sort((a,b) => b.id - a.id);
-  const _locked   = _filtered.filter(a => !isAdmin && a.id > unlockedCount).sort((a,b) => a.id - b.id);
-  const filtered  = [..._unlocked, ..._locked];
+  if(savedAffirmationIds.size >= 3) {
+    // ── Saved section ──────────────────────────────────────────────
+    const savedIds = [...savedAffirmationIds]
+      .filter(id => id !== unlockedCount)
+      .sort((a, b) => b - a);
 
-  filtered.forEach((aff) => {
-    const tile = document.createElement('div');
-    const isUnlocked = isAdmin || aff.id <= unlockedCount;
+    const savedFiltered = savedIds.filter(id => {
+      const entry = savedAffirmationsData[id] || affirmationHistory[id];
+      const libAff = affirmationLibrary.find(a => a.id === id);
+      const cat = entry?.cat || libAff?.cat || '';
+      return filter === 'all' || cat === filter;
+    });
 
-    if(isUnlocked) {
-      const hist = affirmationHistory[aff.id];
-      const dText = hist ? hist.text : aff.text;
-      const dCat = hist ? hist.cat : aff.cat;
-      tile.className = 'library-screen-tile';
-      tile.innerHTML = `<div class="lib-screen-day">Day ${aff.id}</div><div class="lib-screen-text">${dText}</div><div class="lib-screen-cat">${dCat}</div>`;
-      tile.onclick = () => openModal(`Day ${aff.id}`, dText, dCat);
-      const heartBtn = document.createElement('button');
-      heartBtn.className = 'lib-heart' + (savedAffirmationIds.has(aff.id) ? ' saved' : '');
-      heartBtn.dataset.day = aff.id;
-      heartBtn.textContent = savedAffirmationIds.has(aff.id) ? '♥︎' : '♡';
-      heartBtn.onclick = (e) => { e.stopPropagation(); toggleSaveByDay(aff.id, dText, dCat); };
-      tile.appendChild(heartBtn);
-    } else {
-      tile.className = 'library-screen-tile locked-tile';
-      tile.innerHTML = `<div style="filter:blur(5px);font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:rgba(255,255,255,.07);line-height:1.5;margin-bottom:8px">${aff.text}</div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2)">Day ${aff.id}</div></div>`;
+    if(savedFiltered.length > 0) {
+      const savedLabel = document.createElement('div');
+      savedLabel.style.cssText = sectionLabelStyle + 'color:var(--gold);';
+      savedLabel.textContent = '✦ Saved';
+      grid.appendChild(savedLabel);
+
+      savedFiltered.forEach(id => {
+        const hist = affirmationHistory[id];
+        const entry = savedAffirmationsData[id];
+        const libAff = affirmationLibrary.find(a => a.id === id);
+        const dText = hist?.text || entry?.text || libAff?.text || '';
+        const dCat = hist?.cat || entry?.cat || libAff?.cat || '';
+        if(!dText) return;
+        grid.appendChild(makeUnlockedTile(id, `Day ${id}`, dText, dCat, false));
+      });
     }
-    grid.appendChild(tile);
-  });
+
+    // ── All Affirmations section ────────────────────────────────────
+    const allLabel = document.createElement('div');
+    allLabel.style.cssText = sectionLabelStyle + 'color:var(--muted);margin-top:8px;border-top:1px solid rgba(255,255,255,.05);';
+    allLabel.textContent = 'All Affirmations';
+    grid.appendChild(allLabel);
+
+    const _remaining = affirmationLibrary.filter(a =>
+      a.id !== unlockedCount &&
+      !savedAffirmationIds.has(a.id) &&
+      (filter === 'all' || a.cat === filter) &&
+      (isAdmin || a.id <= unlockedCount + 7)
+    );
+    const _unlocked = _remaining.filter(a => isAdmin || a.id < unlockedCount).sort((a,b) => b.id - a.id);
+    const _locked   = _remaining.filter(a => !isAdmin && a.id > unlockedCount).sort((a,b) => a.id - b.id);
+    [..._unlocked, ..._locked].forEach(aff => {
+      const isUnlocked = isAdmin || aff.id <= unlockedCount;
+      if(isUnlocked) {
+        const hist = affirmationHistory[aff.id];
+        const dText = hist ? hist.text : aff.text;
+        const dCat = hist ? hist.cat : aff.cat;
+        grid.appendChild(makeUnlockedTile(aff.id, `Day ${aff.id}`, dText, dCat, false));
+      } else {
+        const tile = document.createElement('div');
+        tile.className = 'library-screen-tile locked-tile';
+        tile.innerHTML = `<div style="filter:blur(5px);font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:rgba(255,255,255,.07);line-height:1.5;margin-bottom:8px">${aff.text}</div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2)">Day ${aff.id}</div></div>`;
+        grid.appendChild(tile);
+      }
+    });
+
+  } else {
+    // Normal view: remaining tiles excluding today
+    const _filtered = affirmationLibrary.filter(a =>
+      a.id !== unlockedCount &&
+      (filter === 'all' || a.cat === filter) &&
+      (isAdmin || a.id <= unlockedCount + 7)
+    );
+    const _unlocked = _filtered.filter(a => isAdmin || a.id < unlockedCount).sort((a,b) => b.id - a.id);
+    const _locked   = _filtered.filter(a => !isAdmin && a.id > unlockedCount).sort((a,b) => a.id - b.id);
+    [..._unlocked, ..._locked].forEach(aff => {
+      const isUnlocked = isAdmin || aff.id <= unlockedCount;
+      if(isUnlocked) {
+        const hist = affirmationHistory[aff.id];
+        const dText = hist ? hist.text : aff.text;
+        const dCat = hist ? hist.cat : aff.cat;
+        grid.appendChild(makeUnlockedTile(aff.id, `Day ${aff.id}`, dText, dCat, false));
+      } else {
+        const tile = document.createElement('div');
+        tile.className = 'library-screen-tile locked-tile';
+        tile.innerHTML = `<div style="filter:blur(5px);font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:rgba(255,255,255,.07);line-height:1.5;margin-bottom:8px">${aff.text}</div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2)">Day ${aff.id}</div></div>`;
+        grid.appendChild(tile);
+      }
+    });
+  }
 
   if(!isAdmin && !isPaidMember) {
     const totalInLib = affirmationLibrary.length;
     const beyondPreview = Math.max(0, totalInLib - (unlockedCount + 7));
     const footer = document.createElement('div');
-    footer.style.cssText = 'grid-column:span 2;margin-top:16px;padding:28px 20px;text-align:center;border-top:1px solid rgba(201,169,110,.08)';
+    footer.style.cssText = 'grid-column:1/-1;margin-top:16px;padding:28px 20px;text-align:center;border-top:1px solid rgba(201,169,110,.08)';
     footer.innerHTML = `<div style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(201,169,110,.4);margin-bottom:10px">✦ The journey continues</div><p style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.8;margin-bottom:16px">You're seeing a 7-day preview ahead. There are <span style="color:var(--soft)">${beyondPreview}+ more affirmations</span> beyond that — one unlocks every day you show up.<br><span style="color:rgba(201,169,110,.5);font-size:12px">Members unlock 800+ instantly.</span></p><button onclick="openUpgrade()" style="padding:10px 28px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Unlock Everything</button>`;
     grid.appendChild(footer);
   }
-
 }
 
 function filterLibrary(cat, btn) {
@@ -5231,7 +5292,8 @@ async function toggleHabitComplete(id) {
       const applicable = habits.filter(h => !(h.frequency === 'weekdays' && isWeekend) && (h.frequency || 'daily') !== 'weekly');
       const todayDone = new Set(habitCompletions[today] || []);
       const allDone = applicable.length > 0 && applicable.every(h => todayDone.has(h.id));
-      if(allDone) {
+      if(allDone && lastFoundationDate !== today) {
+        lastFoundationDate = today;
         foundationDaysCount++;
         db.from('profiles').update({ foundation_days_count: foundationDaysCount }).eq('id', currentUser.id).then(() => {});
       }
