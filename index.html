@@ -725,6 +725,26 @@
     .scan-inner{padding:90px 24px 56px}
   }
 
+  /* ── LEGAL MODAL ── */
+  .legal-overlay { display:none; position:fixed; inset:0; background:var(--deep); z-index:300; flex-direction:column; }
+  .legal-overlay.open { display:flex; }
+  .legal-header { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding:24px 28px 20px; border-bottom:1px solid rgba(201,169,110,.1); }
+  .legal-title { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:300; color:var(--cream); letter-spacing:.04em; }
+  .legal-close { background:none; border:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:color .3s; padding:0; }
+  .legal-close:hover { color:var(--cream); }
+  .legal-body { flex:1; overflow-y:auto; padding:28px 28px 60px; max-width:640px; width:100%; margin:0 auto; }
+  .legal-updated { font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); margin-bottom:28px; }
+  .legal-section { margin-bottom:24px; }
+  .legal-section-title { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; display:flex; align-items:center; gap:10px; }
+  .legal-section-title::after { content:''; flex:1; height:1px; background:rgba(201,169,110,.12); }
+  .legal-section-body { font-size:14px; font-weight:300; color:var(--soft); line-height:1.85; }
+  .legal-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px; }
+  .legal-list li::before { content:'—'; color:rgba(201,169,110,.4); margin-right:10px; }
+  @media(max-width:480px){
+    .legal-header{padding:20px 20px 16px}
+    .legal-body{padding:20px 20px 48px}
+  }
+
   /* ── TOOLTIP BUTTON ── */
   .tooltip-btn { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; border:1px solid rgba(201,169,110,.45); color:var(--gold); font-family:'Jost',sans-serif; font-size:10px; font-weight:300; cursor:pointer; background:none; opacity:.65; transition:opacity .3s; flex-shrink:0; line-height:1; margin-left:6px; padding:0; }
   .tooltip-btn:hover { opacity:1; }
@@ -1567,8 +1587,8 @@
 
   <!-- Links — footer -->
   <div class="profile-links" style="padding-bottom:32px;border-top:1px solid rgba(201,169,110,.06);padding-top:24px;margin-top:8px">
-    <button class="profile-link" onclick="currentModalType='info';document.getElementById('modalDay').textContent='Terms of Service';document.getElementById('modalText').textContent='Our Terms of Service will be available before launch. Thank you for your patience.';document.getElementById('modalCat').textContent='';document.getElementById('modalOverlay').classList.add('open')">Terms of Service</button>
-    <button class="profile-link" onclick="currentModalType='info';document.getElementById('modalDay').textContent='Privacy Policy';document.getElementById('modalText').textContent='Our Privacy Policy will be available before launch. Thank you for your patience.';document.getElementById('modalCat').textContent='';document.getElementById('modalOverlay').classList.add('open')">Privacy Policy</button>
+    <button class="profile-link" onclick="showLegalDoc('tos')">Terms of Service</button>
+    <button class="profile-link" onclick="showLegalDoc('privacy')">Privacy Policy</button>
     <button class="profile-link" onclick="currentModalType='info';document.getElementById('modalDay').textContent='Contact Us';document.getElementById('modalText').textContent='We\'d love to hear from you.';document.getElementById('modalCat').textContent='support@alreadymine.com';document.getElementById('modalOverlay').classList.add('open')">Contact Us</button>
     <button class="profile-link" onclick="handleLogout()">Log Out</button>
   </div>
@@ -1637,6 +1657,15 @@
     </div>
 
   </div>
+</div>
+
+<!-- LEGAL MODAL -->
+<div class="legal-overlay" id="legalOverlay">
+  <div class="legal-header">
+    <div class="legal-title" id="legalTitle"></div>
+    <button class="legal-close" onclick="closeLegalDoc()">✕ Close</button>
+  </div>
+  <div class="legal-body" id="legalBody"></div>
 </div>
 
 <!-- MODAL -->
@@ -2756,7 +2785,7 @@ async function buildHome(){
   }
 
   // Set day counters immediately — unlockedCount is already loaded from profile
-  document.getElementById('streakCount').textContent = unlockedCount;
+  document.getElementById('streakCount').textContent = streakCount || unlockedCount;
   const _dayCountEl = document.getElementById('homeDayCount');
   if(_dayCountEl) _dayCountEl.textContent = unlockedCount;
 
@@ -3372,6 +3401,10 @@ async function saveJournal(){
       awardFirstTimeCinders('first_journal');
     }
     dailyActions.journalSaved = true;
+    if(selectedMoodSub && !dailyActions.moodCheckedIn) {
+      moodCheckinCount++;
+      db.from('profiles').update({ mood_checkin_count: moodCheckinCount }).eq('id', currentUser.id).then(() => {});
+    }
     if(selectedMoodCategory) dailyActions.moodCheckedIn = true;
     updateDailyPractice();
   }
@@ -4691,7 +4724,8 @@ async function saveMantra() {
     const today = getLocalDateString();
     const thisMonday = getThisMonday();
     if(!lastMantraDate || lastMantraDate < thisMonday) {
-      await db.from('profiles').update({ last_mantra_date: today }).eq('id', currentUser.id);
+      mantraWeekCount++;
+      await db.from('profiles').update({ last_mantra_date: today, mantra_week_count: mantraWeekCount }).eq('id', currentUser.id);
       awardCinders(10, 'Weekly mantra set');
     }
     lastMantraDate = today;
@@ -4757,6 +4791,78 @@ function selectSubMood(category, sub, el) {
   el.classList.add('selected');
   const display = document.getElementById('moodSelectedDisplay');
   if(display) display.textContent = `✦ Feeling ${sub}`;
+}
+
+// ── LEGAL DOCS ──
+const LEGAL_CONTENT = {
+  tos: {
+    title: 'Terms of Service',
+    updated: 'Last updated: May 2025',
+    sections: [
+      { title: null, body: 'Already Mine is operated by Gutterglow LLC ("we", "us", "our").' },
+      { title: '1. Acceptance', body: 'By downloading or using Already Mine you agree to these terms. If you do not agree, do not use the app.' },
+      { title: '2. Subscription and Billing', body: 'Already Mine offers a free tier and a paid membership. Paid subscriptions are billed through the Apple App Store or Google Play Store. All billing, refunds, and cancellations are handled through your app store account. We do not process payments directly.' },
+      { title: '3. Free Trial', body: 'New members receive a 30-day free trial. Your subscription begins automatically after the trial unless cancelled before it ends.' },
+      { title: '4. User Content', body: 'Journal entries, intentions, and other content you create in the app belong to you. We do not sell or share your personal content with third parties.' },
+      { title: '5. Acceptable Use', body: 'You agree not to misuse the app, attempt to access other users\' data, reverse engineer the app, or use it for any unlawful purpose.' },
+      { title: '6. Termination', body: 'We reserve the right to suspend or terminate accounts that violate these terms.' },
+      { title: '7. Disclaimers', body: 'Already Mine is a wellness and personal development app. It is not a substitute for professional mental health treatment. Content in the app is for inspirational purposes only.' },
+      { title: '8. Changes', body: 'We may update these terms at any time. Continued use of the app after changes constitutes acceptance.' },
+      { title: '9. Contact', body: 'Questions? Reach us at support@alreadymine.com' },
+      { title: null, body: 'Gutterglow LLC — Salt Lake City, Utah' },
+    ]
+  },
+  privacy: {
+    title: 'Privacy Policy',
+    updated: 'Last updated: May 2025',
+    sections: [
+      { title: null, body: 'Already Mine is operated by Gutterglow LLC.' },
+      { title: 'What we collect', list: [
+        'Email address and name (when you create an account)',
+        'Journal entries, mood check-ins, intentions, and affirmation data you create',
+        'App usage data (streaks, cinders, badges)',
+        'Profile photo (if you choose to upload one)',
+      ]},
+      { title: 'How we use it', list: [
+        'To provide and improve the app experience',
+        'To sync your data across devices',
+        'To generate your monthly reflection summary (processed by Anthropic\'s Claude AI)',
+        'We do not sell your personal data to third parties',
+      ]},
+      { title: 'Data storage', body: 'Your data is stored securely using Supabase, a SOC 2 compliant database provider.' },
+      { title: 'Third party services', list: [
+        'Supabase (database and authentication)',
+        'Anthropic Claude (monthly summary generation — journal data is sent to generate your summary)',
+        'Apple App Store / Google Play (payment processing)',
+      ]},
+      { title: 'Your rights', body: 'You can delete your account and all associated data at any time by contacting us at support@alreadymine.com' },
+      { title: 'Children', body: 'Already Mine is not intended for users under 13.' },
+      { title: 'Changes', body: 'We may update this policy at any time. We will notify users of significant changes.' },
+      { title: 'Contact', body: 'support@alreadymine.com' },
+      { title: null, body: 'Gutterglow LLC — Salt Lake City, Utah' },
+    ]
+  }
+};
+
+function showLegalDoc(type) {
+  const doc = LEGAL_CONTENT[type];
+  if(!doc) return;
+  document.getElementById('legalTitle').textContent = doc.title;
+  const body = document.getElementById('legalBody');
+  body.innerHTML = `<div class="legal-updated">${doc.updated}</div>` +
+    doc.sections.map(s => {
+      const titleHtml = s.title ? `<div class="legal-section-title">${s.title}</div>` : '';
+      const contentHtml = s.list
+        ? `<ul class="legal-list">${s.list.map(item => `<li>${item}</li>`).join('')}</ul>`
+        : `<div class="legal-section-body">${s.body}</div>`;
+      return `<div class="legal-section">${titleHtml}${contentHtml}</div>`;
+    }).join('');
+  body.scrollTop = 0;
+  document.getElementById('legalOverlay').classList.add('open');
+}
+
+function closeLegalDoc() {
+  document.getElementById('legalOverlay').classList.remove('open');
 }
 
 function dismissModal() {
@@ -4873,6 +4979,18 @@ async function toggleHabitComplete(id) {
   renderHabits();
   if(marking) {
     await db.from('habit_completions').insert({ user_id: currentUser.id, habit_id: id, completed_date: completedDate });
+    // Check if all daily/weekday habits are now complete for today
+    if(currentUser && freq !== 'weekly') {
+      const today = getLocalDateString();
+      const isWeekend = [0, 6].includes(new Date().getDay());
+      const applicable = habits.filter(h => !(h.frequency === 'weekdays' && isWeekend) && (h.frequency || 'daily') !== 'weekly');
+      const todayDone = new Set(habitCompletions[today] || []);
+      const allDone = applicable.length > 0 && applicable.every(h => todayDone.has(h.id));
+      if(allDone) {
+        foundationDaysCount++;
+        db.from('profiles').update({ foundation_days_count: foundationDaysCount }).eq('id', currentUser.id).then(() => {});
+      }
+    }
   } else {
     await db.from('habit_completions').delete().eq('habit_id', id).eq('completed_date', completedDate).eq('user_id', currentUser.id);
   }
@@ -5067,6 +5185,10 @@ function completeScan() {
     bodyScanSessions.unshift({ date: today, sections });
   }
   currentScanNotes = {};
+  bodyScanCount++;
+  if(currentUser) {
+    db.from('profiles').update({ body_scan_count: bodyScanCount }).eq('id', currentUser.id).then(() => {});
+  }
   const nav = document.getElementById('globalBottomNav');
   if(nav) nav.style.display = 'flex';
   showScreen('journal');
