@@ -3259,6 +3259,32 @@ function jumpCalToToday() {
   renderCalendar();
 }
 
+async function getReflectionState() {
+  const now = new Date();
+  const today = now.getDate();
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastYear = lastMonthDate.getFullYear();
+  const lastMonth = lastMonthDate.getMonth() + 1;
+  if(today >= 1 && today <= 12) {
+    if(currentUser) {
+      const { data: existing } = await db.from('monthly_summaries')
+        .select('narrative')
+        .eq('user_id', currentUser.id)
+        .eq('year', lastYear)
+        .eq('month', lastMonth)
+        .maybeSingle();
+      if(existing?.narrative) {
+        return { available: true, generated: true, year: lastYear, month: lastMonth, monthName: monthNames[lastMonth - 1] };
+      }
+    }
+    return { available: true, generated: false, year: lastYear, month: lastMonth, monthName: monthNames[lastMonth - 1], daysLeft: 13 - today };
+  }
+  const nextFirst = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const daysUntilNext = Math.ceil((nextFirst - now) / (1000 * 60 * 60 * 24));
+  return { available: false, daysUntilNext };
+}
+
 async function openMonthReflection(year, month) {
   if(!isPaidMember && !adminMode) {
     currentModalType = 'info';
@@ -3270,9 +3296,15 @@ async function openMonthReflection(year, month) {
   }
 
   const now = new Date();
-  const isCurrentMonth = year === now.getFullYear() && month === now.getMonth() + 1;
+  const isCurrentCalMonth = year === now.getFullYear() && month === now.getMonth() + 1;
 
-  if(isCurrentMonth) {
+  if(isCurrentCalMonth) {
+    const rState = await getReflectionState();
+    if(!rState.available) {
+      const d = rState.daysUntilNext;
+      showCindersToast(0, `Next reflection available in ${d} day${d !== 1 ? 's' : ''}`);
+      return;
+    }
     openMonthlySummary();
     return;
   }
@@ -3286,14 +3318,12 @@ async function openMonthReflection(year, month) {
     .eq('month', month)
     .maybeSingle();
 
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   if(!saved?.narrative) {
-    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     showCindersToast(0, `No reflection for ${monthNames[month - 1]} yet`);
     return;
   }
 
-  // Show the summary screen with the past month's data
-  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('summaryMonthTitle').textContent = `${monthNames[month - 1]} ${year}`;
   document.getElementById('summaryDays').textContent = '—';
   document.getElementById('summaryAffirmations').textContent = '—';
@@ -4459,21 +4489,28 @@ async function buildProfile() {
   const lockNotice = document.getElementById('monthlyLockNotice');
   if(reflBtn) {
     if(adminMode || isPaidMember) {
-      reflBtn.onclick = openMonthlySummary;
       if(lockNotice) lockNotice.style.display = 'none';
-      // Check if a summary already exists for this month
-      if(currentUser) {
-        const { data: existingSummary } = await db.from('monthly_summaries')
-          .select('narrative')
-          .eq('user_id', currentUser.id)
-          .eq('year', currentYear)
-          .eq('month', currentMonth)
-          .maybeSingle();
-        reflBtn.textContent = existingSummary?.narrative
-          ? 'Read This Month\'s Reflection'
-          : 'What This Month Held';
+      const rState = await getReflectionState();
+      if(rState.available && rState.generated) {
+        reflBtn.textContent = `Read ${rState.monthName}'s Reflection`;
+        reflBtn.onclick = openMonthlySummary;
+        reflBtn.disabled = false;
+        reflBtn.style.opacity = '';
+        reflBtn.style.cursor = 'pointer';
+      } else if(rState.available) {
+        const d = rState.daysLeft;
+        reflBtn.textContent = `${d} day${d !== 1 ? 's' : ''} left to generate ${rState.monthName}'s Reflection`;
+        reflBtn.onclick = openMonthlySummary;
+        reflBtn.disabled = false;
+        reflBtn.style.opacity = '';
+        reflBtn.style.cursor = 'pointer';
       } else {
-        reflBtn.textContent = 'What This Month Held';
+        const d = rState.daysUntilNext;
+        reflBtn.textContent = `Next reflection available in ${d} day${d !== 1 ? 's' : ''}`;
+        reflBtn.disabled = true;
+        reflBtn.style.opacity = '0.4';
+        reflBtn.style.cursor = 'default';
+        reflBtn.onclick = null;
       }
     } else {
       reflBtn.textContent = 'Unlock Monthly Reflections';
@@ -4607,18 +4644,18 @@ function toggleNicknameEdit() {
 let summaryGenerated = false;
 
 async function openMonthlySummary() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
-  const monthName = now.toLocaleDateString('en-US', {month:'long'});
+  const rState = await getReflectionState();
+  if(!rState.available) {
+    const d = rState.daysUntilNext;
+    showCindersToast(0, `Next reflection available in ${d} day${d !== 1 ? 's' : ''}`);
+    return;
+  }
+  const { year, month, monthName } = rState;
   document.getElementById('summaryMonthTitle').textContent = `${monthName}'s Reflection`;
+  document.getElementById('summaryDays').textContent = '—';
+  document.getElementById('summaryAffirmations').textContent = '—';
+  document.getElementById('summaryEntries').textContent = '—';
 
-  // Populate stats with real data
-  document.getElementById('summaryDays').textContent = streakCount || unlockedCount || 0;
-  document.getElementById('summaryAffirmations').textContent = unlockedCount || 0;
-  document.getElementById('summaryEntries').textContent = journalEntryCount || 0;
-
-  // Check for a cached narrative before showing the screen
   if(currentUser) {
     const { data: cached } = await db.from('monthly_summaries')
       .select('narrative')
@@ -4637,7 +4674,6 @@ async function openMonthlySummary() {
     }
   }
 
-  // No cache — show loading spinner and generate
   document.getElementById('summaryLoading').style.display = 'flex';
   document.getElementById('summaryContent').style.display = 'none';
   showScreen('monthlySummary');
@@ -4645,14 +4681,17 @@ async function openMonthlySummary() {
 }
 
 async function finishSummaryUI(year, month) {
-  // Mood bars — query this month's entries for mood data
-  const now = new Date();
   const fromDate = `${year}-${String(month).padStart(2,'0')}-01`;
   const { data: monthEntries } = await db.from('journal_entries')
-    .select('mood_sub')
+    .select('mood_sub, entry_date')
     .eq('user_id', currentUser.id)
     .gte('entry_date', fromDate)
     .lte('entry_date', `${year}-${String(month).padStart(2,'0')}-31`);
+
+  const entryCount = (monthEntries || []).length;
+  const activeDays = new Set((monthEntries || []).map(e => e.entry_date)).size;
+  document.getElementById('summaryDays').textContent = activeDays || '—';
+  document.getElementById('summaryEntries').textContent = entryCount || '—';
 
   const moodCounts = {};
   (monthEntries || []).forEach(e => {
@@ -4726,14 +4765,14 @@ async function generateSummary(year, month) {
   if(!currentUser) return;
 
   try {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const fromDate = thirtyDaysAgo.toISOString().split('T')[0];
+    const fromDate = `${year}-${String(month).padStart(2,'0')}-01`;
+    const toDate = `${year}-${String(month).padStart(2,'0')}-31`;
 
     const { data: entries, error } = await db.from('journal_entries')
       .select('*')
       .eq('user_id', currentUser.id)
       .gte('entry_date', fromDate)
+      .lte('entry_date', toDate)
       .order('entry_date', { ascending: true });
 
     if (error) throw error;
