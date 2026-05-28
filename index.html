@@ -1571,12 +1571,12 @@
     <div class="profile-section-title">Monthly Reflection</div>
     <div style="position:relative;padding:24px;background:linear-gradient(135deg,rgba(201,169,110,.06) 0%,rgba(201,169,110,.02) 100%);border:1px solid rgba(201,169,110,.15);">
       <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:var(--cream);margin-bottom:8px;">What This Month Held</div>
-      <div style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.7;margin-bottom:16px;">A personalized reflection on your journey this month — your moods, your intentions, your growth. Generated just for you.</div>
+      <div id="monthlyReflectionDesc" style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.7;margin-bottom:16px;">At the end of each month, receive a personalized reflection on your journey — your moods, your intentions, and the growth only you could see.</div>
       <div id="monthlyLockNotice" style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:rgba(201,169,110,.05);border:1px solid rgba(201,169,110,.1);">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Members only · 1 per month</span>
       </div>
-      <button onclick="adminMode ? openMonthlySummary() : openUpgrade()" style="width:100%;padding:14px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;" id="monthlyReflectionBtn">Unlock with Membership</button>
+      <button style="width:100%;padding:14px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;" id="monthlyReflectionBtn">Unlock Monthly Reflections</button>
     </div>
   </div>
 
@@ -3260,6 +3260,15 @@ function jumpCalToToday() {
 }
 
 async function openMonthReflection(year, month) {
+  if(!isPaidMember && !adminMode) {
+    currentModalType = 'info';
+    document.getElementById('modalDay').textContent = 'Monthly Reflections';
+    document.getElementById('modalText').textContent = 'Each month, receive a deeply personal reflection on your journey — written just for you based on your moods, journal entries, and intentions. A membership feature.';
+    document.getElementById('modalCat').innerHTML = '<div style="margin-top:16px"><button onclick="dismissModal();openUpgrade();" style="width:100%;padding:12px 20px;background:rgba(201,169,110,.12);border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:\'Jost\',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;">Unlock with Membership</button></div>';
+    document.getElementById('modalOverlay').classList.add('open');
+    return;
+  }
+
   const now = new Date();
   const isCurrentMonth = year === now.getFullYear() && month === now.getMonth() + 1;
 
@@ -4467,7 +4476,7 @@ async function buildProfile() {
         reflBtn.textContent = 'What This Month Held';
       }
     } else {
-      reflBtn.textContent = 'Unlock with Membership';
+      reflBtn.textContent = 'Unlock Monthly Reflections';
       reflBtn.onclick = openUpgrade;
       if(lockNotice) lockNotice.style.display = '';
     }
