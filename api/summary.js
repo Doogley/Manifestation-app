@@ -4,7 +4,7 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // CORS preflight
   if (req.method === 'OPTIONS') {
     res.writeHead(204, CORS_HEADERS);
