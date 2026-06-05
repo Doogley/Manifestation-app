@@ -2010,9 +2010,22 @@ async function loadUserProfile() {
       });
     }
   }
- 
+
   // Check if user already unlocked today's affirmation
   const today = getLocalDateString();
+
+  // Backfill today's affirmation if it was revealed but not saved to history
+  if(currentUser && data.last_affirmation_date === today && data.today_affirmation_text && !affirmationHistory[unlockedCount]) {
+    const backfillEntry = { text: data.today_affirmation_text, cat: data.today_affirmation_cat || '' };
+    affirmationHistory[unlockedCount] = backfillEntry;
+    db.from('user_affirmations').upsert({
+      user_id: currentUser.id,
+      affirmation_id: unlockedCount,
+      affirmation_text: data.today_affirmation_text,
+      affirmation_cat: data.today_affirmation_cat || '',
+      unlocked_date: data.last_affirmation_date,
+    }, { onConflict: 'user_id,affirmation_id' }).then(() => {});
+  }
   if(data.last_affirmation_date === today) {
     dailyActions.affirmationUnlocked = true;
   }
