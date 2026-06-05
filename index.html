@@ -1850,6 +1850,7 @@ function resetUserState() {
   featureToggles = { foundations: true, body_scan: true, mantra: true, daily_practice: true, intentions: true, monthly_summary: true, tooltips: true };
   habits = [];
   habitCompletions = {};
+  savedAffirmationsData = {};
   currentScanNotes = {};
   bodyScanSessions = [];
   selectedMoodCategory = null;
@@ -2027,7 +2028,6 @@ async function loadUserProfile() {
       unlocked_date: data.last_affirmation_date,
       is_saved: false,
     }, { onConflict: 'user_id,affirmation_id' });
-    if(backfillError) console.error('backfill error full:', JSON.stringify(backfillError));
   }
   if(data.last_affirmation_date === today) {
     dailyActions.affirmationUnlocked = true;
@@ -2767,11 +2767,11 @@ async function goToHome(){
   todayCategory = firstEntry ? firstEntry.cat : catLabels[answers.intention || 'abundance'];
   affirmationHistory[1] = { text: todayAffirmation, cat: todayCategory };
   if(currentUser) {
-    db.from('user_affirmations').upsert({
+    await db.from('user_affirmations').upsert({
       user_id: currentUser.id, affirmation_id: 1,
       affirmation_text: todayAffirmation, affirmation_cat: todayCategory,
       unlocked_date: getLocalDateString(), is_saved: false,
-    }, { onConflict: 'user_id,affirmation_id' }).then(() => {});
+    }, { onConflict: 'user_id,affirmation_id' });
   }
   buildHome();
   showScreen('home');
@@ -3025,7 +3025,6 @@ async function unlockTodaysAffirmation() {
       affirmation_text: todayAffirmation, affirmation_cat: todayCategory,
       unlocked_date: today, is_saved: false,
     }, { onConflict: 'user_id,affirmation_id' });
-    if(upsertError) console.error('user_affirmations upsert error:', upsertError);
   }
   dailyActions.affirmationUnlocked = true;
   document.getElementById('affirmationLocked').style.display = 'none';
@@ -3915,6 +3914,7 @@ async function togglePinBadge(badgeId) {
 
 // ── INTENTIONS ──
 let intentions = [];
+const receivingIntentions = new Set();
 const MAX_FREE_INTENTIONS = 3;
 let pendingIntentionDeletes = new Set();
 let currentModalType = '';
@@ -4077,15 +4077,18 @@ function discardPastIntentionChanges() {
 }
 
 async function markReceived(i) {
+  if(receivingIntentions.has(i)) return;
+  receivingIntentions.add(i);
   intentions[i].received = true;
   intentionsReceivedCount++;
   if(currentUser) {
     await db.from('intentions')
       .update({ is_received: true })
       .eq('id', intentions[i].id);
-    db.from('profiles').update({ intentions_received_count: intentionsReceivedCount }).eq('id', currentUser.id).then(() => {});
+    await db.from('profiles').update({ intentions_received_count: intentionsReceivedCount }).eq('id', currentUser.id);
   }
   renderIntentions();
+  receivingIntentions.delete(i);
 }
 
 async function removeIntention(i) {
@@ -4990,9 +4993,8 @@ async function generateSummary(year, month) {
 
     // Save to Supabase so we don't regenerate this month
     if(narrativeText && currentUser) {
-      db.from('monthly_summaries')
-        .insert({ user_id: currentUser.id, year, month, narrative: narrativeText })
-        .then(() => {});
+      await db.from('monthly_summaries')
+        .insert({ user_id: currentUser.id, year, month, narrative: narrativeText });
     }
   } catch (err) {
     document.getElementById('summaryNarrative').textContent = 'Unable to generate your summary right now. Please try again later.';
@@ -5059,7 +5061,7 @@ async function awardFirstTimeCinders(action) {
   const amounts = { first_journal:50, first_intention:25, first_foundation:25, onboarding_complete:50 };
   const labels = { first_journal:'First journal entry', first_intention:'First intention set', first_foundation:'First foundation added', onboarding_complete:'Journey begins' };
   if(!amounts[action]) return;
-  db.from('profiles').update({ cinder_bonuses: JSON.stringify([...cinderBonuses]) }).eq('id', currentUser.id).then(()=>{});
+  await db.from('profiles').update({ cinder_bonuses: JSON.stringify([...cinderBonuses]) }).eq('id', currentUser.id);
   awardCinders(amounts[action], labels[action]);
 }
 
