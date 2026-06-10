@@ -1971,6 +1971,7 @@ async function loadUserProfile() {
   moodCheckinCount          = data.mood_checkin_count         || 0;
   mantraWeekCount           = data.mantra_week_count          || 0;
   foundationDaysCount       = data.foundation_days_count      || 0;
+  lastFoundationDate        = data.last_foundation_date       || '';
   try { pinnedBadges = JSON.parse(data.pinned_badges || '[]'); } catch(e) { pinnedBadges = []; }
   applyMembershipState();
   // Load intentions from Supabase
@@ -1996,7 +1997,7 @@ async function loadUserProfile() {
       db.from('user_affirmations').select('affirmation_id, affirmation_text, affirmation_cat').eq('user_id', currentUser.id),
     ]);
     if(habitsData) {
-      habits = habitsData.map(h => ({ id: h.id, name: h.name, frequency: h.frequency || 'daily' }));
+      habits = habitsData.map(h => ({ id: h.id, name: h.name, frequency: h.frequency || 'daily', milestones: new Set(h.milestones_awarded || []) }));
     }
     if(completionsData) {
       habitCompletions = {};
@@ -2039,13 +2040,14 @@ async function loadUserProfile() {
   // Check if journal saved today (also sets moodCheckedIn if mood was recorded) + total count for badges
   if(currentUser) {
     const [{ data: todayJournal }, { count }] = await Promise.all([
-      db.from('journal_entries').select('id, mood_category').eq('user_id', currentUser.id).eq('entry_date', today).maybeSingle(),
+      db.from('journal_entries').select('id, mood_sub').eq('user_id', currentUser.id).eq('entry_date', today).maybeSingle(),
       db.from('journal_entries').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id),
     ]);
     if(todayJournal) {
       dailyActions.journalSaved = true;
       dailyActions.journalCindersClaimed = true;
-      if(todayJournal.mood_category) dailyActions.moodCheckedIn = true;
+      // Same condition as saveJournal: a check-in requires a sub-mood
+      if(todayJournal.mood_sub) dailyActions.moodCheckedIn = true;
     }
     journalEntryCount = count ?? 0;
   }
@@ -2730,7 +2732,8 @@ function nextQ(){if(!selectedOption)return;answers[questions[currentQuestion].id
 
 function showReveal(){
   const msgs={tough:"You came here looking for something. This affirmation meets you exactly where you are.",ready:"You're ready for more — and more is ready for you.",good:"From a place of strength, you're calling in even greater things.",fresh:"Every fresh start is a gift. This is yours."};
-  const firstEntry = affirmationLibrary[0];
+  // Use the category-filtered sequence so the reveal matches what gets stored
+  const firstEntry = getUserAffirmationSequence()[0];
   todayAffirmation = firstEntry ? firstEntry.text : "Everything I need is already making its way to me.";
   todayCategory = firstEntry ? firstEntry.cat : 'Manifestation';
   document.getElementById('affirmationText').textContent=todayAffirmation;
@@ -2742,6 +2745,12 @@ function showReveal(){
 
 async function goToHome(){
   dailyActions.affirmationUnlocked = true;
+  // Compute the category-filtered affirmation FIRST so profiles, affirmationHistory,
+  // and user_affirmations all store the exact same text and category
+  const seq = getUserAffirmationSequence();
+  const firstEntry = seq[0];
+  todayAffirmation = firstEntry ? firstEntry.text : affirmations[answers.intention || 'abundance'][answers.tone || 'gentle'];
+  todayCategory = firstEntry ? firstEntry.cat : catLabels[answers.intention || 'abundance'];
   if(currentUser) {
     const today = getLocalDateString();
     const { data: affCheck } = await db.from('profiles')
@@ -2761,10 +2770,6 @@ async function goToHome(){
     if(!alreadyUnlockedToday) awardCinders(10, 'Affirmation unlocked');
   }
   awardFirstTimeCinders('onboarding_complete');
-  const seq = getUserAffirmationSequence();
-  const firstEntry = seq[0];
-  todayAffirmation = firstEntry ? firstEntry.text : affirmations[answers.intention || 'abundance'][answers.tone || 'gentle'];
-  todayCategory = firstEntry ? firstEntry.cat : catLabels[answers.intention || 'abundance'];
   affirmationHistory[1] = { text: todayAffirmation, cat: todayCategory };
   if(currentUser) {
     await db.from('user_affirmations').upsert({
@@ -2989,58 +2994,65 @@ async function buildHome(){
   updateDailyPractice();
 }
 
+let unlockingAffirmation = false;
 async function unlockTodaysAffirmation() {
+  if(unlockingAffirmation) return; // a reveal is already in flight — block double-taps
   if(!isPaidMember && unlockedCount >= 30) {
     openUpgrade();
     return;
   }
-  const today = getLocalDateString();
-  if(currentUser) {
-    const { data } = await db.from('profiles')
-      .select('last_affirmation_date')
-      .eq('id', currentUser.id)
-      .maybeSingle();
-    if(data?.last_affirmation_date === today) return; // already unlocked today
-    unlockedCount = unlockedCount + 1;
-    const seq = getUserAffirmationSequence();
-    const newEntry = seq[(unlockedCount - 1) % seq.length];
-    if(newEntry) { todayAffirmation = newEntry.text; todayCategory = newEntry.cat; }
-    const { error: updateError } = await db.from('profiles')
-      .update({
-        last_affirmation_date: today,
-        unlocked_count: unlockedCount,
-        today_affirmation_text: todayAffirmation,
-        today_affirmation_cat: todayCategory,
-      })
-      .eq('id', currentUser.id);
-    if(updateError) {
-      unlockedCount = unlockedCount - 1;
-      showCindersToast(0, 'Connection error — please try again');
-      return;
+  unlockingAffirmation = true;
+  try {
+    const today = getLocalDateString();
+    if(currentUser) {
+      const { data } = await db.from('profiles')
+        .select('last_affirmation_date')
+        .eq('id', currentUser.id)
+        .maybeSingle();
+      if(data?.last_affirmation_date === today) return; // already unlocked today
+      unlockedCount = unlockedCount + 1;
+      const seq = getUserAffirmationSequence();
+      const newEntry = seq[(unlockedCount - 1) % seq.length];
+      if(newEntry) { todayAffirmation = newEntry.text; todayCategory = newEntry.cat; }
+      const { error: updateError } = await db.from('profiles')
+        .update({
+          last_affirmation_date: today,
+          unlocked_count: unlockedCount,
+          today_affirmation_text: todayAffirmation,
+          today_affirmation_cat: todayCategory,
+        })
+        .eq('id', currentUser.id);
+      if(updateError) {
+        unlockedCount = unlockedCount - 1;
+        showCindersToast(0, 'Connection error — please try again');
+        return;
+      }
+      awardCinders(10, 'Affirmation unlocked');
+      affirmationHistory[unlockedCount] = { text: todayAffirmation, cat: todayCategory };
+      const { error: upsertError } = await db.from('user_affirmations').upsert({
+        user_id: currentUser.id, affirmation_id: unlockedCount,
+        affirmation_text: todayAffirmation, affirmation_cat: todayCategory,
+        unlocked_date: today, is_saved: false,
+      }, { onConflict: 'user_id,affirmation_id' });
     }
-    awardCinders(10, 'Affirmation unlocked');
-    affirmationHistory[unlockedCount] = { text: todayAffirmation, cat: todayCategory };
-    const { error: upsertError } = await db.from('user_affirmations').upsert({
-      user_id: currentUser.id, affirmation_id: unlockedCount,
-      affirmation_text: todayAffirmation, affirmation_cat: todayCategory,
-      unlocked_date: today, is_saved: false,
-    }, { onConflict: 'user_id,affirmation_id' });
+    dailyActions.affirmationUnlocked = true;
+    document.getElementById('affirmationLocked').style.display = 'none';
+    const unlockedEl = document.getElementById('affirmationUnlocked');
+    unlockedEl.style.display = 'block';
+    unlockedEl.style.animation = 'fadeIn .5s ease forwards';
+    document.getElementById('homeAffirmationText').textContent = todayAffirmation;
+    document.getElementById('homeAffirmationCat').textContent = '✦  ' + todayCategory;
+    saved = false;
+    const saveBtn = document.getElementById('saveBtn');
+    if(saveBtn) {
+      saveBtn.textContent = '♡  Save';
+      saveBtn.classList.remove('active');
+    }
+    updateDailyPractice();
+    buildLibrary();
+  } finally {
+    unlockingAffirmation = false;
   }
-  dailyActions.affirmationUnlocked = true;
-  document.getElementById('affirmationLocked').style.display = 'none';
-  const unlockedEl = document.getElementById('affirmationUnlocked');
-  unlockedEl.style.display = 'block';
-  unlockedEl.style.animation = 'fadeIn .5s ease forwards';
-  document.getElementById('homeAffirmationText').textContent = todayAffirmation;
-  document.getElementById('homeAffirmationCat').textContent = '✦  ' + todayCategory;
-  saved = false;
-  const saveBtn = document.getElementById('saveBtn');
-  if(saveBtn) {
-    saveBtn.textContent = '♡  Save';
-    saveBtn.classList.remove('active');
-  }
-  updateDailyPractice();
-  buildLibrary();
 }
 function buildLibrary(){
   const grid=document.getElementById('libraryGrid');
@@ -3517,8 +3529,9 @@ function selectMood(el){document.querySelectorAll('.mood-btn').forEach(b=>b.clas
 
 async function saveJournal(){
   const textarea = document.querySelector('#journal .journal-textarea');
-  const gratitude = [...document.querySelectorAll('.gratitude-input')].map(i=>i.value).filter(Boolean);
-  const hasContent = !!(textarea.value || selectedMoodSub || gratitude.length);
+  // Keep each gratitude in its own slot — empty slots save as null, never collapse
+  const gratitudeVals = [...document.querySelectorAll('.gratitude-input')].map(i => i.value.trim() || null);
+  const hasContent = !!(textarea.value || selectedMoodSub || gratitudeVals.some(Boolean));
 
   if(currentUser) {
     const today = getLocalDateString();
@@ -3551,9 +3564,9 @@ async function saveJournal(){
       reflection: textarea.value || null,
       mood_category: selectedMoodCategory || null,
       mood_sub: selectedMoodSub || null,
-      gratitude_1: gratitude[0] || null,
-      gratitude_2: gratitude[1] || null,
-      gratitude_3: gratitude[2] || null,
+      gratitude_1: gratitudeVals[0],
+      gratitude_2: gratitudeVals[1],
+      gratitude_3: gratitudeVals[2],
       mantra: weeklyMantra || null,
     };
 
@@ -3570,11 +3583,12 @@ async function saveJournal(){
       }
     }
     dailyActions.journalSaved = true;
+    // Flag and counter must share one condition: a check-in requires a sub-mood
     if(selectedMoodSub && !dailyActions.moodCheckedIn) {
       moodCheckinCount++;
       db.from('profiles').update({ mood_checkin_count: moodCheckinCount }).eq('id', currentUser.id).then(() => {});
     }
-    if(selectedMoodCategory) dailyActions.moodCheckedIn = true;
+    if(selectedMoodSub) dailyActions.moodCheckedIn = true;
     updateDailyPractice();
   }
 
@@ -4173,7 +4187,7 @@ function updateBadgeEarnedStates() {
     j1:journalEntryCount>=1, j2:journalEntryCount>=10, j3:journalEntryCount>=30, j4:journalEntryCount>=100, j5:journalEntryCount>=200,
     a1:unlockedCount>=1,  a2:unlockedCount>=30,  a3:unlockedCount>=100, a4:unlockedCount>=200, a5:unlockedCount>=365,
     m1:intentionsReceivedCount>=1,  m2:intentionsReceivedCount>=5,  m3:intentionsReceivedCount>=15,  m4:intentionsReceivedCount>=30,  m5:intentionsReceivedCount>=50,
-    f1:foundationDaysCount>=1,      f2:foundationDaysCount>=7,      f3:foundationDaysCount>=30,      f4:foundationDaysCount>=90,      f5:foundationDaysCount>=180,
+    f1:habits.length>=1,            f2:foundationDaysCount>=7,      f3:foundationDaysCount>=30,      f4:foundationDaysCount>=90,      f5:foundationDaysCount>=180,
     mt1:mantraWeekCount>=1, mt2:mantraWeekCount>=4, mt3:mantraWeekCount>=12, mt4:mantraWeekCount>=26, mt5:mantraWeekCount>=52,
     bs1:bodyScanCount>=1,   bs2:bodyScanCount>=5,   bs3:bodyScanCount>=20,   bs4:bodyScanCount>=50,   bs5:bodyScanCount>=100,
     sv1:savedAffirmationIds.size>=1, sv2:savedAffirmationIds.size>=5, sv3:savedAffirmationIds.size>=15, sv4:savedAffirmationIds.size>=30, sv5:savedAffirmationIds.size>=50,
@@ -4246,6 +4260,8 @@ function buildLibraryScreen(filter) {
   const grid = document.getElementById('libraryScreenGrid');
   grid.innerHTML = '';
   const isAdmin = adminMode;
+  // Filter must match the category the tile DISPLAYS: history overrides the raw library cat
+  const displayCat = a => affirmationHistory[a.id]?.cat || a.cat;
 
   const sectionLabelStyle = 'grid-column:1/-1;font-family:\'Jost\',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;padding:12px 0 6px;';
 
@@ -4282,9 +4298,9 @@ function buildLibraryScreen(filter) {
       .sort((a, b) => b - a);
 
     const savedFiltered = savedIds.filter(id => {
-      const entry = savedAffirmationsData[id] || affirmationHistory[id];
       const libAff = affirmationLibrary.find(a => a.id === id);
-      const cat = entry?.cat || libAff?.cat || '';
+      // Same precedence as the tile display below: history, then saved data, then library
+      const cat = affirmationHistory[id]?.cat || savedAffirmationsData[id]?.cat || libAff?.cat || '';
       return filter === 'all' || cat === filter;
     });
 
@@ -4314,7 +4330,7 @@ function buildLibraryScreen(filter) {
     const _remaining = affirmationLibrary.filter(a =>
       a.id !== unlockedCount &&
       !savedAffirmationIds.has(a.id) &&
-      (filter === 'all' || a.cat === filter) &&
+      (filter === 'all' || displayCat(a) === filter) &&
       (isAdmin || a.id <= unlockedCount + 7)
     );
     const _unlocked = _remaining.filter(a => isAdmin || a.id < unlockedCount).sort((a,b) => b.id - a.id);
@@ -4338,7 +4354,7 @@ function buildLibraryScreen(filter) {
     // Normal view: remaining tiles excluding today
     const _filtered = affirmationLibrary.filter(a =>
       a.id !== unlockedCount &&
-      (filter === 'all' || a.cat === filter) &&
+      (filter === 'all' || displayCat(a) === filter) &&
       (isAdmin || a.id <= unlockedCount + 7)
     );
     const _unlocked = _filtered.filter(a => isAdmin || a.id < unlockedCount).sort((a,b) => b.id - a.id);
@@ -5348,12 +5364,16 @@ async function toggleHabitComplete(id) {
   const marking = idx === -1;
   if(marking) habitCompletions[key].push(id);
   else habitCompletions[key].splice(idx, 1);
-  if(marking && currentUser) {
+  if(marking && currentUser && h) {
     const newStreak = computeHabitStreak(id, freq);
     const milestones = {7:25, 21:50, 30:100};
-    if(milestones[newStreak]) {
+    if(!h.milestones) h.milestones = new Set();
+    // Each milestone pays out once per habit ever — persisted so un/re-checking can't farm it
+    if(milestones[newStreak] && !h.milestones.has(newStreak)) {
+      h.milestones.add(newStreak);
+      db.from('habits').update({ milestones_awarded: [...h.milestones] }).eq('id', id).eq('user_id', currentUser.id).then(() => {});
       const unit = freq === 'weekly' ? 'week' : 'day';
-      awardCinders(milestones[newStreak], `✦ ${newStreak}-${unit} streak: ${h ? h.name : 'Foundation'}`);
+      awardCinders(milestones[newStreak], `✦ ${newStreak}-${unit} streak: ${h.name}`);
     }
   }
   renderHabits();
@@ -5369,7 +5389,7 @@ async function toggleHabitComplete(id) {
       if(allDone && lastFoundationDate !== today) {
         lastFoundationDate = today;
         foundationDaysCount++;
-        db.from('profiles').update({ foundation_days_count: foundationDaysCount }).eq('id', currentUser.id).then(() => {});
+        db.from('profiles').update({ foundation_days_count: foundationDaysCount, last_foundation_date: today }).eq('id', currentUser.id).then(() => {});
       }
     }
   } else {
@@ -5414,7 +5434,7 @@ async function addPresetHabit(name) {
   if(!isPaidMember && habits.length >= 3) { showCindersToast(0, 'Free members can track up to 3 foundations. Upgrade for unlimited.'); return; }
   const { data, error } = await db.from('habits').insert({ user_id: currentUser.id, name, frequency: selectedHabitFrequency }).select().single();
   if(error || !data) return;
-  habits.push({ id: data.id, name: data.name, frequency: data.frequency || 'daily' });
+  habits.push({ id: data.id, name: data.name, frequency: data.frequency || 'daily', milestones: new Set(data.milestones_awarded || []) });
   awardFirstTimeCinders('first_foundation');
   closeAddHabitPanel();
   renderHabits();
@@ -5428,7 +5448,7 @@ async function addCustomHabit() {
   if(!isPaidMember && habits.length >= 3) { showCindersToast(0, 'Free members can track up to 3 foundations. Upgrade for unlimited.'); return; }
   const { data, error } = await db.from('habits').insert({ user_id: currentUser.id, name, frequency: selectedHabitFrequency }).select().single();
   if(error || !data) return;
-  habits.push({ id: data.id, name: data.name, frequency: data.frequency || 'daily' });
+  habits.push({ id: data.id, name: data.name, frequency: data.frequency || 'daily', milestones: new Set(data.milestones_awarded || []) });
   awardFirstTimeCinders('first_foundation');
   closeAddHabitPanel();
   renderHabits();
