@@ -12,7 +12,9 @@
       "Bash(git stash *)",
       "Bash(grep -v \"//.*habit\")",
       "Bash(grep \"'\\\\\\\\*'\")",
-      "PowerShell(Get-Content *)"
+      "PowerShell(Get-Content *)",
+      "Bash(claude update *)",
+      "PowerShell(\\(Get-Content index.html | Measure-Object -Line\\).Lines)"
     ]
   }
 }
