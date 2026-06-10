@@ -2074,8 +2074,8 @@ async function loadUserProfile() {
   if(data.avatar_url) {
     const imgStyle = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
     const profileAvatar = document.getElementById('profileInitial');
-    if(profileAvatar) profileAvatar.innerHTML = `<img src="${data.avatar_url}" alt="Profile" style="${imgStyle}">`;
-    if(navAvatarEl) navAvatarEl.innerHTML = `<img src="${data.avatar_url}" alt="" style="${imgStyle}">`;
+    if(profileAvatar) profileAvatar.innerHTML = `<img src="${escapeHtml(data.avatar_url)}" alt="Profile" style="${imgStyle}">`;
+    if(navAvatarEl) navAvatarEl.innerHTML = `<img src="${escapeHtml(data.avatar_url)}" alt="" style="${imgStyle}">`;
   }
   setTimeout(() => {
     buildHome();
@@ -3426,7 +3426,7 @@ function openCalEntry(dateStr) {
 
   const gratLines = [entry.gratitude_1, entry.gratitude_2, entry.gratitude_3].filter(Boolean);
   if(gratLines.length) {
-    document.getElementById('calEntryGratitude').innerHTML = gratLines.map(g => `<div style="margin-bottom:6px">✦ ${g}</div>`).join('');
+    document.getElementById('calEntryGratitude').innerHTML = gratLines.map(g => `<div style="margin-bottom:6px">✦ ${escapeHtml(g)}</div>`).join('');
     gratWrap.style.display = 'block';
   } else { gratWrap.style.display = 'none'; }
 
@@ -3617,7 +3617,7 @@ function setPricing(type){
 }
 function handleSubscribe(){
   const wrap=document.querySelector('.upgrade-cta-wrap');
-  wrap.innerHTML=`<div style="text-align:center;padding:24px;border:1px solid rgba(201,169,110,.2)"><div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--cream);margin-bottom:8px">Welcome, ${userNickname || userRealName}.</div><div style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:20px">✦ Your library is now open</div><button onclick="showScreen('home');setTabByName('today');buildHome()" style="padding:14px 32px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer">Enter the App</button></div>`;
+  wrap.innerHTML=`<div style="text-align:center;padding:24px;border:1px solid rgba(201,169,110,.2)"><div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--cream);margin-bottom:8px">Welcome, ${escapeHtml(userNickname || userRealName)}.</div><div style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:20px">✦ Your library is now open</div><button onclick="showScreen('home');setTabByName('today');buildHome()" style="padding:14px 32px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer">Enter the App</button></div>`;
 }
 
 // ── BADGE DATA ──
@@ -3990,7 +3990,7 @@ function renderIntentions() {
     list.innerHTML = active.map(intent => {
       const i = intentions.indexOf(intent);
       return `<div style="display:flex;align-items:flex-start;gap:10px;padding:14px 16px;background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.1);">
-        <div style="flex:1;font-size:14px;font-weight:300;color:var(--soft);line-height:1.6;">${intent.text}</div>
+        <div style="flex:1;font-size:14px;font-weight:300;color:var(--soft);line-height:1.6;">${escapeHtml(intent.text)}</div>
         <div style="display:flex;gap:8px;flex-shrink:0">
           <button onclick="markReceived(${i})" style="padding:4px 10px;background:none;border:1px solid rgba(201,169,110,.2);color:var(--muted);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;white-space:nowrap">✦ Received</button>
           <button onclick="removeIntention(${i})" style="padding:4px 8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .3s">×</button>
@@ -4018,7 +4018,7 @@ function renderPastIntentionsModal() {
       return `
       <div id="past-intent-${intent.id}" style="display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid rgba(201,169,110,.08);text-align:left;transition:opacity .2s;">
         <div style="flex:1;">
-          <div style="font-size:14px;font-weight:300;color:${isPending ? 'var(--muted)' : 'var(--soft)'};line-height:1.6;margin-bottom:4px;text-decoration:${isPending ? 'line-through' : 'none'};transition:all .2s;">${intent.text}</div>
+          <div style="font-size:14px;font-weight:300;color:${isPending ? 'var(--muted)' : 'var(--soft)'};line-height:1.6;margin-bottom:4px;text-decoration:${isPending ? 'line-through' : 'none'};transition:all .2s;">${escapeHtml(intent.text)}</div>
           <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);opacity:${isPending ? '.3' : '.7'};">✦ Received</div>
         </div>
         ${isPending
@@ -4493,7 +4493,7 @@ async function adminShowReferralStats() {
 
   const rows = sorted.map(([code, count]) => `
     <tr>
-      <td style="padding:8px 12px;font-family:'Jost',sans-serif;font-size:13px;color:var(--cream);border-bottom:1px solid rgba(201,169,110,.1);letter-spacing:.05em">${code}</td>
+      <td style="padding:8px 12px;font-family:'Jost',sans-serif;font-size:13px;color:var(--cream);border-bottom:1px solid rgba(201,169,110,.1);letter-spacing:.05em">${escapeHtml(code)}</td>
       <td style="padding:8px 12px;font-family:'Jost',sans-serif;font-size:13px;color:var(--gold);text-align:right;border-bottom:1px solid rgba(201,169,110,.1)">${count}</td>
     </tr>`).join('');
 
@@ -4903,7 +4903,7 @@ async function finishSummaryUI(year, month) {
     const maxCount = Math.max(...moods.map(m=>m.count));
     document.getElementById('summaryMoodBars').innerHTML = moods.map(m=>`
       <div class="summary-mood-row">
-        <div class="summary-mood-name">${m.name}</div>
+        <div class="summary-mood-name">${escapeHtml(m.name)}</div>
         <div class="summary-mood-bar"><div class="summary-mood-fill" style="width:${Math.round((m.count/maxCount)*100)}%"></div></div>
         <div class="summary-mood-count">${m.count}</div>
       </div>`).join('');
@@ -4916,7 +4916,7 @@ async function finishSummaryUI(year, month) {
     document.getElementById('summaryIntentionsList').innerHTML = intentions.map(i=>`
       <div class="summary-intention-item">
         <div class="summary-intention-check">${i.received ? '✦' : '◌'}</div>
-        <div class="summary-intention-text" style="${i.received?'text-decoration:line-through;color:var(--muted)':''}">${i.text}${i.received?' — Manifested':''}</div>
+        <div class="summary-intention-text" style="${i.received?'text-decoration:line-through;color:var(--muted)':''}">${escapeHtml(i.text)}${i.received?' — Manifested':''}</div>
       </div>`).join('');
   } else {
     document.getElementById('summaryIntentionsList').innerHTML = `<div style="font-size:13px;font-weight:300;color:var(--muted);font-style:italic;padding:8px 0">No intentions set this month. Add them in your journal to track what you're calling in.</div>`;
@@ -4951,7 +4951,7 @@ async function loadPastReflections(currentYear, currentMonth) {
         <span>${monthNames[r.month - 1]} ${r.year}</span>
         <span class="past-reflection-chevron">▾</span>
       </button>
-      <div class="past-reflection-body">${r.narrative}</div>
+      <div class="past-reflection-body">${escapeHtml(r.narrative)}</div>
     </div>`).join('');
   section.style.display = '';
 }
@@ -4976,9 +4976,14 @@ async function generateSummary(year, month) {
 
     if (error) throw error;
 
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) throw new Error('Not signed in');
     const response = await fetch(SUMMARY_API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
       body: JSON.stringify({
         entries: entries || [],
         intentions: intentions.map(i => i.text),
