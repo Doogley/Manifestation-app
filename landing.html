@@ -40,11 +40,15 @@
     content:''; position:absolute; inset:0; pointer-events:none;
     background:radial-gradient(ellipse 70% 50% at 50% 38%, rgba(201,169,110,.07), transparent 70%);
   }
-  .hero-title {
+  .hero-logo {
     font-family:'Cormorant Garamond',serif;
-    font-size:clamp(48px,11vw,84px); font-weight:300;
-    letter-spacing:.05em; line-height:1.1; color:var(--cream);
+    font-size:clamp(44px,10vw,56px); font-weight:300;
+    letter-spacing:.12em; line-height:1.15; color:var(--gold);
     opacity:0; animation:fadeUp 1s .25s ease forwards;
+  }
+  .hero-logo .logo-star {
+    font-size:.45em; vertical-align:.5em; opacity:.6;
+    margin-left:.3em; letter-spacing:0;
   }
   .hero-tagline {
     font-family:'Jost',sans-serif; font-size:13px; font-weight:300;
@@ -165,7 +169,7 @@
     .section-title { margin-bottom:44px; }
   }
   @media (prefers-reduced-motion:reduce) {
-    .hero-title, .hero-tagline, .hero-rule, .hero-desc, .hero-cta, .hero-scroll {
+    .hero-logo, .hero-tagline, .hero-rule, .hero-desc, .hero-cta, .hero-scroll {
       animation:none; opacity:1;
     }
   }
@@ -174,7 +178,7 @@
 <body>
 
 <header class="hero">
-  <h1 class="hero-title">Already Mine</h1>
+  <h1 class="hero-logo">Already Mine&nbsp;<span class="logo-star">&#10022;</span></h1>
   <p class="hero-tagline">Your daily manifestation practice</p>
   <div class="hero-rule"></div>
   <p class="hero-desc">
