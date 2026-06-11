@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Already Mine — Your daily manifestation practice</title>
+<meta name="description" content="Already Mine is a daily manifestation and affirmation app. Receive affirmations written for your path, journal your journey, and watch your intentions take root.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f5f0e8;
+    --gold: #c9a96e;
+    --deep: #1a1610;
+    --deep2: #211e17;
+    --muted: #8a7d6b;
+    --soft: #d4c9b8;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body {
+    font-family:'Jost',sans-serif; font-weight:300;
+    background:var(--deep); color:var(--cream);
+    min-height:100vh; overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap { max-width:680px; margin:0 auto; padding:0 28px; }
+
+  /* ---------- hero ---------- */
+  .hero {
+    min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; position:relative;
+    padding:80px 28px;
+  }
+  .hero::before {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(ellipse 70% 50% at 50% 38%, rgba(201,169,110,.07), transparent 70%);
+  }
+  .hero-glyph {
+    font-family:'Cormorant Garamond',serif; font-size:64px; line-height:.6;
+    color:var(--gold); opacity:0; margin-bottom:8px;
+    animation:fadeUp 1s .1s ease forwards;
+  }
+  .hero-title {
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(48px,11vw,84px); font-weight:300;
+    letter-spacing:.05em; line-height:1.1; color:var(--cream);
+    opacity:0; animation:fadeUp 1s .25s ease forwards;
+  }
+  .hero-tagline {
+    font-family:'Jost',sans-serif; font-size:13px; font-weight:300;
+    letter-spacing:.28em; text-transform:uppercase; color:var(--gold);
+    margin-top:22px;
+    opacity:0; animation:fadeUp 1s .45s ease forwards;
+  }
+  .hero-rule {
+    width:48px; height:1px; background:rgba(201,169,110,.4);
+    margin:36px auto;
+    opacity:0; animation:fadeUp 1s .6s ease forwards;
+  }
+  .hero-desc {
+    max-width:480px; font-size:clamp(15px,4vw,17px); line-height:1.85; color:var(--soft);
+    opacity:0; animation:fadeUp 1s .75s ease forwards;
+  }
+  .hero-cta {
+    display:inline-block; margin-top:48px;
+    padding:16px 44px;
+    background:rgba(201,169,110,.06); border:1px solid rgba(201,169,110,.35);
+    color:var(--gold); text-decoration:none;
+    font-family:'Jost',sans-serif; font-size:12px; font-weight:300;
+    letter-spacing:.22em; text-transform:uppercase;
+    transition:all .3s ease;
+    opacity:0; animation:fadeUp 1s .9s ease forwards;
+  }
+  .hero-cta:hover { background:rgba(201,169,110,.14); border-color:var(--gold); }
+  .hero-scroll {
+    position:absolute; bottom:32px; left:50%; transform:translateX(-50%);
+    color:var(--muted); font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    opacity:0; animation:fadeUp 1s 1.3s ease forwards;
+  }
+
+  /* ---------- sections ---------- */
+  section { padding:110px 0; }
+  .section-label {
+    font-family:'Cormorant Garamond',serif; font-size:13px;
+    letter-spacing:.22em; text-transform:uppercase; color:var(--gold);
+    text-align:center; margin-bottom:18px;
+  }
+  .section-title {
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(28px,6vw,40px); font-weight:300; line-height:1.3;
+    color:var(--cream); text-align:center; margin-bottom:64px;
+  }
+
+  /* ---------- features ---------- */
+  .features { background:var(--deep2); }
+  .features-grid {
+    display:grid; grid-template-columns:repeat(2,1fr); gap:18px;
+  }
+  .feature {
+    padding:36px 28px;
+    background:rgba(201,169,110,.03); border:1px solid rgba(201,169,110,.12);
+    transition:border-color .3s ease, background .3s ease;
+  }
+  .feature:hover { border-color:rgba(201,169,110,.3); background:rgba(201,169,110,.05); }
+  .feature-icon {
+    font-family:'Cormorant Garamond',serif; font-size:34px; line-height:1;
+    color:var(--gold); opacity:.75; margin-bottom:18px;
+  }
+  .feature-name {
+    font-family:'Cormorant Garamond',serif; font-size:21px; font-weight:400;
+    color:var(--cream); margin-bottom:10px; letter-spacing:.03em;
+  }
+  .feature-text { font-size:14px; line-height:1.75; color:var(--muted); }
+
+  /* ---------- practice ---------- */
+  .practice { text-align:center; position:relative; }
+  .practice::before {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(ellipse 60% 45% at 50% 50%, rgba(201,169,110,.05), transparent 70%);
+  }
+  .practice-quote-mark {
+    font-family:'Cormorant Garamond',serif; font-size:80px; line-height:.5;
+    color:var(--gold); opacity:.3; display:block; margin-bottom:28px;
+  }
+  .practice-text {
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(21px,5vw,28px); font-weight:300; font-style:italic;
+    line-height:1.75; color:var(--soft);
+    max-width:560px; margin:0 auto;
+  }
+  .practice-sign {
+    margin-top:40px; font-family:'Jost',sans-serif;
+    font-size:12px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold);
+  }
+
+  /* ---------- closing cta ---------- */
+  .closing { background:var(--deep2); text-align:center; padding:90px 0; }
+  .closing-title {
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(26px,6vw,36px); font-weight:300; color:var(--cream); margin-bottom:36px;
+  }
+  .closing .hero-cta { margin-top:0; opacity:1; animation:none; }
+
+  /* ---------- footer ---------- */
+  footer {
+    padding:56px 28px; text-align:center;
+    border-top:1px solid rgba(201,169,110,.1);
+  }
+  .footer-logo {
+    font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:300;
+    letter-spacing:.05em; color:rgba(201,169,110,.6); margin-bottom:16px;
+  }
+  .footer-text { font-size:12px; letter-spacing:.08em; color:var(--muted); line-height:2; }
+  .footer-text a { color:var(--muted); text-decoration:underline; text-underline-offset:4px; transition:color .3s; }
+  .footer-text a:hover { color:var(--gold); }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(16px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  @media (max-width:560px) {
+    section { padding:80px 0; }
+    .features-grid { grid-template-columns:1fr; }
+    .section-title { margin-bottom:44px; }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    .hero-glyph, .hero-title, .hero-tagline, .hero-rule, .hero-desc, .hero-cta, .hero-scroll {
+      animation:none; opacity:1;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-glyph">&ldquo;</div>
+  <h1 class="hero-title">Already Mine</h1>
+  <p class="hero-tagline">Your daily manifestation practice</p>
+  <div class="hero-rule"></div>
+  <p class="hero-desc">
+    Each morning, Already Mine offers you an affirmation written for the path you're walking.
+    Journal what rises, set intentions, and build the quiet daily foundations that change everything.
+    Not someday. Already.
+  </p>
+  <a class="hero-cta" href="#features">Coming to the App&nbsp;Store</a>
+  <div class="hero-scroll">&darr;</div>
+</header>
+
+<section class="features" id="features">
+  <div class="wrap">
+    <div class="section-label">The Ritual</div>
+    <h2 class="section-title">A practice that meets you<br>where you are</h2>
+    <div class="features-grid">
+      <div class="feature">
+        <div class="feature-icon">&ldquo;</div>
+        <h3 class="feature-name">Daily Affirmations</h3>
+        <p class="feature-text">One affirmation each day, personalized to your path &mdash; words chosen for where you are and where you're going.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#10047;</div>
+        <h3 class="feature-name">Journal Your Journey</h3>
+        <p class="feature-text">Reflect on what each day stirred in you, with gentle prompts and mood tracking that honor how you actually feel.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#9789;</div>
+        <h3 class="feature-name">Set Intentions</h3>
+        <p class="feature-text">Name what you're calling in. Hold it daily, return to it often, and watch it quietly become real.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#9651;</div>
+        <h3 class="feature-name">Daily Foundations</h3>
+        <p class="feature-text">Small, grounding practices repeated each day &mdash; the unglamorous work that transforms who you're becoming.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#10038;</div>
+        <h3 class="feature-name">Streaks &amp; Ranks</h3>
+        <p class="feature-text">Your devotion is seen. Keep your streak alive, earn ranks, and watch your commitment take shape over time.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#9737;</div>
+        <h3 class="feature-name">Monthly Reflection</h3>
+        <p class="feature-text">At each month's close, look back on your growth &mdash; the moods, the words, the quiet distance you've traveled.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="practice">
+  <div class="wrap">
+    <div class="section-label">The Practice</div>
+    <span class="practice-quote-mark">&ldquo;</span>
+    <p class="practice-text">
+      Manifestation isn't wishing. It's remembering. Everything you're reaching for is
+      already moving toward you &mdash; the practice is simply showing up, morning after
+      morning, until you recognize it when it arrives. Speak the words. Write them down.
+      Live as though it's done. Because it is. It was always already yours.
+    </p>
+    <div class="practice-sign">Already Mine</div>
+  </div>
+</section>
+
+<section class="closing">
+  <div class="wrap">
+    <h2 class="closing-title">Begin your practice</h2>
+    <span class="hero-cta">Coming to the App&nbsp;Store</span>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">Already Mine</div>
+  <p class="footer-text">
+    Already Mine &copy; 2026 Already Mine LLC<br>
+    <a href="mailto:support@alreadymine.app">support@alreadymine.app</a>
+  </p>
+</footer>
+
+</body>
+</html>
