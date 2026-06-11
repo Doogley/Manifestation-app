@@ -40,11 +40,6 @@
     content:''; position:absolute; inset:0; pointer-events:none;
     background:radial-gradient(ellipse 70% 50% at 50% 38%, rgba(201,169,110,.07), transparent 70%);
   }
-  .hero-glyph {
-    font-family:'Cormorant Garamond',serif; font-size:64px; line-height:.6;
-    color:var(--gold); opacity:0; margin-bottom:8px;
-    animation:fadeUp 1s .1s ease forwards;
-  }
   .hero-title {
     font-family:'Cormorant Garamond',serif;
     font-size:clamp(48px,11vw,84px); font-weight:300;
@@ -123,9 +118,9 @@
     content:''; position:absolute; inset:0; pointer-events:none;
     background:radial-gradient(ellipse 60% 45% at 50% 50%, rgba(201,169,110,.05), transparent 70%);
   }
-  .practice-quote-mark {
-    font-family:'Cormorant Garamond',serif; font-size:80px; line-height:.5;
-    color:var(--gold); opacity:.3; display:block; margin-bottom:28px;
+  .practice-rule {
+    width:48px; height:1px; background:rgba(201,169,110,.4);
+    margin:0 auto 44px;
   }
   .practice-text {
     font-family:'Cormorant Garamond',serif;
@@ -170,7 +165,7 @@
     .section-title { margin-bottom:44px; }
   }
   @media (prefers-reduced-motion:reduce) {
-    .hero-glyph, .hero-title, .hero-tagline, .hero-rule, .hero-desc, .hero-cta, .hero-scroll {
+    .hero-title, .hero-tagline, .hero-rule, .hero-desc, .hero-cta, .hero-scroll {
       animation:none; opacity:1;
     }
   }
@@ -179,7 +174,6 @@
 <body>
 
 <header class="hero">
-  <div class="hero-glyph">&ldquo;</div>
   <h1 class="hero-title">Already Mine</h1>
   <p class="hero-tagline">Your daily manifestation practice</p>
   <div class="hero-rule"></div>
@@ -198,7 +192,7 @@
     <h2 class="section-title">A practice that meets you<br>where you are</h2>
     <div class="features-grid">
       <div class="feature">
-        <div class="feature-icon">&ldquo;</div>
+        <div class="feature-icon">&#10022;</div>
         <h3 class="feature-name">Daily Affirmations</h3>
         <p class="feature-text">One affirmation each day, personalized to your path &mdash; words chosen for where you are and where you're going.</p>
       </div>
@@ -234,7 +228,7 @@
 <section class="practice">
   <div class="wrap">
     <div class="section-label">The Practice</div>
-    <span class="practice-quote-mark">&ldquo;</span>
+    <div class="practice-rule"></div>
     <p class="practice-text">
       Manifestation isn't wishing. It's remembering. Everything you're reaching for is
       already moving toward you &mdash; the practice is simply showing up, morning after
