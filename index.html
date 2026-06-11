@@ -4268,10 +4268,7 @@ function buildLibraryScreen(filter) {
   function makeUnlockedTile(id, label, dText, dCat, isToday) {
     const tile = document.createElement('div');
     tile.className = 'library-screen-tile' + (isToday ? ' today-tile' : '');
-    const crossCatNote = (isToday && filter !== 'all' && dCat !== filter)
-      ? `<div style="margin-top:8px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(201,169,110,.45)">Today · ${dCat}</div>`
-      : '';
-    tile.innerHTML = `<div class="lib-screen-day">${label}</div><div class="lib-screen-text">${dText}</div><div class="lib-screen-cat">${dCat}</div>${crossCatNote}`;
+    tile.innerHTML = `<div class="lib-screen-day">${label}</div><div class="lib-screen-text">${dText}</div><div class="lib-screen-cat">${dCat}</div>`;
     tile.onclick = () => openModal(label, dText, dCat);
     const heartBtn = document.createElement('button');
     heartBtn.className = 'lib-heart' + (savedAffirmationIds.has(id) ? ' saved' : '');
@@ -4282,13 +4279,15 @@ function buildLibraryScreen(filter) {
     return tile;
   }
 
-  // Always render today's tile first
+  // Today's tile renders first, but only when it matches the active filter
   const todayAff = affirmationLibrary.find(a => a.id === unlockedCount);
   if(todayAff) {
     const hist = affirmationHistory[todayAff.id];
     const dText = hist ? hist.text : todayAffirmation;
     const dCat = hist ? hist.cat : todayCategory;
-    grid.appendChild(makeUnlockedTile(todayAff.id, `✦ Day ${todayAff.id} · Today`, dText, dCat, true));
+    if(filter === 'all' || dCat === filter) {
+      grid.appendChild(makeUnlockedTile(todayAff.id, `✦ Day ${todayAff.id} · Today`, dText, dCat, true));
+    }
   }
 
   if(savedAffirmationIds.size >= 3) {
