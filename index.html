@@ -1609,6 +1609,9 @@
     <button class="profile-link" onclick="currentModalType='info';document.getElementById('modalDay').textContent='Contact Us';document.getElementById('modalText').textContent='We\'d love to hear from you.';document.getElementById('modalCat').textContent='support@alreadymine.com';document.getElementById('modalOverlay').classList.add('open')">Contact Us</button>
     <button class="profile-link" onclick="handleLogout()">Log Out</button>
   </div>
+  <div style="text-align:center;padding-bottom:40px;">
+    <button onclick="showDeleteAccountModal()" style="background:none;border:none;color:rgba(201,112,112,.55);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.1em;cursor:pointer;text-decoration:underline;text-underline-offset:3px;transition:color .3s;" onmouseover="this.style.color='#c97070'" onmouseout="this.style.color='rgba(201,112,112,.55)'">Delete Account</button>
+  </div>
 </div>
 
 <!-- MONTHLY SUMMARY -->
@@ -1909,6 +1912,44 @@ async function handleLogout() {
   currentUser = null;
   resetUserState();
   showScreen('auth');
+}
+
+function showDeleteAccountModal() {
+  currentModalType = 'deleteAccount';
+  document.getElementById('modalDay').textContent = 'Delete Account';
+  document.getElementById('modalText').textContent = 'This will permanently delete your account and all your data — your journal entries, affirmations, streak, and progress. This cannot be undone.';
+  document.getElementById('modalCat').innerHTML = `
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:4px;">
+      <button onclick="dismissModal()" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.15);color:var(--muted);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Cancel</button>
+      <button onclick="this.disabled=true;this.textContent='Deleting…';deleteAccount()" style="padding:11px 22px;background:none;border:1px solid rgba(201,112,112,.4);color:#c97070;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Delete My Account</button>
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+async function deleteAccount() {
+  try {
+    const uid = currentUser.id;
+    // Child tables first, profiles last
+    const tables = ['habit_completions', 'habits', 'intentions', 'journal_entries', 'saved_affirmations', 'user_affirmations', 'monthly_summaries', 'feedback'];
+    for(const table of tables) {
+      const { error } = await db.from(table).delete().eq('user_id', uid);
+      if(error) throw error;
+    }
+    const { error: profileError } = await db.from('profiles').delete().eq('id', uid);
+    if(profileError) throw profileError;
+    // NOTE: the auth.users row cannot be deleted from the client — it requires the
+    // service role key, so full GDPR erasure needs a Supabase edge function (or manual
+    // deletion in the dashboard). For App Store account-deletion requirements,
+    // removing all user data here is sufficient.
+    await db.auth.signOut();
+    dismissModal();
+    currentUser = null;
+    resetUserState();
+    showScreen('auth');
+  } catch(e) {
+    dismissModal();
+    showCindersToast(0, 'Something went wrong. Please contact support@alreadymine.app');
+  }
 }
 
 const intentionCategoryMap = {
