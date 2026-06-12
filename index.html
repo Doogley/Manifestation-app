@@ -5509,6 +5509,19 @@ function buildLibraryScreen(filter) {
     appendLockedPreview();
   }
 
+  // Empty category state: nothing unlocked yet for this filter
+  if(filter !== 'all' && !grid.querySelector('.library-screen-tile:not(.locked-tile)')) {
+    grid.innerHTML = '';
+    const msg = document.createElement('div');
+    msg.style.cssText = 'grid-column:1/-1;padding:32px 24px 16px;text-align:center;font-family:\'Cormorant Garamond\',serif;font-size:16px;font-style:italic;font-weight:300;color:var(--muted);line-height:1.8;';
+    msg.textContent = `Your ${filter} affirmations are on their way. Keep showing up daily and they'll unlock as your journey continues.`;
+    grid.appendChild(msg);
+    entries
+      .filter(e => e.cat === filter && e.day > unlockedCount)
+      .slice(0, 3)
+      .forEach(aff => grid.appendChild(makeLockedTile(aff)));
+  }
+
   if(!isAdmin && !isPaidMember) {
     const totalInLib = affirmationLibrary.length;
     const beyondPreview = Math.max(0, totalInLib - (unlockedCount + 5));
