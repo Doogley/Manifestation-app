@@ -806,7 +806,7 @@
     <div class="divider"></div>
 
     <!-- Toggle -->
-    <div style="display:flex;justify-content:center;margin-bottom:32px">
+    <div id="authTabs" style="display:flex;justify-content:center;margin-bottom:32px">
       <div style="display:flex;background:rgba(201,169,110,.05);border:1px solid rgba(201,169,110,.12);padding:4px;gap:4px">
         <button id="authTabLogin" onclick="switchAuthTab('login')" style="padding:10px 28px;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;background:rgba(201,169,110,.12);border:none;color:var(--gold);cursor:pointer">Log In</button>
         <button id="authTabSignup" onclick="switchAuthTab('signup')" style="padding:10px 28px;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;background:none;border:none;color:var(--muted);cursor:pointer">Sign Up</button>
@@ -819,6 +819,7 @@
       <input id="loginPassword" type="password" placeholder="Password" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
       <div id="loginError" style="font-size:12px;color:#c97070;min-height:18px;text-align:left"></div>
       <button onclick="handleLogin()" class="btn-primary" style="width:100%;padding:16px">Enter</button>
+      <button onclick="showAuthForm('forgot')" style="background:none;border:none;color:rgba(201,169,110,.6);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.08em;cursor:pointer;text-decoration:underline;text-underline-offset:3px;margin-top:4px">Forgot password?</button>
     </div>
 
     <!-- Signup form -->
@@ -829,6 +830,24 @@
       <input id="signupReferral" type="text" placeholder="Referral code (optional)" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
       <div id="signupError" style="font-size:12px;color:#c97070;min-height:18px;text-align:left"></div>
       <button onclick="handleSignup()" class="btn-primary" style="width:100%;padding:16px">Begin My Journey</button>
+    </div>
+
+    <!-- Forgot password form -->
+    <div id="forgotForm" style="max-width:320px;margin:0 auto;display:none;flex-direction:column;gap:12px">
+      <p style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.7;text-align:left;margin:0">Enter your email and we'll send you a link to reset your password.</p>
+      <input id="forgotEmail" type="email" placeholder="Email" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
+      <div id="forgotMessage" style="font-size:12px;color:#c97070;min-height:18px;text-align:left"></div>
+      <button onclick="handleForgotPassword()" class="btn-primary" style="width:100%;padding:16px">Send Reset Link</button>
+      <button onclick="showAuthForm('login')" style="background:none;border:none;color:var(--muted);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.08em;cursor:pointer;text-decoration:underline;text-underline-offset:3px;margin-top:4px">← Back to log in</button>
+    </div>
+
+    <!-- Reset password form (arrived via email recovery link) -->
+    <div id="resetPasswordForm" style="max-width:320px;margin:0 auto;display:none;flex-direction:column;gap:12px">
+      <p style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.7;text-align:left;margin:0">Choose a new password for your account.</p>
+      <input id="newPassword" type="password" placeholder="New password (min 6 characters)" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
+      <input id="confirmPassword" type="password" placeholder="Confirm password" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
+      <div id="resetPasswordError" style="font-size:12px;color:#c97070;min-height:18px;text-align:left"></div>
+      <button onclick="handlePasswordUpdate()" class="btn-primary" style="width:100%;padding:16px">Update Password</button>
     </div>
   </div>
 </div>
@@ -1712,6 +1731,18 @@ const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 const SUMMARY_API_URL = '/api/summary';
 
+// Password recovery: capture the hash before supabase-js consumes it (detectSessionInUrl
+// strips #access_token=...&type=recovery once it builds the session), and also listen for
+// the PASSWORD_RECOVERY event as a fallback in case the hash is processed first.
+let passwordRecoveryMode = window.location.hash.includes('type=recovery');
+db.auth.onAuthStateChange((event) => {
+  if(event === 'PASSWORD_RECOVERY') {
+    passwordRecoveryMode = true;
+    showScreen('auth');
+    showAuthForm('reset');
+  }
+});
+
 function formatCinders(count) {
   if(count >= 1000000) return (count / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
   if(count >= 1000) return (count / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
@@ -1812,6 +1843,42 @@ async function handleLogin() {
   if(!email || !password) { errorEl.textContent = 'Please fill in both fields.'; return; }
   const { data, error } = await db.auth.signInWithPassword({ email, password });
   if(error) { errorEl.textContent = error.message; return; }
+  currentUser = data.user;
+  await loadUserProfile();
+}
+
+// Switch between the auth screen's form states; the login/signup tab toggle
+// only makes sense for those two forms
+function showAuthForm(form) {
+  document.getElementById('authTabs').style.display = (form === 'login' || form === 'signup') ? 'flex' : 'none';
+  document.getElementById('loginForm').style.display = form === 'login' ? 'flex' : 'none';
+  document.getElementById('signupForm').style.display = form === 'signup' ? 'flex' : 'none';
+  document.getElementById('forgotForm').style.display = form === 'forgot' ? 'flex' : 'none';
+  document.getElementById('resetPasswordForm').style.display = form === 'reset' ? 'flex' : 'none';
+}
+
+async function handleForgotPassword() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  const msgEl = document.getElementById('forgotMessage');
+  msgEl.style.color = '#c97070';
+  msgEl.textContent = '';
+  if(!email || !email.includes('@')) { msgEl.textContent = 'Please enter a valid email address.'; return; }
+  const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: 'https://alreadymine.app' });
+  if(error) { msgEl.textContent = error.message; return; }
+  msgEl.style.color = 'var(--gold)';
+  msgEl.textContent = 'Check your email for a password reset link.';
+}
+
+async function handlePasswordUpdate() {
+  const password = document.getElementById('newPassword').value;
+  const confirm = document.getElementById('confirmPassword').value;
+  const errEl = document.getElementById('resetPasswordError');
+  errEl.textContent = '';
+  if(password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  if(password !== confirm) { errEl.textContent = 'Passwords do not match.'; return; }
+  const { data, error } = await db.auth.updateUser({ password });
+  if(error) { errEl.textContent = error.message; return; }
+  passwordRecoveryMode = false;
   currentUser = data.user;
   await loadUserProfile();
 }
@@ -2138,7 +2205,11 @@ async function loadUserProfile() {
 window.addEventListener('load', async () => {
   try {
     const { data } = await db.auth.getSession();
-    if(data.session && !currentUser) {
+    if(passwordRecoveryMode) {
+      // Recovery link gives a valid session, but the user must set a new password first
+      showScreen('auth');
+      showAuthForm('reset');
+    } else if(data.session && !currentUser) {
       currentUser = data.session.user;
       await loadUserProfile();
     } else {
