@@ -5418,10 +5418,13 @@ function buildLibraryScreen(filter) {
     return tile;
   }
 
-  function makeLockedTile(aff) {
+  // Day numbers only mean progress in the user's own sequence category
+  const userPrefCat = (intentionCategoryMap[answers.intention] || 'Abundance').toLowerCase();
+
+  function makeLockedTile(aff, showDay) {
     const tile = document.createElement('div');
     tile.className = 'library-screen-tile locked-tile';
-    tile.innerHTML = `<div style="filter:blur(5px);font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:rgba(255,255,255,.07);line-height:1.5;margin-bottom:8px">${aff.text}</div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2)">Day ${aff.day}</div></div>`;
+    tile.innerHTML = `<div style="filter:blur(5px);font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:rgba(255,255,255,.07);line-height:1.5;margin-bottom:8px">${aff.text}</div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2)">${showDay ? `Day ${aff.day}` : '✦'}</div></div>`;
     return tile;
   }
 
@@ -5431,7 +5434,7 @@ function buildLibraryScreen(filter) {
     entries
       .filter(e => e.day > unlockedCount && e.day <= unlockedCount + 5)
       .sort((a, b) => a.day - b.day)
-      .forEach(aff => grid.appendChild(makeLockedTile(aff)));
+      .forEach(aff => grid.appendChild(makeLockedTile(aff, aff.cat.toLowerCase() === userPrefCat)));
   }
 
   // Today's tile renders first, but only when it matches the active filter
@@ -5519,7 +5522,7 @@ function buildLibraryScreen(filter) {
     entries
       .filter(e => e.cat === filter && e.day > unlockedCount)
       .slice(0, 3)
-      .forEach(aff => grid.appendChild(makeLockedTile(aff)));
+      .forEach(aff => grid.appendChild(makeLockedTile(aff, false)));
   }
 
   if(!isAdmin && !isPaidMember) {
