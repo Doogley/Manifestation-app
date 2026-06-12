@@ -15,7 +15,8 @@
       "PowerShell(Get-Content *)",
       "Bash(claude update *)",
       "PowerShell(\\(Get-Content index.html | Measure-Object -Line\\).Lines)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(node *)"
     ]
   }
 }

@@ -5418,6 +5418,22 @@ function buildLibraryScreen(filter) {
     return tile;
   }
 
+  function makeLockedTile(aff) {
+    const tile = document.createElement('div');
+    tile.className = 'library-screen-tile locked-tile';
+    tile.innerHTML = `<div style="filter:blur(5px);font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:rgba(255,255,255,.07);line-height:1.5;margin-bottom:8px">${aff.text}</div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2)">Day ${aff.day}</div></div>`;
+    return tile;
+  }
+
+  // Locked previews: next 5 in sequence, only on the "All" view, always after unlocked tiles
+  function appendLockedPreview() {
+    if(isAdmin || filter !== 'all') return;
+    entries
+      .filter(e => e.day > unlockedCount && e.day <= unlockedCount + 5)
+      .sort((a, b) => a.day - b.day)
+      .forEach(aff => grid.appendChild(makeLockedTile(aff)));
+  }
+
   // Today's tile renders first, but only when it matches the active filter
   const todayAff = entries[unlockedCount - 1];
   if(todayAff) {
@@ -5465,60 +5481,40 @@ function buildLibraryScreen(filter) {
     allLabel.textContent = 'All Affirmations';
     grid.appendChild(allLabel);
 
-    const _remaining = entries.filter(e =>
+    entries.filter(e =>
       e.day !== unlockedCount &&
       !savedAffirmationIds.has(e.day) &&
       (filter === 'all' || displayCat(e) === filter) &&
-      (isAdmin || e.day <= unlockedCount + 7)
-    );
-    const _unlocked = _remaining.filter(e => isAdmin || e.day < unlockedCount).sort((a,b) => b.day - a.day);
-    const _locked   = _remaining.filter(e => !isAdmin && e.day > unlockedCount).sort((a,b) => a.day - b.day);
-    [..._unlocked, ..._locked].forEach(aff => {
-      const isUnlocked = isAdmin || aff.day <= unlockedCount;
-      if(isUnlocked) {
-        const hist = affirmationHistory[aff.day];
-        const dText = hist ? hist.text : aff.text;
-        const dCat = hist ? hist.cat : aff.cat;
-        grid.appendChild(makeUnlockedTile(aff.day, `Day ${aff.day}`, dText, dCat, false));
-      } else {
-        const tile = document.createElement('div');
-        tile.className = 'library-screen-tile locked-tile';
-        tile.innerHTML = `<div style="filter:blur(5px);font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:rgba(255,255,255,.07);line-height:1.5;margin-bottom:8px">${aff.text}</div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2)">Day ${aff.day}</div></div>`;
-        grid.appendChild(tile);
-      }
+      (isAdmin || e.day < unlockedCount)
+    ).sort((a,b) => b.day - a.day).forEach(aff => {
+      const hist = affirmationHistory[aff.day];
+      const dText = hist ? hist.text : aff.text;
+      const dCat = hist ? hist.cat : aff.cat;
+      grid.appendChild(makeUnlockedTile(aff.day, `Day ${aff.day}`, dText, dCat, false));
     });
+    appendLockedPreview();
 
   } else {
     // Normal view: remaining tiles excluding today
-    const _filtered = entries.filter(e =>
+    entries.filter(e =>
       e.day !== unlockedCount &&
       (filter === 'all' || displayCat(e) === filter) &&
-      (isAdmin || e.day <= unlockedCount + 7)
-    );
-    const _unlocked = _filtered.filter(e => isAdmin || e.day < unlockedCount).sort((a,b) => b.day - a.day);
-    const _locked   = _filtered.filter(e => !isAdmin && e.day > unlockedCount).sort((a,b) => a.day - b.day);
-    [..._unlocked, ..._locked].forEach(aff => {
-      const isUnlocked = isAdmin || aff.day <= unlockedCount;
-      if(isUnlocked) {
-        const hist = affirmationHistory[aff.day];
-        const dText = hist ? hist.text : aff.text;
-        const dCat = hist ? hist.cat : aff.cat;
-        grid.appendChild(makeUnlockedTile(aff.day, `Day ${aff.day}`, dText, dCat, false));
-      } else {
-        const tile = document.createElement('div');
-        tile.className = 'library-screen-tile locked-tile';
-        tile.innerHTML = `<div style="filter:blur(5px);font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:rgba(255,255,255,.07);line-height:1.5;margin-bottom:8px">${aff.text}</div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2)">Day ${aff.day}</div></div>`;
-        grid.appendChild(tile);
-      }
+      (isAdmin || e.day < unlockedCount)
+    ).sort((a,b) => b.day - a.day).forEach(aff => {
+      const hist = affirmationHistory[aff.day];
+      const dText = hist ? hist.text : aff.text;
+      const dCat = hist ? hist.cat : aff.cat;
+      grid.appendChild(makeUnlockedTile(aff.day, `Day ${aff.day}`, dText, dCat, false));
     });
+    appendLockedPreview();
   }
 
   if(!isAdmin && !isPaidMember) {
     const totalInLib = affirmationLibrary.length;
-    const beyondPreview = Math.max(0, totalInLib - (unlockedCount + 7));
+    const beyondPreview = Math.max(0, totalInLib - (unlockedCount + 5));
     const footer = document.createElement('div');
     footer.style.cssText = 'grid-column:1/-1;margin-top:16px;padding:28px 20px;text-align:center;border-top:1px solid rgba(201,169,110,.08)';
-    footer.innerHTML = `<div style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(201,169,110,.4);margin-bottom:10px">✦ The journey continues</div><p style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.8;margin-bottom:16px">You're seeing a 7-day preview ahead. There are <span style="color:var(--soft)">${beyondPreview}+ more affirmations</span> beyond that — one unlocks every day you show up.<br><span style="color:rgba(201,169,110,.5);font-size:12px">Members unlock 800+ instantly.</span></p><button onclick="openUpgrade()" style="padding:10px 28px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Unlock Everything</button>`;
+    footer.innerHTML = `<div style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(201,169,110,.4);margin-bottom:10px">✦ The journey continues</div><p style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.8;margin-bottom:16px">You're seeing a 5-day preview ahead. There are <span style="color:var(--soft)">${beyondPreview}+ more affirmations</span> beyond that — one unlocks every day you show up.<br><span style="color:rgba(201,169,110,.5);font-size:12px">Members unlock 800+ instantly.</span></p><button onclick="openUpgrade()" style="padding:10px 28px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Unlock Everything</button>`;
     grid.appendChild(footer);
   }
 }
