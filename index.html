@@ -98,6 +98,25 @@
   .nav-logo { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--cream); letter-spacing:.05em; }
   .nav-streak { display:flex; align-items:center; gap:8px; padding:6px 14px; border:1px solid rgba(201,169,110,.2); font-size:12px; letter-spacing:.1em; color:var(--gold); }
   .nav-avatar { width:36px; height:36px; border-radius:50%; background:rgba(201,169,110,.1); border:1px solid rgba(201,169,110,.2); display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; }
+  .nav-bell { position:relative; display:flex; align-items:center; justify-content:center; width:24px; height:24px; color:var(--gold); cursor:pointer; }
+  .nav-bell-svg { width:18px; height:18px; opacity:.82; transition:opacity .3s; }
+  .nav-bell:hover .nav-bell-svg { opacity:1; }
+  .nav-bell-dot { display:none; position:absolute; top:0; right:0; width:6px; height:6px; border-radius:50%; background:#d9534f; box-shadow:0 0 0 2px var(--deep); }
+  /* ── NOTIFICATIONS ── */
+  .notif-panel { display:none; position:fixed; inset:0; background:rgba(10,8,5,.88); z-index:200; align-items:flex-end; justify-content:center; backdrop-filter:blur(8px); }
+  .notif-panel.open { display:flex; }
+  .notif-sheet { width:100%; max-width:520px; max-height:80vh; overflow-y:auto; background:var(--deep2); border-top:1px solid rgba(201,169,110,.2); animation:fadeUp .3s ease forwards; }
+  .notif-sheet-header { position:sticky; top:0; background:var(--deep2); z-index:1; display:flex; align-items:center; justify-content:space-between; padding:22px 28px 16px; border-bottom:1px solid rgba(201,169,110,.08); }
+  .notif-title { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:300; color:var(--cream); }
+  .notif-clear-btn { background:none; border:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:11px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:color .3s; padding:0; }
+  .notif-clear-btn:hover { color:var(--gold); }
+  .notif-list { padding:8px 0 48px; }
+  .notif-row { padding:16px 28px; border-bottom:1px solid rgba(201,169,110,.06); animation:fadeIn .4s ease forwards; }
+  .notif-row.unread { border-left:2px solid var(--gold); background:rgba(201,169,110,.04); }
+  .notif-msg { font-family:'Jost',sans-serif; font-size:14px; font-weight:300; color:var(--soft); line-height:1.5; letter-spacing:.01em; }
+  .notif-row.unread .notif-msg { color:var(--cream); }
+  .notif-time { font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); opacity:.7; margin-top:6px; }
+  .notif-empty { padding:60px 32px; text-align:center; font-family:'Cormorant Garamond',serif; font-size:17px; font-weight:300; font-style:italic; color:var(--muted); line-height:1.7; }
   .home-greeting { position:relative; z-index:1; padding:40px 32px 0; }
   .greeting-time { font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
   .greeting-name { font-family:'Cormorant Garamond',serif; font-size:clamp(28px,7vw,40px); font-weight:300; color:var(--cream); line-height:1.2; }
@@ -901,6 +920,10 @@
   <div class="home-nav" style="position:relative;z-index:1">
     <div class="nav-logo" id="navLogo" onclick="handleLogoTap()" style="cursor:pointer">Already Mine</div>
     <div class="nav-streak" id="navCindersEl" onclick="openCindersModal()" style="cursor:pointer">✦ 0</div>
+    <div class="nav-bell" id="navBell" onclick="openNotifPanel()" title="Notifications" aria-label="Notifications">
+      <svg class="nav-bell-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="nav-bell-dot" id="notifDot"></span>
+    </div>
     <div class="nav-avatar" id="navAvatar" onclick="openProfile();setTabByName('profile')" style="cursor:pointer">✦</div>
   </div>
   <div class="home-greeting">
@@ -1218,6 +1241,17 @@
         <button class="add-habit-confirm-btn" onclick="addCustomHabit()">+ Add</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION PANEL -->
+<div class="notif-panel" id="notifPanel" onclick="closeNotifOutside(event)">
+  <div class="notif-sheet">
+    <div class="notif-sheet-header">
+      <div class="notif-title">Notifications</div>
+      <button class="notif-clear-btn" onclick="clearAllNotifications()">Clear all</button>
+    </div>
+    <div class="notif-list" id="notifList"></div>
   </div>
 </div>
 
@@ -2203,6 +2237,7 @@ async function loadUserProfile() {
 
 // Check if user is already logged in when app loads
 window.addEventListener('load', async () => {
+  loadNotifications();
   try {
     const { data } = await db.auth.getSession();
     if(passwordRecoveryMode) {
@@ -4189,6 +4224,7 @@ async function buildHome(){
     } catch(e) {
       console.error('buildHome streak error:', e);
     }
+    notifyStreakMilestone(streakCount);
   }
 
   // Award daily login Cinders — only once per session and only for returning users
@@ -4236,6 +4272,8 @@ async function buildHome(){
   if(countdownInterval) clearInterval(countdownInterval);
   countdownInterval = setInterval(updateCountdown, 1000);
   updateDailyPractice();
+  // Refresh badge-earned states so newly-crossed badges notify (and seed baseline on first run)
+  updateBadgeEarnedStates();
 }
 
 let unlockingAffirmation = false;
@@ -5386,6 +5424,7 @@ async function enterGracePeriod(streakBefore, daysCompleted) {
       }).eq('id', currentUser.id);
     }
     awardCinders(25, 'Streak restored');
+    addNotification('Streak restored — welcome back', 'streak');
     showScreen('home');
     setTabByName('today');
     buildHome();
@@ -5443,6 +5482,7 @@ function updateBadgeEarnedStates() {
     md1:moodCheckinCount>=1, md2:moodCheckinCount>=10, md3:moodCheckinCount>=30, md4:moodCheckinCount>=100, md5:moodCheckinCount>=200,
   };
   badgeCategories.forEach(cat => cat.badges.forEach(b => { b.earned = !!t[b.id]; }));
+  notifyNewlyEarnedBadges();
 }
 
 // ── EMPTY STATES ──
@@ -6287,6 +6327,142 @@ async function generateSummary(year, month) {
   await finishSummaryUI(year, month);
 }
 
+// ── NOTIFICATIONS ──
+let notifications = [];
+const NOTIF_KEY = 'am_notifications';
+const NOTIF_MAX = 50;
+
+function loadNotifications() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
+    notifications = Array.isArray(raw) ? raw : [];
+  } catch(e) { notifications = []; }
+  updateBellBadge();
+}
+
+function saveNotifications() {
+  try { localStorage.setItem(NOTIF_KEY, JSON.stringify(notifications)); } catch(e) {}
+}
+
+function addNotification(message, type) {
+  notifications.push({
+    id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+    message,
+    type: type || 'general',
+    timestamp: Date.now(),
+    read: false
+  });
+  // Cap at NOTIF_MAX, dropping the oldest
+  if(notifications.length > NOTIF_MAX) notifications = notifications.slice(notifications.length - NOTIF_MAX);
+  saveNotifications();
+  updateBellBadge();
+  const panel = document.getElementById('notifPanel');
+  if(panel && panel.classList.contains('open')) renderNotifications();
+}
+
+function unreadNotifCount() {
+  return notifications.reduce((n, x) => n + (x.read ? 0 : 1), 0);
+}
+
+function updateBellBadge() {
+  const dot = document.getElementById('notifDot');
+  if(dot) dot.style.display = unreadNotifCount() > 0 ? 'block' : 'none';
+}
+
+function markAllRead() {
+  notifications.forEach(n => { n.read = true; });
+  saveNotifications();
+  updateBellBadge();
+}
+
+function clearAllNotifications() {
+  notifications = [];
+  saveNotifications();
+  updateBellBadge();
+  renderNotifications();
+}
+
+function notifRelativeTime(ts) {
+  const diff = Date.now() - ts;
+  if(diff < 0) return 'Just now';
+  const min = Math.floor(diff / 60000);
+  if(min < 1) return 'Just now';
+  if(min < 60) return min + (min === 1 ? ' minute ago' : ' minutes ago');
+  const hr = Math.floor(min / 60);
+  if(hr < 24) return hr + (hr === 1 ? ' hour ago' : ' hours ago');
+  const day = Math.floor(hr / 24);
+  if(day === 1) return 'Yesterday';
+  if(day < 7) return day + ' days ago';
+  const wk = Math.floor(day / 7);
+  if(wk < 5) return wk + (wk === 1 ? ' week ago' : ' weeks ago');
+  const mo = Math.floor(day / 30);
+  if(mo < 12) return mo + (mo === 1 ? ' month ago' : ' months ago');
+  const yr = Math.floor(day / 365);
+  return yr + (yr === 1 ? ' year ago' : ' years ago');
+}
+
+function renderNotifications() {
+  const list = document.getElementById('notifList');
+  if(!list) return;
+  if(notifications.length === 0) {
+    list.innerHTML = `<div class="notif-empty">No notifications yet.<br>Your achievements will appear here.</div>`;
+    return;
+  }
+  const sorted = [...notifications].sort((a, b) => b.timestamp - a.timestamp);
+  list.innerHTML = sorted.map(n => `
+    <div class="notif-row${n.read ? '' : ' unread'}">
+      <div class="notif-msg">${escapeHtml(n.message)}</div>
+      <div class="notif-time">${notifRelativeTime(n.timestamp)}</div>
+    </div>`).join('');
+}
+
+function openNotifPanel() {
+  renderNotifications();
+  document.getElementById('notifPanel').classList.add('open');
+  // Mark read + hide dot after rendering, so the unread highlight is visible this view
+  markAllRead();
+}
+
+function closeNotifPanel() {
+  document.getElementById('notifPanel').classList.remove('open');
+}
+
+function closeNotifOutside(e) {
+  if(e.target === document.getElementById('notifPanel')) closeNotifPanel();
+}
+
+// Fires a notification the first time each badge is earned, persisting which
+// badges have already been announced so existing users don't get a backlog burst.
+const NOTIFIED_BADGES_KEY = 'am_notified_badges';
+function notifyNewlyEarnedBadges() {
+  let announced;
+  const firstRun = localStorage.getItem(NOTIFIED_BADGES_KEY) === null;
+  try { announced = new Set(JSON.parse(localStorage.getItem(NOTIFIED_BADGES_KEY) || '[]')); }
+  catch(e) { announced = new Set(); }
+  badgeCategories.forEach(cat => cat.badges.forEach(b => {
+    if(b.earned && !announced.has(b.id)) {
+      announced.add(b.id);
+      // On the very first run we seed silently to avoid notifying for past badges
+      if(!firstRun) addNotification(`You earned ${b.name} · ${cat.name} Tier ${b.tier}`, 'badge');
+    }
+  }));
+  try { localStorage.setItem(NOTIFIED_BADGES_KEY, JSON.stringify([...announced])); } catch(e) {}
+}
+
+// Fires once for each streak milestone reached, persisted so it never repeats.
+const NOTIFIED_STREAKS_KEY = 'am_notified_streaks';
+function notifyStreakMilestone(count) {
+  const milestones = [7, 30, 90, 180, 365];
+  if(!milestones.includes(count)) return;
+  let announced;
+  try { announced = new Set(JSON.parse(localStorage.getItem(NOTIFIED_STREAKS_KEY) || '[]')); }
+  catch(e) { announced = new Set(); }
+  if(announced.has(count)) return;
+  announced.add(count);
+  try { localStorage.setItem(NOTIFIED_STREAKS_KEY, JSON.stringify([...announced])); } catch(e) {}
+  addNotification(`You reached a ${count}-day streak`, 'streak');
+}
+
 // ── CINDERS TOAST ──
 let toastTimer = null;
 function showCindersToast(amount, reason) {
@@ -6330,9 +6506,14 @@ function showTooltip(title, text) {
 }
 
 async function awardCinders(amount, reason) {
+  const prevRank = getLevelInfo(currentCinders).name;
   currentCinders += amount;
   updateNavCinders();
   showCindersToast(amount, reason);
+  const newRank = getLevelInfo(currentCinders).name;
+  if(amount > 0 && newRank !== prevRank) {
+    addNotification(`You reached ${newRank}`, 'rank');
+  }
   if(currentUser) {
     await db.from('profiles').update({ cinders: currentCinders }).eq('id', currentUser.id);
   }
@@ -6343,9 +6524,16 @@ async function awardFirstTimeCinders(action) {
   cinderBonuses.add(action);
   const amounts = { first_journal:50, first_intention:25, first_foundation:25, onboarding_complete:50 };
   const labels = { first_journal:'First journal entry', first_intention:'First intention set', first_foundation:'First foundation added', onboarding_complete:'Journey begins' };
+  const notifMessages = {
+    onboarding_complete: 'Welcome to Already Mine — your journey begins',
+    first_journal: 'You wrote your first journal entry',
+    first_intention: 'You set your first intention',
+    first_foundation: 'You added your first foundation'
+  };
   if(!amounts[action]) return;
   await db.from('profiles').update({ cinder_bonuses: JSON.stringify([...cinderBonuses]) }).eq('id', currentUser.id);
   awardCinders(amounts[action], labels[action]);
+  if(notifMessages[action]) addNotification(notifMessages[action], 'milestone');
 }
 
 // ── WEEKLY MANTRA ──
@@ -6636,6 +6824,7 @@ async function toggleHabitComplete(id) {
       db.from('habits').update({ milestones_awarded: [...h.milestones] }).eq('id', id).eq('user_id', currentUser.id).then(() => {});
       const unit = freq === 'weekly' ? 'week' : 'day';
       awardCinders(milestones[newStreak], `✦ ${newStreak}-${unit} streak: ${h.name}`);
+      addNotification(`${newStreak}-${unit} streak: ${h.name}`, 'milestone');
     }
   }
   renderHabits();
