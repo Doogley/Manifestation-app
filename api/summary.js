@@ -176,6 +176,9 @@ Write only the narrative — no introduction, no label, no quotes. 4-6 sentences
 
     send(res, 200, headers, { narrative });
   } catch (err) {
+    // Log server-side only (no user journal data) so outages/abuse are visible
+    // in Vercel logs; the client still gets a graceful fallback message.
+    console.error('summary generation failed for user', user.id, '-', err.message);
     send(res, 200, headers, {
       narrative: 'This month you showed up — and that is the whole practice. Your reflection will be available once we\'re able to reach our summary service. Keep going.',
     });

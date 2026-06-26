@@ -16,7 +16,10 @@
       "Bash(claude update *)",
       "PowerShell(\\(Get-Content index.html | Measure-Object -Line\\).Lines)",
       "Bash(git rm *)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(curl -sL \"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js\")",
+      "Bash(openssl dgst *)",
+      "Bash(openssl base64 *)"
     ]
   }
 }
