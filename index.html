@@ -6730,32 +6730,41 @@ const LEGAL_CONTENT = {
   },
   privacy: {
     title: 'Privacy Policy',
-    updated: 'Last updated: May 2026',
+    updated: 'Last updated: June 2026',
     sections: [
-      { title: null, body: 'Already Mine is operated by Already Mine LLC.' },
-      { title: 'What we collect', list: [
-        'Email address and name (when you create an account)',
-        'Journal entries, mood check-ins, intentions, and affirmation data you create',
-        'App usage data (streaks, cinders, badges)',
-        'Profile photo (if you choose to upload one)',
+      { title: 'Who We Are', body: 'Already Mine is operated by Already Mine LLC, a Utah limited liability company. We can be reached at support@alreadymine.app.' },
+      { title: 'What We Collect', list: [
+        'Email address and name — collected when you create an account',
+        'Journal entries, mood check-ins, gratitude entries, and reflection text — content you create',
+        'Intentions, mantras, and affirmation history — your practice data',
+        'Habit and foundation tracking data — your daily completion records',
+        'App usage data — streaks, cinders, badges, and rank',
+        'Profile information — nickname, avatar photo if uploaded',
+        'Device information — device type and operating system for app compatibility',
       ]},
-      { title: 'How we use it', list: [
-        'To provide and improve the app experience',
-        'To sync your data across devices',
-        'To generate your monthly reflection summary (processed by Anthropic\'s Claude AI)',
+      { title: 'How We Use Your Data', list: [
+        'To provide and sync your app experience across sessions',
+        'To generate your personalized daily affirmations based on your chosen category',
+        'To generate your monthly reflection summary (see AI Processing section below)',
+        'To maintain your streak, cinders, and progress',
+        'To improve the app and fix bugs',
         'We do not sell your personal data to third parties',
+        'We do not use your data for advertising purposes',
       ]},
-      { title: 'Data storage', body: 'Your data is stored securely using Supabase, a SOC 2 compliant database provider.' },
-      { title: 'Third party services', list: [
-        'Supabase (database and authentication)',
-        'Anthropic Claude (monthly summary generation — journal data is sent to generate your summary)',
-        'Apple App Store / Google Play (payment processing)',
+      { title: 'AI Processing and Third-Party Services', body: 'Already Mine uses the following third-party services: Supabase (database and authentication — SOC 2 compliant, data stored in the United States); Anthropic Claude AI (monthly reflection generation — your journal entries and mood data are sent to Anthropic solely to generate your personal reflection, are not stored by Anthropic beyond the processing of your request, and are not used to train AI models); Apple App Store and Google Play (payment processing — we never see or store your payment information). When you use the Monthly Reflection feature, you will be asked for explicit consent before any journal data is sent to Anthropic. You may decline without affecting any other app features.' },
+      { title: 'Your Rights', list: [
+        'Access — you can view all your data within the app at any time',
+        'Correction — you can edit your journal entries, profile, and preferences at any time',
+        'Deletion — you can delete your account and all associated data at any time from the Profile screen under Delete Account. We will process your deletion within 30 days.',
+        'Portability — contact us at support@alreadymine.app to request a copy of your data',
+        'California residents (CCPA/CPRA) — you have the right to know what data we collect, request deletion, and opt out of data sales. We do not sell your data.',
+        'European users (GDPR) — you have the right to access, correct, delete, restrict processing, and data portability. Contact us at support@alreadymine.app to exercise these rights.',
       ]},
-      { title: 'Your rights', body: 'You can delete your account and all associated data at any time by contacting us at support@alreadymine.app' },
-      { title: 'Children', body: 'Already Mine is not intended for users under 13.' },
-      { title: 'Changes', body: 'We may update this policy at any time. We will notify users of significant changes.' },
-      { title: 'Contact', body: 'support@alreadymine.app' },
-      { title: null, body: 'Already Mine LLC — Salt Lake City, Utah' },
+      { title: 'Data Retention', body: 'We retain your data for as long as your account is active. If you delete your account, we delete your data within 30 days. Some anonymized, non-identifiable usage statistics may be retained for app improvement purposes.' },
+      { title: 'Children', body: 'Already Mine is not directed at children under 13. We do not knowingly collect personal data from children under 13. If you believe a child under 13 has created an account, please contact us at support@alreadymine.app and we will delete the account.' },
+      { title: 'Data Security', body: 'We use industry-standard security measures including encrypted connections (HTTPS), row-level security on our database, and secure authentication. No method of transmission over the internet is 100% secure, but we take reasonable measures to protect your personal information.' },
+      { title: 'Changes to This Policy', body: 'We may update this policy from time to time. We will notify you of significant changes by updating the date at the top of this policy. Continued use of the app after changes constitutes acceptance of the updated policy.' },
+      { title: 'Contact Us', body: 'For privacy questions, data requests, or to exercise your rights, contact us at support@alreadymine.app. Already Mine LLC — Salt Lake City, Utah, United States.' },
     ]
   }
 };
