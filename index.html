@@ -1976,6 +1976,7 @@ function resetUserState() {
   userNickname = '';
   userRealName = '';
   summaryGenerated = false;
+  monthlySummaryConsent = false;
   adminMode = false;
   isPaidMember = false;
   cinderBonuses = new Set();
@@ -2149,6 +2150,7 @@ async function loadUserProfile() {
   foundationDaysCount       = data.foundation_days_count      || 0;
   lastFoundationDate        = data.last_foundation_date       || '';
   try { pinnedBadges = JSON.parse(data.pinned_badges || '[]'); } catch(e) { pinnedBadges = []; }
+  monthlySummaryConsent = data.monthly_summary_consent || false;
   applyMembershipState();
   // Load intentions from Supabase
   if(currentUser) {
@@ -6192,6 +6194,7 @@ function toggleNicknameEdit() {
 
 // ── MONTHLY SUMMARY ──
 let summaryGenerated = false;
+let monthlySummaryConsent = false;
 
 async function openMonthlySummary() {
   const rState = await getReflectionState();
@@ -6224,10 +6227,43 @@ async function openMonthlySummary() {
     }
   }
 
+  // First-time generation requires one-time consent to AI processing of their
+  // journal data. Cached reflections (handled above) skip this entirely.
+  if(!monthlySummaryConsent) {
+    showSummaryConsentModal(year, month);
+    return;
+  }
+
+  startSummaryGeneration(year, month);
+}
+
+// Switches to the summary screen in its loading state and kicks off generation.
+function startSummaryGeneration(year, month) {
   document.getElementById('summaryLoading').style.display = 'flex';
   document.getElementById('summaryContent').style.display = 'none';
   showScreen('monthlySummary');
   generateSummary(year, month);
+}
+
+function showSummaryConsentModal(year, month) {
+  currentModalType = 'summaryConsent';
+  document.getElementById('modalDay').textContent = 'Your Monthly Reflection';
+  document.getElementById('modalText').textContent = 'Your reflection is crafted from your journal entries and mood check-ins. To create it, that data is briefly processed by a secure service — never stored beyond your reflection, never shared, never sold. Just used to write something meaningful for you.';
+  document.getElementById('modalCat').innerHTML = `
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:4px;">
+      <button onclick="dismissModal()" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.15);color:var(--muted);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">No Thanks</button>
+      <button onclick="acceptSummaryConsent(${year}, ${month})" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.4);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Create My Reflection</button>
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+async function acceptSummaryConsent(year, month) {
+  monthlySummaryConsent = true;
+  if(currentUser) {
+    db.from('profiles').update({ monthly_summary_consent: true }).eq('id', currentUser.id);
+  }
+  dismissModal();
+  startSummaryGeneration(year, month);
 }
 
 async function finishSummaryUI(year, month) {
