@@ -12,6 +12,28 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ||
 const MAX_BODY_BYTES = 256 * 1024; // hard cap on request payload
 const MAX_ENTRIES = 60;            // at most ~2 months of daily entries
 
+// Simple in-memory rate limit. Users can only legitimately generate a summary
+// once a month, so 3 requests/hour is generous while still blocking abuse that
+// would burn Anthropic credits. Keyed by Supabase user id -> array of recent
+// request timestamps (ms). State is per-serverless-instance and resets on cold
+// start, which is acceptable for this low-stakes guard.
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const RATE_LIMIT_MAX = 3;                     // max requests per user per window
+const requestLog = new Map();
+
+// Records the current request and returns true if the user is over the limit.
+function isRateLimited(userId) {
+  const now = Date.now();
+  const recent = (requestLog.get(userId) || []).filter(ts => now - ts < RATE_LIMIT_WINDOW_MS);
+  if (recent.length >= RATE_LIMIT_MAX) {
+    requestLog.set(userId, recent); // persist the pruned list, drop nothing new
+    return true;
+  }
+  recent.push(now);
+  requestLog.set(userId, recent);
+  return false;
+}
+
 function corsHeaders(origin) {
   const allowOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
@@ -65,6 +87,12 @@ module.exports = async function handler(req, res) {
   const user = await verifyUser(token);
   if (!user) {
     send(res, 401, headers, { error: 'Unauthorized' });
+    return;
+  }
+
+  // Throttle per user to prevent credit-burning abuse.
+  if (isRateLimited(user.id)) {
+    send(res, 429, headers, { error: 'Too many requests' });
     return;
   }
 

@@ -1869,6 +1869,31 @@ function switchAuthTab(tab) {
   }
 }
 
+// Maps Supabase auth errors to generic, user-friendly messages so we never leak
+// implementation details (e.g. whether an email exists, rate-limit internals, or
+// which field was wrong). Falls back to a neutral message for anything unmapped.
+function friendlyAuthError(error, context) {
+  const raw = ((error && error.message) || '').toLowerCase();
+  if (context === 'login') {
+    return 'Incorrect email or password.';
+  }
+  if (context === 'signup') {
+    if (raw.includes('already') || raw.includes('registered') || raw.includes('exists')) {
+      return 'An account with this email already exists.';
+    }
+    if (raw.includes('valid email') || raw.includes('invalid') && raw.includes('email')) {
+      return 'Please enter a valid email address.';
+    }
+    if (raw.includes('password')) {
+      return 'Password must be at least 6 characters.';
+    }
+  }
+  if (raw.includes('rate') || raw.includes('too many')) {
+    return 'Too many attempts. Please try again in a few minutes.';
+  }
+  return 'Something went wrong. Please try again.';
+}
+
 async function handleLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
@@ -1876,7 +1901,7 @@ async function handleLogin() {
   errorEl.textContent = '';
   if(!email || !password) { errorEl.textContent = 'Please fill in both fields.'; return; }
   const { data, error } = await db.auth.signInWithPassword({ email, password });
-  if(error) { errorEl.textContent = error.message; return; }
+  if(error) { errorEl.textContent = friendlyAuthError(error, 'login'); return; }
   currentUser = data.user;
   await loadUserProfile();
 }
@@ -1898,7 +1923,9 @@ async function handleForgotPassword() {
   msgEl.textContent = '';
   if(!email || !email.includes('@')) { msgEl.textContent = 'Please enter a valid email address.'; return; }
   const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: 'https://alreadymine.app' });
-  if(error) { msgEl.textContent = error.message; return; }
+  // Always show the same success message regardless of whether the email exists,
+  // so we don't reveal which addresses have accounts.
+  if(error) { msgEl.textContent = friendlyAuthError(error, 'forgot'); return; }
   msgEl.style.color = 'var(--gold)';
   msgEl.textContent = 'Check your email for a password reset link.';
 }
@@ -1911,7 +1938,7 @@ async function handlePasswordUpdate() {
   if(password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
   if(password !== confirm) { errEl.textContent = 'Passwords do not match.'; return; }
   const { data, error } = await db.auth.updateUser({ password });
-  if(error) { errEl.textContent = error.message; return; }
+  if(error) { errEl.textContent = friendlyAuthError(error, 'reset'); return; }
   passwordRecoveryMode = false;
   currentUser = data.user;
   await loadUserProfile();
@@ -1992,7 +2019,14 @@ async function handleSignup() {
   if(!name || !email || !password) { errorEl.textContent = 'Please fill in all fields.'; return; }
   if(password.length < 6) { errorEl.textContent = 'Password must be at least 6 characters.'; return; }
   const { data, error } = await db.auth.signUp({ email, password });
-  if(error) { errorEl.textContent = error.message; return; }
+  if(error) { errorEl.textContent = friendlyAuthError(error, 'signup'); return; }
+  // When confirmation is enabled, Supabase returns a user with no identities for
+  // an already-registered email (to avoid leaking existence). Treat that as a
+  // duplicate so we don't silently create a broken signup flow.
+  if(data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    errorEl.textContent = 'An account with this email already exists.';
+    return;
+  }
   currentUser = data.user;
   // Create their profile in the database
   await db.from('profiles').insert({
