@@ -13,6 +13,7 @@ const www = join(root, 'www');
 const files = [
   'index.html',
   'favicon.svg',
+  'affirmations.js',
   'capacitor-init.js',
   'revenuecat-handler.js',
 ];
