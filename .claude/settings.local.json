@@ -25,7 +25,15 @@
       "PowerShell(npm ls *)",
       "PowerShell(npm run *)",
       "PowerShell(npx cap ls)",
-      "PowerShell(npx cap doctor 2>$null)"
+      "PowerShell(npx cap doctor 2>$null)",
+      "Bash(awk '{print $NF}')",
+      "Bash(awk '/for ?\\\\\\(/{inloop=NR+15} NR<=inloop && /getElementById|querySelector/ {print NR\": \"$0}' inline.js)",
+      "Bash(grep -nE \"\\\\.\\(add-habit-close-btn|badge-modal-circle-wrap|badge-modal-desc|badge-modal-name|badge-modal-req|badge-modal-tier|habits-preview-row|mood-chevron|mood-grid|preset-icon|profile-fav-none|profile-fav-text|profile-intention-none|profile-rank-label|upgrade-header|upgrade-teaser\\)[ ,.{:]\" index.html)",
+      "Bash(grep -n \"^// ── \\\\|^  /\\\\* ── \" inline.js)",
+      "Bash(grep -c 'then\\(\\(\\) => {}\\)' __TRACKED_VAR__/inline.js)",
+      "Bash(grep -c 'then\\(dbResult\\(' __TRACKED_VAR__/inline.js)",
+      "Bash(grep -n 'await db.from' __TRACKED_VAR__/inline.js)",
+      "Bash(git diff *)"
     ]
   }
 }
