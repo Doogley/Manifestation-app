@@ -14,12 +14,31 @@
     --gold: #c9a96e;
     --deep: #1a1610;
     --deep2: #211e17;
-    --muted: #8a7d6b;
+    --muted: #93866f; /* 5.0:1 on --deep (WCAG AA) */
     --soft: #d4c9b8;
     --locked: #1e1b14;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Jost',sans-serif; background:var(--deep); color:var(--cream); min-height:100vh; overflow-x:hidden; }
+  :focus-visible { outline:2px solid rgba(201,169,110,.85); outline-offset:2px; }
+  @media (prefers-reduced-motion:reduce) {
+    *, *::before, *::after {
+      animation-duration:.01s !important; animation-delay:0s !important;
+      animation-iteration-count:1 !important; transition-duration:.01s !important;
+      scroll-behavior:auto !important;
+    }
+  }
+  /* Expand small controls to a ~44px tap area without changing their visual size */
+  .tooltip-btn, .nav-bell, .nav-avatar, .nav-streak, .legal-close, .summary-close, .notif-clear-btn,
+  .habit-delete-btn, .lib-heart, .add-habit-x-btn, .upgrade-close-btn, .scan-close-btn, .btn-ghost,
+  .back-btn, .modal-close { position:relative; }
+  .tooltip-btn::after, .nav-bell::after, .nav-avatar::after, .nav-streak::after, .legal-close::after,
+  .summary-close::after, .notif-clear-btn::after, .habit-delete-btn::after, .lib-heart::after,
+  .add-habit-x-btn::after, .upgrade-close-btn::after, .scan-close-btn::after, .btn-ghost::after,
+  .back-btn::after, .modal-close::after {
+    content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:max(100%,44px); height:max(100%,44px);
+  }
   .screen { display:none; min-height:100vh; flex-direction:column; }
   .screen.active { display:flex; }
   .bg-texture {
@@ -117,12 +136,6 @@
   .btn-door:hover { color:var(--deep); box-shadow:0 0 36px rgba(201,169,110,.45); }
   .btn-door:active { transform:scale(.98); }
   @keyframes doorGlow { 0%,100%{box-shadow:0 0 20px rgba(201,169,110,.2)} 50%{box-shadow:0 0 34px rgba(201,169,110,.4)} }
-  @media (prefers-reduced-motion:reduce) {
-    #onboarding *, #reveal *, #onboarding, #reveal {
-      animation-duration:.01s !important; animation-delay:0s !important;
-      animation-iteration-count:1 !important; transition-duration:.01s !important;
-    }
-  }
 
   /* ── HOME ── */
   #home { padding-bottom:90px; }
@@ -208,7 +221,7 @@
   .locked-blur-text { font-family:'Cormorant Garamond',serif; font-size:13px; font-style:italic; color:rgba(255,255,255,.07); line-height:1.5; filter:blur(4px); user-select:none; margin-bottom:8px; }
   .locked-overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; }
   .lock-icon { font-size:14px; opacity:.25; }
-  .lock-day-label { font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:rgba(255,255,255,.2); }
+  .lock-day-label { font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:rgba(255,255,255,.5); }
   .lib-tile.locked::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent 0%,rgba(201,169,110,.03) 50%,transparent 100%); background-size:200% 100%; animation:shimmer 4s ease-in-out infinite; }
 
   /* Upgrade */
@@ -338,7 +351,7 @@
 
   /* Secondary screen logo header */
   .screen-logo-bar { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; padding:20px 32px 16px; border-bottom:1px solid rgba(201,169,110,.08); }
-  .screen-logo-link { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300; color:rgba(201,169,110,.6); letter-spacing:.05em; background:none; border:none; cursor:pointer; transition:color .3s; padding:0; }
+  .screen-logo-link { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300; color:rgba(201,169,110,.75); letter-spacing:.05em; background:none; border:none; cursor:pointer; transition:color .3s; padding:0; }
   .screen-logo-link:hover { color:var(--gold); }
 
   /* ── JOURNAL ── */
@@ -383,13 +396,13 @@
   .cal-nav-btn:hover { border-color:var(--gold); color:var(--gold); }
   .cal-today-btn { background:none; border:none; color:var(--gold); font-family:'Jost',sans-serif; font-size:11px; font-weight:300; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; padding:0 4px; transition:opacity .3s; flex-shrink:0; }
   .cal-today-btn:hover { opacity:.7; }
-  .cal-reflection-btn { background:none; border:none; color:rgba(201,169,110,.6); font-family:'Jost',sans-serif; font-size:10px; font-weight:300; letter-spacing:.14em; text-transform:uppercase; cursor:pointer; padding:0 4px; transition:color .3s; flex-shrink:0; }
+  .cal-reflection-btn { background:none; border:none; color:rgba(201,169,110,.75); font-family:'Jost',sans-serif; font-size:10px; font-weight:300; letter-spacing:.14em; text-transform:uppercase; cursor:pointer; padding:0 4px; transition:color .3s; flex-shrink:0; }
   .cal-reflection-btn:hover { color:var(--gold); }
   .cal-month-label { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--cream); letter-spacing:.05em; }
   .cal-dow-row { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; margin-bottom:3px; }
   .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
   .cal-dow { font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); text-align:center; padding:4px 0 8px; }
-  .cal-day { display:flex; flex-direction:column; height:72px; padding:7px 6px 6px; position:relative; border:1px solid rgba(201,169,110,.07); background:rgba(201,169,110,.02); transition:border-color .2s, background .2s; overflow:hidden; }
+  .cal-day { display:flex; flex-direction:column; min-height:72px; padding:7px 6px 6px; position:relative; border:1px solid rgba(201,169,110,.07); background:rgba(201,169,110,.02); transition:border-color .2s, background .2s; overflow:hidden; }
   .cal-day.has-entry { border-color:rgba(201,169,110,.18); background:rgba(201,169,110,.06); cursor:pointer; }
   .cal-day.has-entry:hover { border-color:rgba(201,169,110,.35); background:rgba(201,169,110,.1); }
   .cal-day.today-day { border-color:rgba(201,169,110,.5); box-shadow:inset 0 0 0 1px rgba(201,169,110,.25); }
@@ -397,7 +410,7 @@
   .cal-day-num { font-size:12px; font-weight:300; color:var(--soft); line-height:1; flex-shrink:0; }
   .cal-day.today-day .cal-day-num { color:var(--gold); font-weight:400; }
   .cal-day-preview { font-size:10px; font-weight:300; color:var(--muted); line-height:1.35; margin-top:5px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
-  .cal-day.has-entry .cal-day-preview { color:rgba(201,169,110,.55); }
+  .cal-day.has-entry .cal-day-preview { color:rgba(201,169,110,.75); }
   .cal-lock-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(26,22,16,.85); }
   .cal-lock-icon { font-size:13px; opacity:.4; }
 
@@ -495,7 +508,7 @@
   .lib-screen-text { font-family:'Jost',sans-serif; font-size:13px; font-weight:300; color:var(--soft); line-height:1.5; }
   .lib-screen-cat { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:8px; }
   .library-screen-tile.locked-tile::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent 0%,rgba(201,169,110,.03) 50%,transparent 100%); background-size:200% 100%; animation:shimmer 4s ease-in-out infinite; }
-  .lib-heart { position:absolute; top:8px; right:10px; background:none; border:none; color:rgba(201,169,110,.35); font-size:14px; cursor:pointer; padding:4px; line-height:1; transition:color .2s; }
+  .lib-heart { position:absolute; top:8px; right:10px; background:none; border:none; color:rgba(201,169,110,.6); font-size:14px; cursor:pointer; padding:4px; line-height:1; transition:color .2s; }
   .lib-heart:hover, .lib-heart.saved { color:var(--gold); }
 
   @media(max-width:480px){
@@ -596,7 +609,7 @@
   .compare-table td { font-size:13px; font-weight:300; color:var(--soft); padding:10px 12px; text-align:center; border-bottom:1px solid rgba(201,169,110,.05); }
   .compare-table td:first-child { text-align:left; color:var(--muted); font-size:12px; }
   .compare-yes { color:var(--gold); }
-  .compare-no { color:rgba(255,255,255,.15); }
+  .compare-no { color:rgba(255,255,255,.5); }
   .compare-table .highlight-col { color:var(--cream); }
   .upgrade-cta-wrap { position:relative; z-index:1; padding:0 32px 16px; }
   .upgrade-cta-btn { width:100%; padding:20px; background:var(--gold); border:none; color:var(--deep); font-family:'Jost',sans-serif; font-weight:400; font-size:14px; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; transition:all .3s; }
@@ -676,12 +689,12 @@
   .week-dot.today-dot { border-color:rgba(201,169,110,.45); }
   .week-dot.future { background:transparent; border-color:rgba(201,169,110,.07); }
   .week-dot.inactive-dot { opacity:.2; }
-  .week-dot-label { font-size:8px; letter-spacing:.02em; color:rgba(201,169,110,.22); }
+  .week-dot-label { font-size:9px; letter-spacing:.02em; color:rgba(201,169,110,.7); }
   .habit-streak-wrap { display:flex; flex-direction:column; align-items:center; flex-shrink:0; padding-top:1px; min-width:28px; }
   .habit-streak-num { font-family:'Cormorant Garamond',serif; font-size:19px; font-weight:300; color:var(--gold); line-height:1; }
-  .habit-streak-zero .habit-streak-num { color:rgba(201,169,110,.18); font-size:14px; }
+  .habit-streak-zero .habit-streak-num { color:rgba(201,169,110,.55); font-size:14px; }
   .habit-streak-label { font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); opacity:.5; }
-  .habit-delete-btn { background:none; border:none; color:rgba(255,255,255,.1); font-size:18px; cursor:pointer; padding:0 0 0 6px; transition:color .3s; line-height:1; flex-shrink:0; margin-top:2px; }
+  .habit-delete-btn { background:none; border:none; color:rgba(255,255,255,.45); font-size:18px; cursor:pointer; padding:0 0 0 6px; transition:color .3s; line-height:1; flex-shrink:0; margin-top:2px; }
   .habit-delete-btn:hover { color:rgba(201,169,110,.35); }
   .habits-add-wrap { position:relative; z-index:1; padding:20px 32px 0; }
   .habits-add-btn { width:100%; padding:16px; background:none; border:1px solid rgba(201,169,110,.2); color:var(--gold); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; transition:all .3s; }
@@ -782,7 +795,7 @@
   .legal-section-title::after { content:''; flex:1; height:1px; background:rgba(201,169,110,.12); }
   .legal-section-body { font-size:14px; font-weight:300; color:var(--soft); line-height:1.85; }
   .legal-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px; }
-  .legal-list li::before { content:'—'; color:rgba(201,169,110,.4); margin-right:10px; }
+  .legal-list li::before { content:'—'; color:rgba(201,169,110,.6); margin-right:10px; }
   @media(max-width:480px){
     .legal-header{padding:20px 20px 16px}
     .legal-body{padding:20px 20px 48px}
@@ -843,19 +856,19 @@
 
     <!-- Login form -->
     <div id="loginForm" style="max-width:320px;margin:0 auto;display:flex;flex-direction:column;gap:12px">
-      <input id="loginEmail" type="email" placeholder="Email" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
-      <input id="loginPassword" type="password" placeholder="Password" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
+      <input id="loginEmail" aria-label="Email" type="email" placeholder="Email" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
+      <input id="loginPassword" aria-label="Password" type="password" placeholder="Password" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
       <div id="loginError" style="font-size:12px;color:#c97070;min-height:18px;text-align:left"></div>
       <button onclick="handleLogin()" class="btn-primary" style="width:100%;padding:16px">Enter</button>
-      <button onclick="showAuthForm('forgot')" style="background:none;border:none;color:rgba(201,169,110,.6);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.08em;cursor:pointer;text-decoration:underline;text-underline-offset:3px;margin-top:4px">Forgot password?</button>
+      <button onclick="showAuthForm('forgot')" style="background:none;border:none;color:rgba(201,169,110,.75);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.08em;cursor:pointer;text-decoration:underline;text-underline-offset:3px;margin-top:4px;padding:10px">Forgot password?</button>
     </div>
 
     <!-- Signup form -->
     <div id="signupForm" style="max-width:320px;margin:0 auto;display:none;flex-direction:column;gap:12px">
-      <input id="signupName" type="text" placeholder="Your name" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
-      <input id="signupEmail" type="email" placeholder="Email" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
-      <input id="signupPassword" type="password" placeholder="Password (min 6 characters)" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
-      <input id="signupReferral" type="text" placeholder="Referral code (optional)" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
+      <input id="signupName" aria-label="Your name" type="text" placeholder="Your name" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
+      <input id="signupEmail" aria-label="Email" type="email" placeholder="Email" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
+      <input id="signupPassword" aria-label="Password" type="password" placeholder="Password (min 6 characters)" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
+      <input id="signupReferral" aria-label="Referral code (optional)" type="text" placeholder="Referral code (optional)" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
       <div id="signupError" style="font-size:12px;color:#c97070;min-height:18px;text-align:left"></div>
       <button onclick="handleSignup()" class="btn-primary" style="width:100%;padding:16px">Begin My Journey</button>
     </div>
@@ -863,7 +876,7 @@
     <!-- Forgot password form -->
     <div id="forgotForm" style="max-width:320px;margin:0 auto;display:none;flex-direction:column;gap:12px">
       <p style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.7;text-align:left;margin:0">Enter your email and we'll send you a link to reset your password.</p>
-      <input id="forgotEmail" type="email" placeholder="Email" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
+      <input id="forgotEmail" aria-label="Email" type="email" placeholder="Email" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
       <div id="forgotMessage" style="font-size:12px;color:#c97070;min-height:18px;text-align:left"></div>
       <button onclick="handleForgotPassword()" class="btn-primary" style="width:100%;padding:16px">Send Reset Link</button>
       <button onclick="showAuthForm('login')" style="background:none;border:none;color:var(--muted);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.08em;cursor:pointer;text-decoration:underline;text-underline-offset:3px;margin-top:4px">← Back to log in</button>
@@ -872,8 +885,8 @@
     <!-- Reset password form (arrived via email recovery link) -->
     <div id="resetPasswordForm" style="max-width:320px;margin:0 auto;display:none;flex-direction:column;gap:12px">
       <p style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.7;text-align:left;margin:0">Choose a new password for your account.</p>
-      <input id="newPassword" type="password" placeholder="New password (min 6 characters)" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
-      <input id="confirmPassword" type="password" placeholder="Confirm password" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
+      <input id="newPassword" aria-label="New password" type="password" placeholder="New password (min 6 characters)" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
+      <input id="confirmPassword" aria-label="Confirm password" type="password" placeholder="Confirm password" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
       <div id="resetPasswordError" style="font-size:12px;color:#c97070;min-height:18px;text-align:left"></div>
       <button onclick="handlePasswordUpdate()" class="btn-primary" style="width:100%;padding:16px">Update Password</button>
     </div>
@@ -900,7 +913,7 @@
   <div class="onboarding-header">
     <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill" style="width:20%"></div></div>
     <div style="margin-top:8px">
-      <div class="progress-label" id="progressLabel"><span class="progress-current">1</span> of 5</div>
+      <div class="progress-label" id="progressLabel" aria-live="polite"><span class="progress-current">1</span> of 5</div>
     </div>
   </div>
   <div class="question-container" id="questionContainer"></div>
@@ -928,17 +941,17 @@
 <div id="home" class="screen">
   <div class="home-nav" style="position:relative;z-index:1">
     <div class="nav-logo" id="navLogo" onclick="handleLogoTap()" style="cursor:pointer">Already Mine</div>
-    <div class="nav-streak" id="navCindersEl" onclick="openCindersModal()" style="cursor:pointer">✦ 0</div>
-    <div class="nav-bell" id="navBell" onclick="openNotifPanel()" title="Notifications" aria-label="Notifications">
-      <svg class="nav-bell-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <div class="nav-streak" id="navCindersEl" onclick="openCindersModal()" style="cursor:pointer" role="button" tabindex="0" aria-label="Your Cinders and rank">✦ 0</div>
+    <div class="nav-bell" id="navBell" onclick="openNotifPanel()" title="Notifications" aria-label="Notifications" role="button" tabindex="0">
+      <svg class="nav-bell-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="nav-bell-dot" id="notifDot"></span>
     </div>
-    <div class="nav-avatar" id="navAvatar" onclick="openProfile();setTabByName('profile')" style="cursor:pointer">✦</div>
+    <div class="nav-avatar" id="navAvatar" onclick="openProfile();setTabByName('profile')" style="cursor:pointer" role="button" tabindex="0" aria-label="Open profile">✦</div>
   </div>
   <div class="home-greeting">
     <div class="greeting-time" id="greetingTime">Good morning</div>
-    <div class="greeting-name" id="greetingName">Your library awaits.</div>
-    <div style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:rgba(201,169,110,.45);margin-top:6px" id="greetingRank"></div>
+    <h1 class="greeting-name" id="greetingName">Your library awaits.</h1>
+    <div style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:rgba(201,169,110,.75);margin-top:6px" id="greetingRank"></div>
   </div>
   <div class="todays-card-wrap">
     <div class="section-label">Today's Affirmation</div>
@@ -972,7 +985,7 @@
 
   <!-- My Foundations -->
   <div class="habits-preview-wrap">
-    <div class="section-label">My Foundations<button class="tooltip-btn" onclick="showTooltip('My Foundations','Small daily rituals that build the life you are calling in. Each foundation you hold builds a streak — consistency is where transformation happens.')">?</button></div>
+    <div class="section-label">My Foundations<button class="tooltip-btn" aria-label="More info" onclick="showTooltip('My Foundations','Small daily rituals that build the life you are calling in. Each foundation you hold builds a streak — consistency is where transformation happens.')">?</button></div>
     <div style="font-size:11px;font-weight:300;color:var(--muted);letter-spacing:.04em;margin-top:-10px;margin-bottom:14px;font-style:italic">Consistency is the bridge between intention and reality</div>
     <div class="habits-preview-card" id="habitsPreviewCard" onclick="openHabits()">
       <div class="habits-preview-empty">Tap to build your daily foundation stack</div>
@@ -981,7 +994,7 @@
 
   <!-- Daily Practice -->
   <div class="practice-wrap">
-    <div class="section-label">Daily Practice<button class="tooltip-btn" onclick="showTooltip('Daily Practice','Complete these actions each day to earn Cinders — your experience points. Cinders unlock new ranks as your practice deepens.')">?</button></div>
+    <div class="section-label">Daily Practice<button class="tooltip-btn" aria-label="More info" onclick="showTooltip('Daily Practice','Complete these actions each day to earn Cinders — your experience points. Cinders unlock new ranks as your practice deepens.')">?</button></div>
     <div class="practice-card">
       <div class="practice-progress"><span class="practice-progress-count" id="practiceCount">0</span> of 4 complete</div>
       <div class="practice-item">
@@ -1009,7 +1022,7 @@
 
   <!-- Weekly Mantra -->
   <div class="mantra-card-wrap">
-    <div class="section-label">My Weekly Mantra<button class="tooltip-btn" onclick="showTooltip('My Weekly Mantra','Your personal declaration for the week — written in your own words. Unlike your daily affirmation which is given to you, your mantra is what you choose to stand on.')">?</button></div>
+    <div class="section-label">My Weekly Mantra<button class="tooltip-btn" aria-label="More info" onclick="showTooltip('My Weekly Mantra','Your personal declaration for the week — written in your own words. Unlike your daily affirmation which is given to you, your mantra is what you choose to stand on.')">?</button></div>
     <div class="mantra-card">
       <div class="mantra-card-label">
         <span>This week I declare</span>
@@ -1078,7 +1091,7 @@
   <div class="journal-header" style="position:relative;z-index:1">
     <div>
       <div class="journal-date" id="journalDate"></div>
-      <div class="journal-title">Today's Journal</div>
+      <h1 class="journal-title">Today's Journal</h1>
     </div>
   </div>
 
@@ -1098,7 +1111,7 @@
   <div class="journal-section" style="animation-delay:.15s">
     <div class="journal-section-title">Reflection</div>
     <div class="journal-prompt" id="journalPrompt"></div>
-    <textarea class="journal-textarea" rows="5" placeholder="Write freely — this space is only for you..." maxlength="2000"></textarea>
+    <textarea class="journal-textarea" rows="5" placeholder="Write freely — this space is only for you..." maxlength="2000" aria-label="Journal reflection"></textarea>
   </div>
 
   <!-- Mood check-in — expanded -->
@@ -1110,7 +1123,7 @@
     <div class="body-scan-entry">
       <div style="display:flex;align-items:center;gap:8px">
         <button class="body-scan-entry-btn" onclick="openBodyScan()">✦ &nbsp;Body Scan — Go Deeper</button>
-        <button class="tooltip-btn" onclick="showTooltip('Body Scan','A guided practice to bring awareness into your body. After your mood check-in, the body scan helps you feel where your emotions live — not just name them.')">?</button>
+        <button class="tooltip-btn" aria-label="More info" onclick="showTooltip('Body Scan','A guided practice to bring awareness into your body. After your mood check-in, the body scan helps you feel where your emotions live — not just name them.')">?</button>
       </div>
       <div class="body-scan-entry-sub">A gentle guided body awareness practice</div>
     </div>
@@ -1121,15 +1134,15 @@
     <div class="journal-section-title">Gratitude</div>
     <div class="journal-section-sub">Three things you're grateful for today</div>
     <div class="gratitude-inputs">
-      <div class="gratitude-row"><span class="gratitude-num">I</span><input class="gratitude-input" type="text" placeholder="I am grateful for..."></div>
-      <div class="gratitude-row"><span class="gratitude-num">II</span><input class="gratitude-input" type="text" placeholder="I am grateful for..."></div>
-      <div class="gratitude-row"><span class="gratitude-num">III</span><input class="gratitude-input" type="text" placeholder="I am grateful for..."></div>
+      <div class="gratitude-row"><span class="gratitude-num" aria-hidden="true">I</span><input class="gratitude-input" type="text" placeholder="I am grateful for..." aria-label="First gratitude"></div>
+      <div class="gratitude-row"><span class="gratitude-num" aria-hidden="true">II</span><input class="gratitude-input" type="text" placeholder="I am grateful for..." aria-label="Second gratitude"></div>
+      <div class="gratitude-row"><span class="gratitude-num" aria-hidden="true">III</span><input class="gratitude-input" type="text" placeholder="I am grateful for..." aria-label="Third gratitude"></div>
     </div>
   </div>
 
   <!-- Manifestation Intentions -->
   <div class="journal-section" style="animation-delay:.42s">
-    <div class="journal-section-title">My Intentions<button class="tooltip-btn" onclick="showTooltip('My Intentions','What you are actively calling into your life. Set them and hold them — they stay until you mark them as received. Free members can hold 3 at a time.')">?</button></div>
+    <div class="journal-section-title">My Intentions<button class="tooltip-btn" aria-label="More info" onclick="showTooltip('My Intentions','What you are actively calling into your life. Set them and hold them — they stay until you mark them as received. Free members can hold 3 at a time.')">?</button></div>
     <div class="journal-section-sub">Set your intentions and hold them until they're yours. They stay until you mark them received.</div>
     <div style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.7;margin-bottom:14px;padding:12px 16px;background:rgba(201,169,110,.03);border-left:2px solid rgba(201,169,110,.2);">
       An intention is something you believe is already on its way to you. Write it as if it's coming — not as a wish, but as a truth you're stepping into.
@@ -1145,7 +1158,7 @@
     </div>
     <div id="intentionsList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px"></div>
     <div style="display:flex;gap:10px;align-items:center">
-      <input id="newIntentionInput" class="gratitude-input" type="text" placeholder="I am calling in..." maxlength="200" style="flex:1;border:1px solid rgba(201,169,110,.12);padding:12px 14px;">
+      <input id="newIntentionInput" class="gratitude-input" type="text" placeholder="I am calling in..." maxlength="200" aria-label="New intention" style="flex:1;border:1px solid rgba(201,169,110,.12);padding:12px 14px;">
       <button onclick="addIntention()" style="padding:12px 18px;background:none;border:1px solid rgba(201,169,110,.25);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:all .3s;">+ Add</button>
     </div>
     <div style="font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:.05em" id="intentionsCount">0 of 3 intentions used (free plan)</div>
@@ -1232,8 +1245,8 @@
 <div class="add-habit-panel" id="addHabitPanel" onclick="closeAddHabitOutside(event)">
   <div class="add-habit-sheet">
     <div class="add-habit-sheet-header">
-      <div class="add-habit-title" style="margin-bottom:0">Add a Foundation</div>
-      <button class="add-habit-x-btn" onclick="closeAddHabitPanel()">✕</button>
+      <h2 class="add-habit-title" style="margin-bottom:0">Add a Foundation</h2>
+      <button class="add-habit-x-btn" aria-label="Close" onclick="closeAddHabitPanel()">✕</button>
     </div>
     <div class="add-habit-sheet-body">
       <div class="add-habit-label">How often?</div>
@@ -1255,9 +1268,9 @@
 
 <!-- NOTIFICATION PANEL -->
 <div class="notif-panel" id="notifPanel" onclick="closeNotifOutside(event)">
-  <div class="notif-sheet">
+  <div class="notif-sheet" role="dialog" aria-modal="true" aria-label="Notifications">
     <div class="notif-sheet-header">
-      <div class="notif-title">Notifications</div>
+      <h2 class="notif-title">Notifications</h2>
       <button class="notif-clear-btn" onclick="clearAllNotifications()">Clear all</button>
     </div>
     <div class="notif-list" id="notifList"></div>
@@ -1276,7 +1289,7 @@
     <div class="scan-progress" id="scanProgress"></div>
     <div class="scan-step-wrap" id="scanStepWrap">
       <div class="scan-step-num" id="scanStepNum"></div>
-      <div class="scan-title" id="scanTitle"></div>
+      <h2 class="scan-title" id="scanTitle"></h2>
       <div class="scan-prompt" id="scanPrompt"></div>
       <div class="scan-cue" id="scanCue"></div>
       <div class="scan-note-wrap">
@@ -1295,7 +1308,7 @@
   </div>
   <div class="badges-header">
     <div class="badges-header-top">
-      <div class="badges-title">Trophy Room</div>
+      <h1 class="badges-title">Trophy Room</h1>
       <div style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)" id="badgesEarnedCount">1 earned</div>
     </div>
   </div>
@@ -1306,7 +1319,7 @@
       <div class="level-name" id="levelName">Ember</div>
       <div style="display:flex;align-items:center;gap:8px">
         <div class="level-num">Level <span id="levelNum">1</span></div>
-        <button class="tooltip-btn" onclick="showTooltip('Your Frequency','Cinders are earned by showing up daily — revealing your affirmation, journaling, setting your mantra, and completing your foundations. As they accumulate your rank rises.')">?</button>
+        <button class="tooltip-btn" aria-label="More info" onclick="showTooltip('Your Frequency','Cinders are earned by showing up daily — revealing your affirmation, journaling, setting your mantra, and completing your foundations. As they accumulate your rank rises.')">?</button>
       </div>
     </div>
     <div class="cinders-track"><div class="cinders-fill" id="cindersFill" style="width:5%"></div></div>
@@ -1328,8 +1341,8 @@
       <div class="upgrade-orb-ring"></div><div class="upgrade-orb-ring"></div>
       <div class="upgrade-orb-core">∞</div>
     </div>
-    <div class="upgrade-headline">Unlock Your Full<br>Library</div>
-    <p class="upgrade-sub">800+ affirmations, unlimited journaling, and everything you need to manifest without limits.</p>
+    <h1 class="upgrade-headline">Unlock Your Full<br>Library</h1>
+    <p class="upgrade-sub">800+ affirmations, unlimited intentions and foundations, and everything you need to manifest without limits.</p>
   </div>
   <div class="pricing-toggle-wrap">
     <div class="pricing-toggle">
@@ -1348,22 +1361,17 @@
   <div class="features-wrap">
     <div class="features-title">Everything Included</div>
     <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>800+ Affirmations</strong>Unlock the full library — one new affirmation every day, forever.</div></div>
-    <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Unlimited Journaling</strong>Write as much as you want. No entry limits, ever.</div></div>
     <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Unlimited Intentions</strong>Free members can track 3 intentions. Members carry as many as they need.</div></div>
-    <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Ad Free</strong>A clean, uninterrupted space for your practice.</div></div>
     <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Unlimited Foundations</strong>Free members track up to 3 daily foundations. Members add as many as they need.</div></div>
     <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Customize Your Practice</strong>Show or hide features to shape your daily practice exactly the way you want it.</div></div>
     <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Monthly Reflection Summary</strong>A curated look at your month — affirmations unlocked, moods tracked, intentions manifested.</div></div>
-    <div class="feature-row"><div class="feature-check">✦</div><div class="feature-text"><strong>Early Access</strong>Be first to receive new affirmation packs and features.</div></div>
   </div>
   <div class="compare-wrap">
     <div class="compare-title">Free vs Member</div>
     <table class="compare-table">
       <tr><th></th><th>Free</th><th style="color:var(--gold)">Member</th></tr>
       <tr><td>Affirmations</td><td>30</td><td class="highlight-col">800+</td></tr>
-      <tr><td>Journal entries</td><td>30</td><td class="highlight-col">Unlimited</td></tr>
       <tr><td>Intentions</td><td>3</td><td class="highlight-col">Unlimited</td></tr>
-      <tr><td>Ads</td><td class="compare-no">—</td><td class="compare-yes">Ad free</td></tr>
       <tr><td>Foundations</td><td>3</td><td class="highlight-col">Unlimited</td></tr>
       <tr><td>Customize practice</td><td class="compare-no">—</td><td class="compare-yes">✦</td></tr>
       <tr><td>Monthly summary</td><td class="compare-no">—</td><td class="compare-yes">✦</td></tr>
@@ -1374,7 +1382,9 @@
     <button id="restorePurchasesBtn" onclick="handleRestorePurchases()" style="display:none;margin-top:14px;padding:10px 24px;background:none;border:none;color:var(--muted);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;text-decoration:underline;text-underline-offset:3px">Restore Purchases</button>
   </div>
   <div class="upgrade-fine-print">
-    <p>Cancel anytime. Billed through your app store.<br>By subscribing you agree to our Terms and Privacy Policy.</p>
+    <p>Cancel anytime. Billed through your app store.<br>By subscribing you agree to our
+      <button onclick="showLegalDoc('tos')" style="background:none;border:none;color:var(--muted);font-family:inherit;font-size:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:8px 2px">Terms</button> and
+      <button onclick="showLegalDoc('privacy')" style="background:none;border:none;color:var(--muted);font-family:inherit;font-size:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:8px 2px">Privacy Policy</button>.</p>
   </div>
 </div>
 
@@ -1439,7 +1449,7 @@
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(201,169,110,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
       </div>
     </div>
-    <input type="file" id="profilePicInput" accept="image/*" style="display:none" onchange="handleProfilePic(this)">
+    <input type="file" id="profilePicInput" aria-label="Upload profile photo" accept="image/*" style="display:none" onchange="handleProfilePic(this)">
     <div class="profile-real-name" id="profileRealName" style="display:none"></div>
     <div class="profile-nickname" id="profileNicknameDisplay"></div>
     <input class="profile-nickname-input" id="profileNicknameInput" type="text" placeholder="Add a nickname..." maxlength="20">
@@ -1557,7 +1567,7 @@
         <div class="customize-row-sub">Show helpful ? icons explaining each feature</div>
       </div>
       <label class="toggle-pill">
-        <input type="checkbox" id="toggle_tooltips" checked onchange="saveFeatureToggle('tooltips', this.checked)">
+        <input type="checkbox" id="toggle_tooltips" aria-label="Show help tips" checked onchange="saveFeatureToggle('tooltips', this.checked)">
         <div class="toggle-pill-track"></div>
         <div class="toggle-pill-knob"></div>
       </label>
@@ -1568,7 +1578,7 @@
         <div class="customize-row-sub">Your daily habit tracker on the home screen</div>
       </div>
       <label class="toggle-pill">
-        <input type="checkbox" id="toggle_foundations" checked onchange="saveFeatureToggle('foundations', this.checked)">
+        <input type="checkbox" id="toggle_foundations" aria-label="Show Foundations" checked onchange="saveFeatureToggle('foundations', this.checked)">
         <div class="toggle-pill-track"></div>
         <div class="toggle-pill-knob"></div>
       </label>
@@ -1579,7 +1589,7 @@
         <div class="customize-row-sub">Your daily progress card on the home screen</div>
       </div>
       <label class="toggle-pill">
-        <input type="checkbox" id="toggle_daily_practice" checked onchange="saveFeatureToggle('daily_practice', this.checked)">
+        <input type="checkbox" id="toggle_daily_practice" aria-label="Show Daily Practice" checked onchange="saveFeatureToggle('daily_practice', this.checked)">
         <div class="toggle-pill-track"></div>
         <div class="toggle-pill-knob"></div>
       </label>
@@ -1590,7 +1600,7 @@
         <div class="customize-row-sub">Your personal mantra card on the home screen</div>
       </div>
       <label class="toggle-pill">
-        <input type="checkbox" id="toggle_mantra" checked onchange="saveFeatureToggle('mantra', this.checked)">
+        <input type="checkbox" id="toggle_mantra" aria-label="Show Weekly Mantra" checked onchange="saveFeatureToggle('mantra', this.checked)">
         <div class="toggle-pill-track"></div>
         <div class="toggle-pill-knob"></div>
       </label>
@@ -1601,7 +1611,7 @@
         <div class="customize-row-sub">The body scan entry point in your journal</div>
       </div>
       <label class="toggle-pill">
-        <input type="checkbox" id="toggle_body_scan" checked onchange="saveFeatureToggle('body_scan', this.checked)">
+        <input type="checkbox" id="toggle_body_scan" aria-label="Show Body Scan" checked onchange="saveFeatureToggle('body_scan', this.checked)">
         <div class="toggle-pill-track"></div>
         <div class="toggle-pill-knob"></div>
       </label>
@@ -1612,7 +1622,7 @@
         <div class="customize-row-sub">Your manifestation intentions in your journal</div>
       </div>
       <label class="toggle-pill">
-        <input type="checkbox" id="toggle_intentions" checked onchange="saveFeatureToggle('intentions', this.checked)">
+        <input type="checkbox" id="toggle_intentions" aria-label="Show Intentions" checked onchange="saveFeatureToggle('intentions', this.checked)">
         <div class="toggle-pill-track"></div>
         <div class="toggle-pill-knob"></div>
       </label>
@@ -1623,7 +1633,7 @@
         <div class="customize-row-sub">A personalized summary of your month — your moods, intentions, and growth.</div>
       </div>
       <label class="toggle-pill">
-        <input type="checkbox" id="toggle_monthly_summary" checked onchange="saveFeatureToggle('monthly_summary', this.checked)">
+        <input type="checkbox" id="toggle_monthly_summary" aria-label="Show Monthly Reflection" checked onchange="saveFeatureToggle('monthly_summary', this.checked)">
         <div class="toggle-pill-track"></div>
         <div class="toggle-pill-knob"></div>
       </label>
@@ -1650,7 +1660,7 @@
     <div class="profile-section-title">Share Your Thoughts</div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="position:relative">
-        <select id="feedbackType" style="width:100%;background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.15);color:var(--soft);font-family:'Jost',sans-serif;font-size:14px;font-weight:300;padding:12px 40px 12px 16px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;">
+        <select id="feedbackType" aria-label="Feedback type" style="width:100%;background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.15);color:var(--soft);font-family:'Jost',sans-serif;font-size:14px;font-weight:300;padding:12px 40px 12px 16px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;">
           <option value="" style="background:var(--deep)">What kind of feedback?</option>
           <option value="bug" style="background:var(--deep)">Bug Report</option>
           <option value="feature" style="background:var(--deep)">Feature Request</option>
@@ -1659,7 +1669,7 @@
         </select>
         <svg style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;opacity:.5" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
-      <textarea id="feedbackText" style="background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.12);color:var(--cream);font-family:'Jost',sans-serif;font-weight:300;font-size:14px;line-height:1.7;padding:14px 16px;resize:none;outline:none;transition:border-color .3s;" rows="4" placeholder="Tell us what's on your mind..."></textarea>
+      <textarea id="feedbackText" aria-label="Feedback message" style="background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.12);color:var(--cream);font-family:'Jost',sans-serif;font-weight:300;font-size:14px;line-height:1.7;padding:14px 16px;resize:none;outline:none;transition:border-color .3s;" rows="4" placeholder="Tell us what's on your mind..."></textarea>
       <div id="feedbackError" style="font-size:12px;color:#c97070;min-height:18px;text-align:left"></div>
       <button onclick="submitFeedback()" style="padding:14px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Submit Feedback</button>
     </div>
@@ -1669,18 +1679,19 @@
   <div class="profile-links" style="padding-bottom:32px;border-top:1px solid rgba(201,169,110,.06);padding-top:24px;margin-top:8px">
     <button class="profile-link" onclick="showLegalDoc('tos')">Terms of Service</button>
     <button class="profile-link" onclick="showLegalDoc('privacy')">Privacy Policy</button>
-    <button class="profile-link" onclick="currentModalType='info';document.getElementById('modalDay').textContent='Contact Us';document.getElementById('modalText').textContent='We\'d love to hear from you.';document.getElementById('modalCat').textContent='support@alreadymine.com';document.getElementById('modalOverlay').classList.add('open')">Contact Us</button>
+    <button class="profile-link" onclick="showLegalDoc('disclaimer')">Health Disclaimer</button>
+    <button class="profile-link" onclick="currentModalType='info';document.getElementById('modalDay').textContent='Contact Us';document.getElementById('modalText').textContent='We\'d love to hear from you.';document.getElementById('modalCat').textContent='support@alreadymine.app';document.getElementById('modalOverlay').classList.add('open')">Contact Us</button>
     <button class="profile-link" onclick="handleLogout()">Log Out</button>
   </div>
   <div style="text-align:center;padding-bottom:40px;">
-    <button onclick="showDeleteAccountModal()" style="background:none;border:none;color:rgba(201,112,112,.55);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.1em;cursor:pointer;text-decoration:underline;text-underline-offset:3px;transition:color .3s;" onmouseover="this.style.color='#c97070'" onmouseout="this.style.color='rgba(201,112,112,.55)'">Delete Account</button>
+    <button onclick="showDeleteAccountModal()" style="background:none;border:none;color:#c97070;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.1em;cursor:pointer;text-decoration:underline;text-underline-offset:3px;transition:color .3s;padding:12px" onmouseover="this.style.color='#e08d8d'" onmouseout="this.style.color='#c97070'">Delete Account</button>
   </div>
 </div>
 
 <!-- MONTHLY SUMMARY -->
 <div id="monthlySummary" class="screen">
   <div class="summary-header">
-    <div class="summary-month" id="summaryMonthTitle">April's Reflection</div>
+    <h1 class="summary-month" id="summaryMonthTitle">April's Reflection</h1>
     <button class="summary-close" onclick="showScreen('profile');setTabByName('profile')">✕ Close</button>
   </div>
 
@@ -1749,9 +1760,9 @@
 </div>
 
 <!-- LEGAL MODAL -->
-<div class="legal-overlay" id="legalOverlay">
+<div class="legal-overlay" id="legalOverlay" role="dialog" aria-modal="true" aria-labelledby="legalTitle">
   <div class="legal-header">
-    <div class="legal-title" id="legalTitle"></div>
+    <h2 class="legal-title" id="legalTitle"></h2>
     <button class="legal-close" onclick="closeLegalDoc()">✕ Close</button>
   </div>
   <div class="legal-body" id="legalBody"></div>
@@ -1759,7 +1770,7 @@
 
 <!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-  <div class="modal-card">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalDay">
     <div class="modal-day" id="modalDay"></div>
     <div class="modal-text" id="modalText"></div>
     <div class="modal-cat" id="modalCat"></div>
@@ -1833,7 +1844,7 @@ function openCindersModal() {
       </div>
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
         <div style="font-family:'Jost',sans-serif;font-size:12px;font-weight:300;color:var(--muted);letter-spacing:.04em">${fmtNum(currentCinders)} / ${fmtNum(info.currentMax)} Cinders</div>
-        <div style="font-family:'Jost',sans-serif;font-size:11px;font-weight:300;color:rgba(201,169,110,.55);letter-spacing:.08em;text-transform:uppercase">Next: ${info.nextName}</div>
+        <div style="font-family:'Jost',sans-serif;font-size:11px;font-weight:300;color:rgba(201,169,110,.75);letter-spacing:.08em;text-transform:uppercase">Next: ${info.nextName}</div>
       </div>
       <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;color:var(--soft);font-style:italic;text-align:center;line-height:1.6">${motivational}</div>
     </div>`;
@@ -2360,6 +2371,14 @@ let savedAffirmationIds = new Set();
 let savedAffirmationsData = {}; // map of day number -> { id, text, cat } for saved affirmations
 let affirmationHistory = {}; // map of day number -> { id, text, cat } from user_affirmations table; id is the string affirmation id (e.g. "AB001")
 
+// Divs with role="button" (nav icons) need keyboard activation to match real buttons
+document.addEventListener('keydown', e => {
+  if((e.key === 'Enter' || e.key === ' ') && e.target instanceof HTMLElement && e.target.getAttribute('role') === 'button') {
+    e.preventDefault();
+    e.target.click();
+  }
+});
+
 const noNavScreens = ['loading','auth','splash','onboarding','reveal','grace','monthlySummary'];
 function _navigateToScreen(id){
   currentScreen = id;
@@ -2414,14 +2433,14 @@ function renderQuestion(i){
   document.getElementById('questionContainer').innerHTML=`
     <div class="question-number">${q.number}</div>
     <div class="question-text">${q.text}</div>
-    <div class="options-grid">${q.options.map(o=>`<button class="option-btn${selectedOption===o.value?' selected':''}" onclick="selectOpt(this,'${o.value}')"><span class="option-dot"></span>${o.label}</button>`).join('')}</div>
+    <div class="options-grid">${q.options.map(o=>`<button class="option-btn${selectedOption===o.value?' selected':''}" aria-pressed="${selectedOption===o.value}" onclick="selectOpt(this,'${o.value}')"><span class="option-dot" aria-hidden="true"></span>${o.label}</button>`).join('')}</div>
     <div class="next-btn-wrap">
       <button class="q-back-btn" onclick="prevQ()" ${i===0?'disabled':''}>Back</button>
       <button id="nextBtn" class="q-next-btn${selectedOption?' ready':''}" onclick="nextQ()">${i<questions.length-1?'Continue':'Reveal My Affirmation'}</button>
     </div>
   `;
 }
-function selectOpt(el,val){document.querySelectorAll('.option-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');selectedOption=val;document.getElementById('nextBtn').classList.add('ready');}
+function selectOpt(el,val){document.querySelectorAll('.option-btn').forEach(b=>{b.classList.remove('selected');b.setAttribute('aria-pressed','false');});el.classList.add('selected');el.setAttribute('aria-pressed','true');selectedOption=val;document.getElementById('nextBtn').classList.add('ready');}
 function nextQ(){if(!selectedOption||questionLeaving)return;answers[questions[currentQuestion].id]=selectedOption;if(currentQuestion<questions.length-1){currentQuestion++;transitionToQuestion(currentQuestion);}else showReveal();}
 
 function showReveal(){
@@ -2851,6 +2870,7 @@ async function toggleSaveByDay(dayNum, text, cat) {
   document.querySelectorAll(`.lib-heart[data-day="${dayNum}"]`).forEach(h => {
     h.textContent = isSaved ? '♥︎' : '♡';
     h.classList.toggle('saved', isSaved);
+    h.setAttribute('aria-label', isSaved ? 'Remove from saved' : 'Save affirmation');
   });
   const saveBtn = document.getElementById('saveBtn');
   if (saveBtn && dayNum === unlockedCount) {
@@ -3771,7 +3791,7 @@ function renderIntentions() {
         <div style="flex:1;font-size:14px;font-weight:300;color:var(--soft);line-height:1.6;">${escapeHtml(intent.text)}</div>
         <div style="display:flex;gap:8px;flex-shrink:0">
           <button onclick="markReceived(${i})" style="padding:4px 10px;background:none;border:1px solid rgba(201,169,110,.2);color:var(--muted);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;white-space:nowrap">✦ Received</button>
-          <button onclick="removeIntention(${i})" style="padding:4px 8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .3s">×</button>
+          <button onclick="removeIntention(${i})" aria-label="Remove intention" style="padding:12px 14px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .3s">×</button>
         </div>
       </div>`;
     }).join('');
@@ -3801,7 +3821,7 @@ function renderPastIntentionsModal() {
         </div>
         ${isPending
           ? `<button onclick="undoPastIntentionDelete('${intent.id}')" style="padding:4px 8px;background:none;border:none;color:var(--gold);cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.08em;flex-shrink:0;line-height:1.8;">Undo</button>`
-          : `<button onclick="deletePastIntention('${intent.id}')" style="padding:4px 8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;flex-shrink:0;line-height:1;transition:color .3s;">×</button>`
+          : `<button onclick="deletePastIntention('${intent.id}')" aria-label="Delete intention" style="padding:12px 14px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;flex-shrink:0;line-height:1;transition:color .3s;">×</button>`
         }
       </div>`;
     }).join('');
@@ -4046,6 +4066,7 @@ function buildLibraryScreen(filter) {
     heartBtn.className = 'lib-heart' + (savedAffirmationIds.has(id) ? ' saved' : '');
     heartBtn.dataset.day = id;
     heartBtn.textContent = savedAffirmationIds.has(id) ? '♥︎' : '♡';
+    heartBtn.setAttribute('aria-label', savedAffirmationIds.has(id) ? 'Remove from saved' : 'Save affirmation');
     heartBtn.onclick = (e) => { e.stopPropagation(); toggleSaveByDay(id, dText, dCat); };
     tile.appendChild(heartBtn);
     return tile;
@@ -4163,7 +4184,7 @@ function buildLibraryScreen(filter) {
     const beyondPreview = Math.max(0, totalInLib - (unlockedCount + 5));
     const footer = document.createElement('div');
     footer.style.cssText = 'grid-column:1/-1;margin-top:16px;padding:28px 20px;text-align:center;border-top:1px solid rgba(201,169,110,.08)';
-    footer.innerHTML = `<div style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(201,169,110,.4);margin-bottom:10px">✦ The journey continues</div><p style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.8;margin-bottom:16px">You're seeing a 5-day preview ahead. There are <span style="color:var(--soft)">${beyondPreview}+ more affirmations</span> beyond that — one unlocks every day you show up.<br><span style="color:rgba(201,169,110,.5);font-size:12px">Members unlock 800+ instantly.</span></p><button onclick="openUpgrade()" style="padding:10px 28px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Unlock Everything</button>`;
+    footer.innerHTML = `<div style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(201,169,110,.75);margin-bottom:10px">✦ The journey continues</div><p style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.8;margin-bottom:16px">You're seeing a 5-day preview ahead. There are <span style="color:var(--soft)">${beyondPreview}+ more affirmations</span> beyond that — one unlocks every day you show up.<br><span style="color:rgba(201,169,110,.75);font-size:12px">Members unlock 800+ instantly.</span></p><button onclick="openUpgrade()" style="padding:10px 28px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Unlock Everything</button>`;
     grid.appendChild(footer);
   }
 }
@@ -4442,8 +4463,9 @@ async function buildProfile() {
           textDiv.textContent = s.affirmation_text;
           textDiv.appendChild(meta);
           const removeBtn = document.createElement('button');
-          removeBtn.style.cssText = 'background:none;border:none;color:rgba(201,169,110,.4);font-size:15px;cursor:pointer;padding:2px 4px;flex-shrink:0;line-height:1';
+          removeBtn.style.cssText = 'background:none;border:none;color:rgba(201,169,110,.7);font-size:15px;cursor:pointer;padding:12px 14px;flex-shrink:0;line-height:1';
           removeBtn.textContent = '✕';
+          removeBtn.setAttribute('aria-label', 'Remove saved affirmation');
           removeBtn.onclick = async () => { await toggleSaveByDay(s.affirmation_day, s.affirmation_text, s.affirmation_cat); buildProfile(); };
           row.appendChild(textDiv);
           row.appendChild(removeBtn);
@@ -5188,6 +5210,15 @@ const LEGAL_CONTENT = {
       { title: 'Contact', body: 'Questions about these terms? Contact us at support@alreadymine.app. Already Mine LLC — Salt Lake City, Utah, United States.' },
     ]
   },
+  disclaimer: {
+    title: 'Health Disclaimer',
+    updated: 'Last updated: June 2026',
+    sections: [
+      { body: 'Already Mine is a personal wellness and manifestation app intended for general wellbeing and motivational purposes only. It is not a substitute for professional mental health treatment, medical advice, or crisis intervention.' },
+      { body: 'The affirmations, journaling prompts, body scan, and reflection features in this app are tools for personal practice. They are not therapy, and no content in this app should be understood as medical or psychological advice.' },
+      { title: 'If You Need Support', body: 'If you are experiencing a mental health crisis, please contact a licensed mental health professional. In the United States, you can call or text 988 (Suicide and Crisis Lifeline) at any time, day or night. If you are outside the United States, please contact your local emergency services or crisis line.' },
+    ]
+  },
   privacy: {
     title: 'Privacy Policy',
     updated: 'Last updated: June 2026',
@@ -5337,7 +5368,7 @@ function renderHabits() {
       `<button class="habit-check" onclick="toggleHabitComplete('${h.id}')">${done ? '✓' : ''}</button>` +
       `<div class="habit-body"><span class="habit-name">${escapeHtml(h.name)}</span>${dotsHtml}${freqLabelHtml}</div>` +
       streakHtml +
-      `<button class="habit-delete-btn" onclick="deleteHabit('${h.id}')">×</button>`;
+      `<button class="habit-delete-btn" aria-label="Delete foundation" onclick="deleteHabit('${h.id}')">×</button>`;
     listEl.appendChild(item);
   });
   updateHabitsHomePreview();
