@@ -33,7 +33,8 @@
       "Bash(grep -c 'then\\(\\(\\) => {}\\)' __TRACKED_VAR__/inline.js)",
       "Bash(grep -c 'then\\(dbResult\\(' __TRACKED_VAR__/inline.js)",
       "Bash(grep -n 'await db.from' __TRACKED_VAR__/inline.js)",
-      "Bash(git diff *)"
+      "Bash(git diff *)",
+      "Bash(npm run *)"
     ]
   }
 }
