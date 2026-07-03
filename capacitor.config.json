@@ -1,0 +1,37 @@
+{
+  "appId": "app.alreadymine",
+  "appName": "Already Mine",
+  "webDir": "www",
+  "server": {
+    "allowNavigation": [
+      "*.supabase.co",
+      "api.anthropic.com",
+      "alreadymine.app"
+    ]
+  },
+  "ios": {
+    "contentInset": "automatic"
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#1a1610",
+      "overlaysWebView": false
+    },
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "backgroundColor": "#1a1610",
+      "showSpinner": false,
+      "splashFullScreen": true,
+      "splashImmersive": true
+    },
+    "Keyboard": {
+      "resize": "body",
+      "resizeOnFullScreen": true
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
+  }
+}
