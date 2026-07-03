@@ -1,0 +1,15 @@
+# Capacitor / native build files — not part of the web deployment.
+# capacitor-init.js and revenuecat-handler.js are NOT listed here:
+# index.html loads them on the web too (they no-op in a browser).
+node_modules
+ios
+android
+www
+capacitor.config.json
+stage-www.mjs
+package.json
+package-lock.json
+MAC_SESSION_GUIDE.md
+APPSTORE.md
+*.sql
+.claude

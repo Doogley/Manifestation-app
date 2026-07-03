@@ -19,7 +19,13 @@
       "Bash(node *)",
       "Bash(curl -sL \"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js\")",
       "Bash(openssl dgst *)",
-      "Bash(openssl base64 *)"
+      "Bash(openssl base64 *)",
+      "PowerShell(npm *)",
+      "PowerShell(npx cap init \"Already Mine\" \"app.alreadymine\" --web-dir=\".\")",
+      "PowerShell(npm ls *)",
+      "PowerShell(npm run *)",
+      "PowerShell(npx cap ls)",
+      "PowerShell(npx cap doctor 2>$null)"
     ]
   }
 }

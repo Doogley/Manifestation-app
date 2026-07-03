@@ -1362,6 +1362,7 @@
   </div>
   <div class="upgrade-cta-wrap">
     <button class="upgrade-cta-btn" onclick="handleSubscribe()" id="upgradeCtaBtn">Start My Member Journey</button>
+    <button id="restorePurchasesBtn" onclick="handleRestorePurchases()" style="display:none;margin-top:14px;padding:10px 24px;background:none;border:none;color:var(--muted);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;text-decoration:underline;text-underline-offset:3px">Restore Purchases</button>
   </div>
   <div class="upgrade-fine-print">
     <p>Cancel anytime. Billed through your app store.<br>By subscribing you agree to our Terms and Privacy Policy.</p>
@@ -1757,13 +1758,19 @@
   </div>
 </div>
 
+<script src="capacitor-init.js"></script>
+<script src="revenuecat-handler.js"></script>
 <script>
 // ── SUPABASE SETUP ──
 const SUPABASE_URL = 'https://cvplifgpmhqonfoggwhj.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2cGxpZmdwbWhxb25mb2dnd2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODU2OTIsImV4cCI6MjA5NDI2MTY5Mn0.nZ4NMFvA8xuWhpgBuWvosxyxq9zGry5K4maqqxgqjaQ';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
-const SUMMARY_API_URL = '/api/summary';
+// Inside the native app (Capacitor) the page is served from
+// capacitor://localhost, so the Vercel API needs an absolute URL.
+const IS_NATIVE_APP = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+const NATIVE_PLATFORM = IS_NATIVE_APP ? window.Capacitor.getPlatform() : 'web';
+const SUMMARY_API_URL = IS_NATIVE_APP ? 'https://alreadymine.app/api/summary' : '/api/summary';
 
 // Password recovery: capture the hash before supabase-js consumes it (detectSessionInUrl
 // strips #access_token=...&type=recovery once it builds the session), and also listen for
@@ -4951,10 +4958,68 @@ function setPricing(type){
     document.getElementById('priceEquiv').textContent='A small commitment to something that changes everything.';
   }
 }
-function handleSubscribe(){
+function showSubscribeSuccess(){
   const wrap=document.querySelector('.upgrade-cta-wrap');
   wrap.innerHTML=`<div style="text-align:center;padding:24px;border:1px solid rgba(201,169,110,.2)"><div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--cream);margin-bottom:8px">Welcome, ${escapeHtml(userNickname || userRealName)}.</div><div style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:20px">✦ Your library is now open</div><button onclick="showScreen('home');setTabByName('today');buildHome()" style="padding:14px 32px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer">Enter the App</button></div>`;
 }
+async function activateMembership(){
+  isPaidMember = true;
+  if(currentUser) {
+    try { await db.from('profiles').update({ is_paid_member: true }).eq('id', currentUser.id); }
+    catch(e) { console.error('Failed to persist membership:', e); }
+  }
+  showSubscribeSuccess();
+}
+async function handleSubscribe(){
+  if(!IS_NATIVE_APP) {
+    // Web: purchases run through the app stores only. Keep the existing
+    // web behavior unchanged.
+    showSubscribeSuccess();
+    return;
+  }
+  const btn=document.getElementById('upgradeCtaBtn');
+  const plan=document.getElementById('toggleAnnual')?.classList.contains('active') ? 'annual' : 'monthly';
+  const productId=window.AMPurchases.PRODUCTS[plan];
+  if(btn){ btn.disabled=true; btn.textContent='Opening App Store…'; }
+  try {
+    await window.AMPurchases.initializePurchases(currentUser && currentUser.id);
+    const result=await window.AMPurchases.purchaseSubscription(productId);
+    if(result.success) {
+      await activateMembership();
+      return;
+    }
+    if(!result.cancelled && result.error) showCindersToast(0, result.error);
+  } catch(e) {
+    console.error('Purchase error:', e);
+    showCindersToast(0, 'Something went wrong starting your purchase. Please try again.');
+  } finally {
+    if(btn && document.getElementById('upgradeCtaBtn')){ btn.disabled=false; btn.textContent='Start My Member Journey'; }
+  }
+}
+async function handleRestorePurchases(){
+  const btn=document.getElementById('restorePurchasesBtn');
+  if(btn){ btn.disabled=true; btn.textContent='Restoring…'; }
+  try {
+    await window.AMPurchases.initializePurchases(currentUser && currentUser.id);
+    const result=await window.AMPurchases.restorePurchases();
+    if(result.success && result.isPaid) {
+      await activateMembership();
+      return;
+    }
+    showCindersToast(0, result.error || 'No previous purchases were found for this account.');
+  } catch(e) {
+    console.error('Restore error:', e);
+    showCindersToast(0, 'Restore failed. Please try again.');
+  } finally {
+    if(btn && document.getElementById('restorePurchasesBtn')){ btn.disabled=false; btn.textContent='Restore Purchases'; }
+  }
+}
+// Native-only UI: the Restore Purchases button is required by Apple but
+// meaningless in a browser, so it only appears inside the Capacitor shell.
+document.addEventListener('am-native-ready', () => {
+  const restoreBtn=document.getElementById('restorePurchasesBtn');
+  if(restoreBtn) restoreBtn.style.display='';
+});
 
 // ── BADGE DATA ──
 const BADGE_YEAR_COLORS = { 1:'#c9a96e', 2:'#b0b8c1', 3:'#e8d5c4' };
