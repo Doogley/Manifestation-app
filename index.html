@@ -180,9 +180,6 @@
   .lib-tile.locked::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent 0%,rgba(201,169,110,.03) 50%,transparent 100%); background-size:200% 100%; animation:shimmer 4s ease-in-out infinite; }
 
   /* Upgrade */
-  .upgrade-teaser { position:relative; z-index:1; margin:20px 32px 0; padding:24px; background:linear-gradient(135deg,rgba(201,169,110,.06) 0%,rgba(201,169,110,.02) 100%); border:1px solid rgba(201,169,110,.15); text-align:center; }
-  .upgrade-teaser p { font-size:14px; font-weight:300; color:var(--soft); line-height:1.7; margin-bottom:16px; }
-  .upgrade-teaser strong { color:var(--gold); font-weight:400; }
 
   /* Bottom nav */
   .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:rgba(26,22,16,.95); backdrop-filter:blur(12px); border-top:1px solid rgba(201,169,110,.1); display:flex; align-items:center; justify-content:space-around; padding:14px 20px 20px; z-index:100; -webkit-transform:translateZ(0); transform:translateZ(0); }
@@ -280,8 +277,6 @@
   .mood-category-btn:hover { border-color:rgba(201,169,110,.3); color:var(--soft); }
   .mood-category-btn.selected { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.08); }
   .mood-category-btn.expanded { border-color:rgba(201,169,110,.25); color:var(--soft); background:rgba(201,169,110,.05); border-bottom:none; }
-  .mood-chevron { font-size:10px; transition:transform .3s; opacity:.5; }
-  .mood-category-btn.expanded .mood-chevron { transform:rotate(180deg); }
   .mood-sub-grid { display:none; flex-wrap:wrap; gap:6px; padding:12px 16px; background:rgba(201,169,110,.04); border:1px solid rgba(201,169,110,.25); border-top:none; margin-bottom:0; }
   .mood-sub-grid.open { display:flex; }
   .mood-sub-btn { padding:7px 14px; background:rgba(201,169,110,.03); border:1px solid rgba(201,169,110,.1); color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; cursor:pointer; transition:all .3s; letter-spacing:.04em; }
@@ -341,11 +336,6 @@
   .gratitude-input { flex:1; background:rgba(201,169,110,.03); border:none; border-bottom:1px solid rgba(201,169,110,.12); color:var(--cream); font-family:'Jost',sans-serif; font-weight:300; font-size:14px; padding:10px 4px; outline:none; transition:border-color .3s; }
   .gratitude-input::placeholder { color:var(--muted); opacity:.5; }
   .gratitude-input:focus { border-bottom-color:var(--gold); }
-
-  .mood-grid { display:flex; gap:10px; flex-wrap:wrap; }
-  .mood-btn { padding:10px 18px; background:rgba(201,169,110,.03); border:1px solid rgba(201,169,110,.12); color:var(--muted); font-family:'Jost',sans-serif; font-size:13px; cursor:pointer; transition:all .3s; letter-spacing:.05em; }
-  .mood-btn:hover { border-color:rgba(201,169,110,.3); color:var(--soft); }
-  .mood-btn.selected { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.08); }
 
   .journal-save-wrap { position:sticky; bottom:0; z-index:10; padding:16px 32px 90px; background:rgba(26,22,16,.95); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-top:1px solid rgba(201,169,110,.1); }
 
@@ -438,11 +428,6 @@
   .badge-item.earned .badge-name { color:var(--soft); }
 
   /* Badge modal */
-  .badge-modal-circle-wrap { display:flex; justify-content:center; margin-bottom:8px; }
-  .badge-modal-tier { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; margin-top:10px; }
-  .badge-modal-name { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300; color:var(--cream); margin-bottom:12px; }
-  .badge-modal-desc { font-size:14px; font-weight:300; color:var(--soft); line-height:1.7; margin-bottom:24px; }
-  .badge-modal-req { font-size:13px; font-weight:300; color:var(--muted); line-height:1.6; font-style:italic; margin-bottom:24px; }
 
   /* ── STREAK GRACE PERIOD ── */
   #grace { align-items:center; justify-content:center; text-align:center; padding:60px 32px; }
@@ -500,7 +485,6 @@
   .profile-rank-card { position:relative; z-index:1; margin:24px 32px 0; padding:20px 24px; background:linear-gradient(135deg,rgba(201,169,110,.08) 0%,rgba(201,169,110,.03) 100%); border:1px solid rgba(201,169,110,.18); }
   .profile-rank-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
   .profile-rank-name { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:300; color:var(--gold); }
-  .profile-rank-label { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
   .profile-frequency-label { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
 
   .profile-section { position:relative; z-index:1; padding:24px 32px 0; }
@@ -515,11 +499,8 @@
   .profile-intention { padding:16px 20px; background:rgba(201,169,110,.04); border-left:2px solid var(--gold); }
   .profile-intention-label { font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
   .profile-intention-text { font-family:'Jost',sans-serif; font-size:14px; font-weight:300; color:var(--soft); line-height:1.6; font-style:italic; }
-  .profile-intention-none { font-size:13px; font-weight:300; color:var(--muted); font-style:italic; }
 
   .profile-fav-affirmation { padding:20px; border:1px solid rgba(201,169,110,.15); background:rgba(201,169,110,.03); position:relative; }
-  .profile-fav-text { font-family:'Jost',sans-serif; font-size:14px; font-weight:300; color:var(--soft); line-height:1.7; padding-left:8px; }
-  .profile-fav-none { font-size:13px; font-weight:300; color:var(--muted); font-style:italic; }
 
   .profile-pinned-badges { display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start; }
 
@@ -545,7 +526,6 @@
     .profile-stat-num{font-size:24px}
   }
   #upgrade { padding-bottom:40px; overflow-y:auto; }
-  .upgrade-header { position:relative; z-index:1; padding:28px 32px 0; display:flex; align-items:center; justify-content:space-between; }
   .upgrade-close-btn { background:none; border:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:color .3s; }
   .upgrade-close-btn:hover { color:var(--cream); }
   .upgrade-hero { position:relative; z-index:1; text-align:center; padding:36px 32px 28px; }
@@ -604,7 +584,6 @@
   @media(max-width:480px){
     .question-container,.onboarding-header{padding-left:24px;padding-right:24px}
     .home-nav,.home-greeting,.todays-card-wrap,.next-unlock-wrap,.practice-wrap,.library-wrap,.mantra-card-wrap{padding-left:20px;padding-right:20px}
-    .upgrade-teaser{margin-left:20px;margin-right:20px}
     .journal-header,.journal-section,.journal-save-wrap{padding-left:20px;padding-right:20px}
     .journal-affirmation-ref{margin-left:20px;margin-right:20px}
     .app-name{font-size:38px}
@@ -623,7 +602,7 @@
     .modal-card{padding:36px 24px}
     .modal-text{font-size:18px}
     .journal-prompt{font-size:16px}
-    .upgrade-header,.upgrade-hero,.pricing-toggle-wrap,.price-card-wrap,.features-wrap,.compare-wrap,.upgrade-cta-wrap,.upgrade-fine-print{padding-left:20px;padding-right:20px}
+    .upgrade-hero,.pricing-toggle-wrap,.price-card-wrap,.features-wrap,.compare-wrap,.upgrade-cta-wrap,.upgrade-fine-print{padding-left:20px;padding-right:20px}
     .price-amount{font-size:44px}
     .upgrade-headline{font-size:26px}
   }
@@ -638,10 +617,7 @@
   .habits-preview-bar-track { height:1px; background:rgba(201,169,110,.1); margin-bottom:14px; }
   .habits-preview-bar-fill { height:1px; background:var(--gold); transition:width .6s ease; }
   .habits-preview-list { display:flex; flex-direction:column; gap:8px; }
-  .habits-preview-row { display:flex; align-items:center; gap:10px; font-size:13px; font-weight:300; color:var(--muted); letter-spacing:.02em; }
-  .habits-preview-row.done { color:var(--soft); }
   .habits-preview-check { width:6px; height:6px; border-radius:50%; border:1px solid rgba(201,169,110,.25); flex-shrink:0; }
-  .habits-preview-row.done .habits-preview-check { background:var(--gold); border-color:var(--gold); }
   .habits-preview-empty { font-size:13px; font-weight:300; color:var(--muted); font-style:italic; text-align:center; padding:4px 0; }
 
   /* ── HABITS SCREEN ── */
@@ -691,14 +667,11 @@
   .preset-btn { display:flex; align-items:center; gap:10px; padding:12px 14px; background:rgba(201,169,110,.03); border:1px solid rgba(201,169,110,.1); color:var(--muted); font-family:'Jost',sans-serif; font-size:13px; cursor:pointer; transition:all .3s; text-align:left; }
   .preset-btn:hover { border-color:var(--gold); color:var(--soft); background:rgba(201,169,110,.06); }
   .preset-btn.used { opacity:.25; cursor:default; pointer-events:none; }
-  .preset-icon { font-size:16px; flex-shrink:0; }
   .add-habit-custom-row { display:flex; gap:10px; align-items:center; margin-bottom:16px; }
   .add-habit-input { flex:1; background:rgba(201,169,110,.04); border:1px solid rgba(201,169,110,.2); color:var(--cream); font-family:'Jost',sans-serif; font-size:14px; padding:12px 14px; outline:none; transition:border-color .3s; }
   .add-habit-input:focus { border-color:rgba(201,169,110,.4); }
   .add-habit-input::placeholder { color:var(--muted); opacity:.6; }
   .add-habit-confirm-btn { padding:12px 18px; background:none; border:1px solid rgba(201,169,110,.3); color:var(--gold); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; white-space:nowrap; transition:all .3s; }
-  .add-habit-close-btn { width:100%; padding:14px; background:none; border:1px solid rgba(201,169,110,.1); color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:all .3s; margin-top:4px; }
-  .add-habit-close-btn:hover { border-color:rgba(201,169,110,.25); color:var(--cream); }
   .freq-picker { display:flex; gap:8px; margin-bottom:24px; }
   .freq-pill { flex:1; padding:9px 6px; border:1px solid rgba(201,169,110,.15); background:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:11px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:all .2s; text-align:center; }
   .freq-pill.active { border-color:var(--gold); color:var(--gold); background:rgba(201,169,110,.06); }
@@ -1766,10 +1739,18 @@ const SUPABASE_URL = 'https://cvplifgpmhqonfoggwhj.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2cGxpZmdwbWhxb25mb2dnd2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODU2OTIsImV4cCI6MjA5NDI2MTY5Mn0.nZ4NMFvA8xuWhpgBuWvosxyxq9zGry5K4maqqxgqjaQ';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+// supabase-js never throws — it resolves { data, error }. Appending
+// .then(dbResult('context')) to a query logs errors that would otherwise be
+// silently discarded, without changing the resolved value.
+function dbResult(context) {
+  return (res) => {
+    if(res && res.error) console.error('[db] ' + context + ':', res.error.message);
+    return res;
+  };
+}
 // Inside the native app (Capacitor) the page is served from
 // capacitor://localhost, so the Vercel API needs an absolute URL.
 const IS_NATIVE_APP = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
-const NATIVE_PLATFORM = IS_NATIVE_APP ? window.Capacitor.getPlatform() : 'web';
 const SUMMARY_API_URL = IS_NATIVE_APP ? 'https://alreadymine.app/api/summary' : '/api/summary';
 
 // Password recovery: capture the hash before supabase-js consumes it (detectSessionInUrl
@@ -1784,6 +1765,7 @@ db.auth.onAuthStateChange((event) => {
   }
 });
 
+// ── SHARED HELPERS ──
 function formatCinders(count) {
   if(count >= 1000000) return (count / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
   if(count >= 1000) return (count / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
@@ -1823,10 +1805,11 @@ function openCindersModal() {
   document.getElementById('modalOverlay').classList.add('open');
 }
 
+function formatDateYMD(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
 function getLocalDateString() {
-  const now = new Date();
-  const localDate = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
-  return localDate;
+  return formatDateYMD(new Date());
 }
 function getThisMonday() {
   const now = new Date();
@@ -1834,7 +1817,7 @@ function getThisMonday() {
   const diff = (day === 0) ? -6 : 1 - day; // roll back to Monday
   const mon = new Date(now);
   mon.setDate(now.getDate() + diff);
-  return mon.getFullYear() + '-' + String(mon.getMonth()+1).padStart(2,'0') + '-' + String(mon.getDate()).padStart(2,'0');
+  return formatDateYMD(mon);
 }
 
 let currentUser = null;
@@ -2043,7 +2026,7 @@ async function handleSignup() {
     cinders: 0,
     streak: 0,
     referral_code: referralCode || null,
-  });
+  }).then(dbResult('create profile'));
   userRealName = name;
   // New user goes to onboarding
   showScreen('onboarding');
@@ -2112,6 +2095,7 @@ function getUserAffirmationSequence() {
   return filtered.length > 0 ? filtered : affirmationLibrary;
 }
 
+// ── PROFILE LOADING ──
 async function loadUserProfile() {
   const { data, error } = await db.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
   if(error && error.code !== 'PGRST116') {
@@ -2164,7 +2148,8 @@ async function loadUserProfile() {
     const { data: intentionsData } = await db.from('intentions')
       .select('*')
       .eq('user_id', currentUser.id)
-      .order('created_at', { ascending: true });
+      .order('created_at', { ascending: true })
+      .then(dbResult('load intentions'));
     if(intentionsData) {
       intentions = intentionsData.map(i => ({
         id: i.id,
@@ -2256,7 +2241,7 @@ async function loadUserProfile() {
     todayAffirmationId = libEntry ? libEntry.id : null;
   }
   // Load saved affirmations from dedicated table
-  const { data: savedData } = await db.from('saved_affirmations').select('affirmation_day,affirmation_id,affirmation_text,affirmation_cat').eq('user_id', currentUser.id);
+  const { data: savedData } = await db.from('saved_affirmations').select('affirmation_day,affirmation_id,affirmation_text,affirmation_cat').eq('user_id', currentUser.id).then(dbResult('load saved affirmations'));
   if(savedData) {
     savedAffirmationIds = new Set(savedData.map(r => r.affirmation_day));
     savedData.forEach(r => { savedAffirmationsData[r.affirmation_day] = { id: r.affirmation_id, text: r.affirmation_text, cat: r.affirmation_cat }; });
@@ -4078,7 +4063,8 @@ async function goToHome(){
     const { data: affCheck } = await db.from('profiles')
       .select('last_affirmation_date')
       .eq('id', currentUser.id)
-      .maybeSingle();
+      .maybeSingle()
+      .then(dbResult('check unlock date'));
     const alreadyUnlockedToday = affCheck?.last_affirmation_date === today;
     await db.from('profiles').update({
       intention: answers.intention || 'abundance',
@@ -4088,7 +4074,7 @@ async function goToHome(){
       unlocked_count: 1,
       today_affirmation_text: todayAffirmation,
       today_affirmation_cat: todayCategory,
-    }).eq('id', currentUser.id);
+    }).eq('id', currentUser.id).then(dbResult('save onboarding profile'));
     if(!alreadyUnlockedToday) awardCinders(10, 'Affirmation unlocked');
   }
   awardFirstTimeCinders('onboarding_complete');
@@ -4098,7 +4084,7 @@ async function goToHome(){
       user_id: currentUser.id, day_number: 1, affirmation_id: todayAffirmationId,
       affirmation_text: todayAffirmation, affirmation_cat: todayCategory,
       unlocked_date: getLocalDateString(), is_saved: false,
-    }, { onConflict: 'user_id,day_number' });
+    }, { onConflict: 'user_id,day_number' }).then(dbResult('save day-1 affirmation'));
   }
   buildHome();
   showScreen('home');
@@ -4158,6 +4144,7 @@ function applyMembershipState() {
   if(intentionsCount) intentionsCount.style.display = isPaidMember ? 'none' : '';
 }
 
+// ── HOME SCREEN ──
 async function buildHome(){
   if(!currentUser) return;
   if(!document.getElementById('home').classList.contains('active')){
@@ -4207,11 +4194,12 @@ async function buildHome(){
     try {
       const today = getLocalDateString();
       const d = new Date(); d.setDate(d.getDate() - 1);
-      const yesterday = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      const yesterday = formatDateYMD(d);
       const { data: streakData } = await db.from('profiles')
         .select('streak_count, last_streak_date')
         .eq('id', currentUser.id)
-        .maybeSingle();
+        .maybeSingle()
+        .then(dbResult('load streak'));
       if(streakData) {
         if(inGracePeriod) {
           streakCount = streakData.streak_count;
@@ -4228,7 +4216,7 @@ async function buildHome(){
               grace_streak_before: 0,
               grace_days_completed: 0,
               grace_last_date: null
-            }).eq('id', currentUser.id);
+            }).eq('id', currentUser.id).then(dbResult('reset streak after grace'));
           } else {
             // First visit today during grace — show grace screen
             return enterGracePeriod(graceStreakBefore, graceDaysCompleted);
@@ -4241,7 +4229,7 @@ async function buildHome(){
           await db.from('profiles').update({
             streak_count: streakCount,
             last_streak_date: today
-          }).eq('id', currentUser.id);
+          }).eq('id', currentUser.id).then(dbResult('update streak'));
         } else if(streakData.last_streak_date != null) {
           // Missed a day — enter grace period
           graceStreakBefore  = streakData.streak_count;
@@ -4253,7 +4241,7 @@ async function buildHome(){
             grace_streak_before: graceStreakBefore,
             grace_days_completed: 0,
             grace_last_date:    null
-          }).eq('id', currentUser.id);
+          }).eq('id', currentUser.id).then(dbResult('enter grace period'));
           return enterGracePeriod(graceStreakBefore, 0);
         } else {
           // No streak history yet (brand new user) — start at 1
@@ -4261,7 +4249,7 @@ async function buildHome(){
           await db.from('profiles').update({
             streak_count: 1,
             last_streak_date: today
-          }).eq('id', currentUser.id);
+          }).eq('id', currentUser.id).then(dbResult('start streak'));
         }
       }
     } catch(e) {
@@ -4278,12 +4266,14 @@ async function buildHome(){
       const { data: visitData } = await db.from('profiles')
         .select('last_visit_date')
         .eq('id', currentUser.id)
-        .maybeSingle();
+        .maybeSingle()
+        .then(dbResult('load last visit'));
       const isNewDay = visitData?.last_visit_date !== today;
       const isReturning = visitData?.last_visit_date != null;
       await db.from('profiles')
         .update({ last_visit_date: today })
-        .eq('id', currentUser.id);
+        .eq('id', currentUser.id)
+        .then(dbResult('update last visit'));
       if(isNewDay && isReturning) awardCinders(5, 'Daily login');
     } catch(e) {
       console.error('buildHome login cinders error:', e);
@@ -4333,7 +4323,8 @@ async function unlockTodaysAffirmation() {
       const { data } = await db.from('profiles')
         .select('last_affirmation_date')
         .eq('id', currentUser.id)
-        .maybeSingle();
+        .maybeSingle()
+        .then(dbResult('check unlock date'));
       if(data?.last_affirmation_date === today) return; // already unlocked today
       unlockedCount = unlockedCount + 1;
       const seq = getUserAffirmationSequence();
@@ -4448,7 +4439,7 @@ async function toggleSave(){
 async function toggleSaveByDay(dayNum, text, cat) {
   if(!currentUser) return;
   if(savedAffirmationIds.has(dayNum)) {
-    await db.from('saved_affirmations').delete().eq('user_id', currentUser.id).eq('affirmation_day', dayNum);
+    await db.from('saved_affirmations').delete().eq('user_id', currentUser.id).eq('affirmation_day', dayNum).then(dbResult('unsave affirmation'));
     savedAffirmationIds.delete(dayNum);
     delete savedAffirmationsData[dayNum];
   } else {
@@ -4457,7 +4448,7 @@ async function toggleSaveByDay(dayNum, text, cat) {
       || (dayNum === unlockedCount ? todayAffirmationId : null)
       || (affirmationLibrary[dayNum-1] || {}).id
       || null;
-    await db.from('saved_affirmations').insert({ user_id: currentUser.id, affirmation_day: dayNum, affirmation_id: affId, affirmation_text: text, affirmation_cat: cat });
+    await db.from('saved_affirmations').insert({ user_id: currentUser.id, affirmation_day: dayNum, affirmation_id: affId, affirmation_text: text, affirmation_cat: cat }).then(dbResult('save affirmation'));
     savedAffirmationIds.add(dayNum);
     savedAffirmationsData[dayNum] = { id: affId, text, cat };
   }
@@ -4569,7 +4560,8 @@ async function loadMonthEntries(year, month) {
     .select('entry_date,reflection,mood_category,mood_sub,gratitude_1,gratitude_2,gratitude_3')
     .eq('user_id', currentUser.id)
     .gte('entry_date', start)
-    .lte('entry_date', end);
+    .lte('entry_date', end)
+    .then(dbResult('load month journal'));
   const map = {};
   if(data) data.forEach(e => { map[e.entry_date] = e; });
   return map;
@@ -4681,7 +4673,8 @@ async function getReflectionState() {
         .eq('user_id', currentUser.id)
         .eq('year', lastYear)
         .eq('month', lastMonth)
-        .maybeSingle();
+        .maybeSingle()
+        .then(dbResult('check last month summary'));
       if(existing?.narrative) {
         return { available: true, generated: true, year: lastYear, month: lastMonth, monthName: monthNames[lastMonth - 1] };
       }
@@ -4724,7 +4717,8 @@ async function openMonthReflection(year, month) {
     .eq('user_id', currentUser.id)
     .eq('year', year)
     .eq('month', month)
-    .maybeSingle();
+    .maybeSingle()
+    .then(dbResult('load summary'));
 
   const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   if(!saved?.narrative) {
@@ -4787,6 +4781,7 @@ function updateLastSavedTime() {
   }
 }
 
+// ── JOURNAL ──
 async function openJournal(){
   applyFeatureToggles();
   switchJournalView('today');
@@ -4816,7 +4811,8 @@ async function openJournal(){
       .select('*')
       .eq('user_id', currentUser.id)
       .eq('entry_date', today)
-      .maybeSingle();
+      .maybeSingle()
+      .then(dbResult('load today journal'));
     if(data) {
       const textarea = document.querySelector('#journal .journal-textarea');
       if(textarea && data.reflection) textarea.value = data.reflection;
@@ -4855,7 +4851,6 @@ async function openJournal(){
   }
 }
 
-function selectMood(el){document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
 
 async function saveJournal(){
   const textarea = document.querySelector('#journal .journal-textarea');
@@ -4870,16 +4865,17 @@ async function saveJournal(){
       .select('id')
       .eq('user_id', currentUser.id)
       .eq('entry_date', today)
-      .maybeSingle();
+      .maybeSingle()
+      .then(dbResult('check existing journal entry'));
 
     if(!hasContent) {
       if(existing) {
         // User cleared their entry — delete it and reverse cinders if they were awarded
-        await db.from('journal_entries').delete().eq('id', existing.id);
+        await db.from('journal_entries').delete().eq('id', existing.id).then(dbResult('delete journal entry'));
         journalEntryCount = Math.max(0, journalEntryCount - 1);
         if(dailyActions.journalSaved) {
           currentCinders = Math.max(0, currentCinders - 20);
-          await db.from('profiles').update({ cinders: currentCinders }).eq('id', currentUser.id);
+          await db.from('profiles').update({ cinders: currentCinders }).eq('id', currentUser.id).then(dbResult('update cinders'));
           dailyActions.journalSaved = false;
           dailyActions.moodCheckedIn = false;
           updateDailyPractice();
@@ -4901,11 +4897,11 @@ async function saveJournal(){
     };
 
     if(existing) {
-      await db.from('journal_entries').update(entryData).eq('id', existing.id);
+      await db.from('journal_entries').update(entryData).eq('id', existing.id).then(dbResult('save journal entry'));
     } else {
-      await db.from('journal_entries').insert(entryData);
+      await db.from('journal_entries').insert(entryData).then(dbResult('save journal entry'));
       journalEntryCount++;
-      db.from('profiles').update({ journal_entry_count: journalEntryCount }).eq('id', currentUser.id).then(() => {});
+      db.from('profiles').update({ journal_entry_count: journalEntryCount }).eq('id', currentUser.id).then(dbResult('update journal count'));
       if(!dailyActions.journalCindersClaimed) {
         dailyActions.journalCindersClaimed = true;
         awardCinders(20, 'Journal entry saved');
@@ -4916,7 +4912,7 @@ async function saveJournal(){
     // Flag and counter must share one condition: a check-in requires a sub-mood
     if(selectedMoodSub && !dailyActions.moodCheckedIn) {
       moodCheckinCount++;
-      db.from('profiles').update({ mood_checkin_count: moodCheckinCount }).eq('id', currentUser.id).then(() => {});
+      db.from('profiles').update({ mood_checkin_count: moodCheckinCount }).eq('id', currentUser.id).then(dbResult('update mood check-in count'));
     }
     if(selectedMoodSub) dailyActions.moodCheckedIn = true;
     updateDailyPractice();
@@ -5022,7 +5018,6 @@ document.addEventListener('am-native-ready', () => {
 });
 
 // ── BADGE DATA ──
-const BADGE_YEAR_COLORS = { 1:'#c9a96e', 2:'#b0b8c1', 3:'#e8d5c4' };
 
 const badgeCategories = [
   { name:'Streak', id:'streak', icon:'☽', badges:[
@@ -5308,7 +5303,7 @@ async function togglePinBadge(badgeId) {
     pinnedBadges.push(badgeId);
   }
   if (currentUser) {
-    await db.from('profiles').update({ pinned_badges: JSON.stringify(pinnedBadges) }).eq('id', currentUser.id);
+    await db.from('profiles').update({ pinned_badges: JSON.stringify(pinnedBadges) }).eq('id', currentUser.id).then(dbResult('save pinned badges'));
   }
   dismissModal();
   buildBadgeScreen();
@@ -5321,56 +5316,43 @@ const MAX_FREE_INTENTIONS = 3;
 let pendingIntentionDeletes = new Set();
 let currentModalType = '';
 
+// Shared by addIntention and useExampleIntention. Returns false when the
+// free-plan limit blocks the add.
+async function createIntention(text) {
+  if(!isPaidMember && intentions.filter(i => !i.received).length >= MAX_FREE_INTENTIONS) {
+    currentModalType='info';
+    document.getElementById('modalDay').textContent='Intention Limit Reached';
+    document.getElementById('modalText').textContent='You\'ve used all 3 intention slots on the free plan. Upgrade for unlimited intentions.';
+    document.getElementById('modalCat').innerHTML=`<button onclick="dismissModal();openUpgrade()" style="margin-top:12px;padding:11px 28px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;">Upgrade</button>`;
+    document.getElementById('modalOverlay').classList.add('open');
+    return false;
+  }
+  const newIntention = { text, received: false, id: Date.now() };
+  if(currentUser) {
+    const { data } = await db.from('intentions').insert({
+      user_id: currentUser.id,
+      text: text,
+      is_received: false
+    }).select().single().then(dbResult('add intention'));
+    if(data) newIntention.id = data.id;
+  }
+  intentions.push(newIntention);
+  awardFirstTimeCinders('first_intention');
+  renderIntentions();
+  return true;
+}
+
 async function addIntention() {
   const input = document.getElementById('newIntentionInput');
   const text = input.value.trim();
   if(!text) return;
   if(text.length > 200) { showCindersToast(0, 'Intention must be 200 characters or less'); return; }
-  if(!isPaidMember && intentions.filter(i => !i.received).length >= MAX_FREE_INTENTIONS) {
-    currentModalType='info';
-    document.getElementById('modalDay').textContent='Intention Limit Reached';
-    document.getElementById('modalText').textContent='You\'ve used all 3 intention slots on the free plan. Upgrade for unlimited intentions.';
-    document.getElementById('modalCat').innerHTML=`<button onclick="dismissModal();openUpgrade()" style="margin-top:12px;padding:11px 28px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;">Upgrade</button>`;
-    document.getElementById('modalOverlay').classList.add('open');
-    return;
-  }
-  const newIntention = { text, received: false, id: Date.now() };
-  if(currentUser) {
-    const { data } = await db.from('intentions').insert({
-      user_id: currentUser.id,
-      text: text,
-      is_received: false
-    }).select().single();
-    if(data) newIntention.id = data.id;
-  }
-  intentions.push(newIntention);
-  awardFirstTimeCinders('first_intention');
-  input.value = '';
-  renderIntentions();
+  if(await createIntention(text)) input.value = '';
 }
 
 async function useExampleIntention(btn) {
   const text = btn.textContent.trim();
-  if(!isPaidMember && intentions.filter(i => !i.received).length >= MAX_FREE_INTENTIONS) {
-    currentModalType='info';
-    document.getElementById('modalDay').textContent='Intention Limit Reached';
-    document.getElementById('modalText').textContent='You\'ve used all 3 intention slots on the free plan. Upgrade for unlimited intentions.';
-    document.getElementById('modalCat').innerHTML=`<button onclick="dismissModal();openUpgrade()" style="margin-top:12px;padding:11px 28px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;">Upgrade</button>`;
-    document.getElementById('modalOverlay').classList.add('open');
-    return;
-  }
-  const newIntention = { text, received: false, id: Date.now() };
-  if(currentUser) {
-    const { data } = await db.from('intentions').insert({
-      user_id: currentUser.id,
-      text: text,
-      is_received: false
-    }).select().single();
-    if(data) newIntention.id = data.id;
-  }
-  intentions.push(newIntention);
-  awardFirstTimeCinders('first_intention');
-  renderIntentions();
+  if(!(await createIntention(text))) return;
   btn.style.borderColor = 'var(--gold)';
   btn.style.color = 'var(--gold)';
   setTimeout(() => { btn.style.borderColor = 'rgba(201,169,110,.1)'; btn.style.color = 'var(--muted)'; }, 800);
@@ -5486,8 +5468,9 @@ async function markReceived(i) {
   if(currentUser) {
     await db.from('intentions')
       .update({ is_received: true })
-      .eq('id', intentions[i].id);
-    await db.from('profiles').update({ intentions_received_count: intentionsReceivedCount }).eq('id', currentUser.id);
+      .eq('id', intentions[i].id)
+      .then(dbResult('mark intention received'));
+    await db.from('profiles').update({ intentions_received_count: intentionsReceivedCount }).eq('id', currentUser.id).then(dbResult('update intentions received count'));
   }
   renderIntentions();
   receivingIntentions.delete(i);
@@ -5498,7 +5481,8 @@ async function removeIntention(i) {
     await db.from('intentions')
       .delete()
       .eq('id', intentions[i].id)
-      .eq('user_id', currentUser.id);
+      .eq('user_id', currentUser.id)
+      .then(dbResult('delete intention'));
   }
   intentions.splice(i, 1);
   renderIntentions();
@@ -5522,7 +5506,7 @@ async function enterGracePeriod(streakBefore, daysCompleted) {
         grace_days_completed: 0,
         grace_last_date: null,
         comeback_count: comebackCount
-      }).eq('id', currentUser.id);
+      }).eq('id', currentUser.id).then(dbResult('restore streak'));
     }
     awardCinders(25, 'Streak restored');
     addNotification('Streak restored — welcome back', 'streak');
@@ -5535,7 +5519,7 @@ async function enterGracePeriod(streakBefore, daysCompleted) {
         grace_days_completed: graceDaysCompleted,
         grace_last_date: today,
         last_streak_date: today
-      }).eq('id', currentUser.id);
+      }).eq('id', currentUser.id).then(dbResult('update grace progress'));
     }
     showGracePeriod(streakBefore, graceDaysCompleted);
   }
@@ -5884,7 +5868,7 @@ async function adminResetToday() {
   await db.from('profiles').update({
     last_affirmation_date: null,
     last_visit_date: null
-  }).eq('id', currentUser.id);
+  }).eq('id', currentUser.id).then(dbResult('admin reset day'));
   dailyActions.affirmationUnlocked = false;
   dailyLoginChecked = false;
   buildHome();
@@ -6007,7 +5991,8 @@ async function buildProfile() {
   if(currentUser) {
     const { count } = await db.from('journal_entries')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', currentUser.id);
+      .eq('user_id', currentUser.id)
+      .then(dbResult('count journal entries'));
     document.getElementById('profileStatJournal').textContent = count ?? 0;
   } else {
     document.getElementById('profileStatJournal').textContent = 0;
@@ -6047,7 +6032,7 @@ async function buildProfile() {
     if(savedAffirmationIds.size === 0) {
       favEl.innerHTML = '<span style="font-family:\'Jost\',sans-serif;font-size:13px;font-weight:300;color:var(--muted);font-style:italic">Tap the ♡ on any affirmation to save it here.</span>';
     } else if(currentUser) {
-      const { data: savedFull } = await db.from('saved_affirmations').select('affirmation_day,affirmation_text,affirmation_cat').eq('user_id', currentUser.id).order('affirmation_day', { ascending: false });
+      const { data: savedFull } = await db.from('saved_affirmations').select('affirmation_day,affirmation_text,affirmation_cat').eq('user_id', currentUser.id).order('affirmation_day', { ascending: false }).then(dbResult('load saved affirmations list'));
       if(savedFull) {
         savedFull.forEach(s => {
           const row = document.createElement('div');
@@ -6104,7 +6089,8 @@ async function buildProfile() {
             .eq('user_id', currentUser.id)
             .eq('year', rState.lastYear)
             .eq('month', rState.lastMonth)
-            .maybeSingle();
+            .maybeSingle()
+            .then(dbResult('load last reflection'));
           if(lastSummary?.narrative) {
             reflBtn.textContent = `Read ${rState.lastMonthName}'s Reflection`;
             reflBtn.disabled = false;
@@ -6196,7 +6182,7 @@ async function handleProfilePic(input) {
     if(!uploadError) {
       const { data: urlData } = db.storage.from('avatars').getPublicUrl(path);
       const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-      await db.from('profiles').update({ avatar_url: publicUrl }).eq('id', currentUser.id);
+      await db.from('profiles').update({ avatar_url: publicUrl }).eq('id', currentUser.id).then(dbResult('save avatar'));
     }
   }
 }
@@ -6209,7 +6195,7 @@ async function submitFeedback() {
   if(!type) { if(errEl) errEl.textContent = 'Please select a feedback type.'; return; }
   if(!text) { if(errEl) errEl.textContent = 'Please write your feedback before submitting.'; return; }
   if(currentUser) {
-    await db.from('feedback').insert({ user_id: currentUser.id, type, message: text });
+    await db.from('feedback').insert({ user_id: currentUser.id, type, message: text }).then(dbResult('send feedback'));
   }
   document.getElementById('feedbackType').value = '';
   document.getElementById('feedbackText').value = '';
@@ -6280,7 +6266,8 @@ async function openMonthlySummary() {
       .eq('user_id', currentUser.id)
       .eq('year', year)
       .eq('month', month)
-      .maybeSingle();
+      .maybeSingle()
+      .then(dbResult('load cached summary'));
 
     if(cached?.narrative) {
       document.getElementById('summaryNarrative').textContent = cached.narrative;
@@ -6389,7 +6376,8 @@ async function loadPastReflections(currentYear, currentMonth) {
     .select('year, month, narrative')
     .eq('user_id', currentUser.id)
     .order('year', { ascending: false })
-    .order('month', { ascending: false });
+    .order('month', { ascending: false })
+    .then(dbResult('load past reflections'));
 
   const filtered = (past || []).filter(r => !(r.year === currentYear && r.month === currentMonth));
   const section = document.getElementById('pastReflectionsSection');
@@ -6452,7 +6440,8 @@ async function generateSummary(year, month) {
     // Save to Supabase so we don't regenerate this month
     if(narrativeText && currentUser) {
       await db.from('monthly_summaries')
-        .insert({ user_id: currentUser.id, year, month, narrative: narrativeText });
+        .insert({ user_id: currentUser.id, year, month, narrative: narrativeText })
+        .then(dbResult('save summary'));
     }
   } catch (err) {
     document.getElementById('summaryNarrative').textContent = 'Unable to generate your summary right now. Please try again later.';
@@ -6616,7 +6605,7 @@ function showCindersToast(amount, reason) {
 async function saveFeatureToggle(feature, value) {
   featureToggles[feature] = value;
   if(currentUser) {
-    db.from('profiles').update({ feature_toggles: featureToggles }).eq('id', currentUser.id).then(() => {});
+    db.from('profiles').update({ feature_toggles: featureToggles }).eq('id', currentUser.id).then(dbResult('save feature toggles'));
   }
   applyFeatureToggles();
 }
@@ -6650,7 +6639,7 @@ async function awardCinders(amount, reason) {
     addNotification(`You reached ${newRank}`, 'rank');
   }
   if(currentUser) {
-    await db.from('profiles').update({ cinders: currentCinders }).eq('id', currentUser.id);
+    await db.from('profiles').update({ cinders: currentCinders }).eq('id', currentUser.id).then(dbResult('update cinders'));
   }
 }
 
@@ -6666,7 +6655,7 @@ async function awardFirstTimeCinders(action) {
     first_foundation: 'You added your first foundation'
   };
   if(!amounts[action]) return;
-  await db.from('profiles').update({ cinder_bonuses: JSON.stringify([...cinderBonuses]) }).eq('id', currentUser.id);
+  await db.from('profiles').update({ cinder_bonuses: JSON.stringify([...cinderBonuses]) }).eq('id', currentUser.id).then(dbResult('save cinder bonuses'));
   awardCinders(amounts[action], labels[action]);
   if(notifMessages[action]) addNotification(notifMessages[action], 'milestone');
 }
@@ -6699,14 +6688,14 @@ async function saveMantra() {
   document.getElementById('mantraInputWrap').style.display = 'none';
   updateJournalMantra();
   if(currentUser) {
-    await db.from('profiles').update({ mantra: text }).eq('id', currentUser.id);
+    await db.from('profiles').update({ mantra: text }).eq('id', currentUser.id).then(dbResult('save mantra'));
   }
   if(currentUser) {
     const today = getLocalDateString();
     const thisMonday = getThisMonday();
     if(!lastMantraDate || lastMantraDate < thisMonday) {
       mantraWeekCount++;
-      await db.from('profiles').update({ last_mantra_date: today, mantra_week_count: mantraWeekCount }).eq('id', currentUser.id);
+      await db.from('profiles').update({ last_mantra_date: today, mantra_week_count: mantraWeekCount }).eq('id', currentUser.id).then(dbResult('update mantra week'));
       awardCinders(10, 'Weekly mantra set');
     }
     lastMantraDate = today;
@@ -6975,7 +6964,7 @@ async function toggleHabitComplete(id) {
     // Each milestone pays out once per habit ever — persisted so un/re-checking can't farm it
     if(milestones[newStreak] && !h.milestones.has(newStreak)) {
       h.milestones.add(newStreak);
-      db.from('habits').update({ milestones_awarded: [...h.milestones] }).eq('id', id).eq('user_id', currentUser.id).then(() => {});
+      db.from('habits').update({ milestones_awarded: [...h.milestones] }).eq('id', id).eq('user_id', currentUser.id).then(dbResult('save habit milestones'));
       const unit = freq === 'weekly' ? 'week' : 'day';
       awardCinders(milestones[newStreak], `✦ ${newStreak}-${unit} streak: ${h.name}`);
       addNotification(`${newStreak}-${unit} streak: ${h.name}`, 'milestone');
@@ -6983,7 +6972,7 @@ async function toggleHabitComplete(id) {
   }
   renderHabits();
   if(marking) {
-    await db.from('habit_completions').insert({ user_id: currentUser.id, habit_id: id, completed_date: completedDate });
+    if(currentUser) await db.from('habit_completions').insert({ user_id: currentUser.id, habit_id: id, completed_date: completedDate }).then(dbResult('save habit completion'));
     // Check if all daily/weekday habits are now complete for today
     if(currentUser && freq !== 'weekly') {
       const today = getLocalDateString();
@@ -6994,11 +6983,11 @@ async function toggleHabitComplete(id) {
       if(allDone && lastFoundationDate !== today) {
         lastFoundationDate = today;
         foundationDaysCount++;
-        db.from('profiles').update({ foundation_days_count: foundationDaysCount, last_foundation_date: today }).eq('id', currentUser.id).then(() => {});
+        db.from('profiles').update({ foundation_days_count: foundationDaysCount, last_foundation_date: today }).eq('id', currentUser.id).then(dbResult('update foundation days'));
       }
     }
   } else {
-    await db.from('habit_completions').delete().eq('habit_id', id).eq('completed_date', completedDate).eq('user_id', currentUser.id);
+    if(currentUser) await db.from('habit_completions').delete().eq('habit_id', id).eq('completed_date', completedDate).eq('user_id', currentUser.id).then(dbResult('remove habit completion'));
   }
 }
 
@@ -7008,7 +6997,7 @@ async function deleteHabit(id) {
     habitCompletions[date] = habitCompletions[date].filter(hid => hid !== id);
   });
   renderHabits();
-  await db.from('habits').delete().eq('id', id).eq('user_id', currentUser.id);
+  if(currentUser) await db.from('habits').delete().eq('id', id).eq('user_id', currentUser.id).then(dbResult('delete habit'));
 }
 
 function showAddHabitPanel() {
@@ -7034,10 +7023,11 @@ function closeAddHabitOutside(e) {
   if(e.target === document.getElementById('addHabitPanel')) closeAddHabitPanel();
 }
 
-async function addPresetHabit(name) {
-  if(habits.some(h => h.name === name)) return;
+// Shared by addPresetHabit and addCustomHabit.
+async function createHabit(name) {
   if(!isPaidMember && habits.length >= 3) { showCindersToast(0, 'Free members can track up to 3 foundations. Upgrade for unlimited.'); return; }
-  const { data, error } = await db.from('habits').insert({ user_id: currentUser.id, name, frequency: selectedHabitFrequency }).select().single();
+  if(!currentUser) return;
+  const { data, error } = await db.from('habits').insert({ user_id: currentUser.id, name, frequency: selectedHabitFrequency }).select().single().then(dbResult('add habit'));
   if(error || !data) return;
   habits.push({ id: data.id, name: data.name, frequency: data.frequency || 'daily', milestones: new Set(data.milestones_awarded || []) });
   awardFirstTimeCinders('first_foundation');
@@ -7045,18 +7035,17 @@ async function addPresetHabit(name) {
   renderHabits();
 }
 
+async function addPresetHabit(name) {
+  if(habits.some(h => h.name === name)) return;
+  await createHabit(name);
+}
+
 async function addCustomHabit() {
   const input = document.getElementById('customHabitInput');
   const name = input.value.trim();
   if(!name) return;
   if(habits.some(h => h.name === name)) { input.value = ''; return; }
-  if(!isPaidMember && habits.length >= 3) { showCindersToast(0, 'Free members can track up to 3 foundations. Upgrade for unlimited.'); return; }
-  const { data, error } = await db.from('habits').insert({ user_id: currentUser.id, name, frequency: selectedHabitFrequency }).select().single();
-  if(error || !data) return;
-  habits.push({ id: data.id, name: data.name, frequency: data.frequency || 'daily', milestones: new Set(data.milestones_awarded || []) });
-  awardFirstTimeCinders('first_foundation');
-  closeAddHabitPanel();
-  renderHabits();
+  await createHabit(name);
 }
 
 function updateHabitsHomePreview() {
@@ -7195,7 +7184,7 @@ function completeScan() {
     lastBodyScanDate = today;
     bodyScanCount++;
     if(currentUser) {
-      db.from('profiles').update({ body_scan_count: bodyScanCount }).eq('id', currentUser.id).then(() => {});
+      db.from('profiles').update({ body_scan_count: bodyScanCount }).eq('id', currentUser.id).then(dbResult('update body scan count'));
     }
   }
   const nav = document.getElementById('globalBottomNav');
