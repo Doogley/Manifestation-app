@@ -1543,6 +1543,18 @@
         <button onclick="setPref('timing','random','Surprise me')" class="pref-opt">Surprise me</button>
       </div>
     </div>
+    <!-- Native-only: daily reminder notification (hidden on web, shown on am-native-ready) -->
+    <div class="customize-row" id="notifReminderRow" style="display:none">
+      <div>
+        <div class="customize-row-label">Notifications</div>
+        <div class="customize-row-sub">A gentle daily reminder at your preferred reading time</div>
+      </div>
+      <label class="toggle-pill">
+        <input type="checkbox" id="toggle_notifications" aria-label="Daily reminder notifications" onchange="toggleDailyReminder(this.checked)">
+        <div class="toggle-pill-track"></div>
+        <div class="toggle-pill-knob"></div>
+      </label>
+    </div>
   </div>
 
   <!-- Subscription -->
@@ -1780,6 +1792,7 @@
 
 <script src="capacitor-init.js"></script>
 <script src="revenuecat-handler.js"></script>
+<script src="push-notifications.js"></script>
 <script>
 // ── SUPABASE SETUP ──
 const SUPABASE_URL = 'https://cvplifgpmhqonfoggwhj.supabase.co';
@@ -2304,6 +2317,9 @@ async function loadUserProfile() {
     if(profileAvatar) profileAvatar.innerHTML = `<img src="${escapeHtml(data.avatar_url)}" alt="Profile" loading="lazy" decoding="async" style="${imgStyle}">`;
     if(navAvatarEl) navAvatarEl.innerHTML = `<img src="${escapeHtml(data.avatar_url)}" alt="" loading="lazy" decoding="async" style="${imgStyle}">`;
   }
+  // Refresh the daily reminder (native only; no-ops if permission was
+  // never granted or the user turned the toggle off).
+  if(window.AMNotifications) AMNotifications.setupNotifications(answers.timing);
   setTimeout(() => {
     buildHome();
     showScreen('home');
@@ -3427,10 +3443,28 @@ async function handleRestorePurchases(){
 }
 // Native-only UI: the Restore Purchases button is required by Apple but
 // meaningless in a browser, so it only appears inside the Capacitor shell.
-document.addEventListener('am-native-ready', () => {
+document.addEventListener('am-native-ready', async () => {
   const restoreBtn=document.getElementById('restorePurchasesBtn');
   if(restoreBtn) restoreBtn.style.display='';
+  // Daily reminder toggle: on only when the user opted in AND the OS
+  // permission is actually granted (it can be revoked in Settings).
+  const notifRow=document.getElementById('notifReminderRow');
+  if(notifRow && window.AMNotifications){
+    notifRow.style.display='';
+    const granted=await AMNotifications.hasPermission();
+    document.getElementById('toggle_notifications').checked=AMNotifications.isEnabled()&&granted;
+  }
 });
+
+async function toggleDailyReminder(on){
+  if(!window.AMNotifications) return;
+  const ok=await AMNotifications.setDailyReminderEnabled(on, answers.timing);
+  if(on && !ok){
+    // Permission denied — revert the toggle and point at iOS Settings
+    document.getElementById('toggle_notifications').checked=false;
+    showCindersToast(0,'Notifications are blocked. Enable them for Already Mine in Settings.');
+  }
+}
 
 // ── BADGE DATA ──
 
@@ -4353,6 +4387,8 @@ function setPref(type, value, label) {
       if(error) console.error('pref save error:', error);
     });
   }
+  // Move the daily reminder to the new time (no-ops on web / when off)
+  if(type === 'timing' && window.AMNotifications) AMNotifications.setupNotifications(value);
 }
 let userNickname = '';
 let userRealName = '';
