@@ -34,7 +34,8 @@
       "Bash(grep -c 'then\\(dbResult\\(' __TRACKED_VAR__/inline.js)",
       "Bash(grep -n 'await db.from' __TRACKED_VAR__/inline.js)",
       "Bash(git diff *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(npm install *)"
     ]
   }
 }

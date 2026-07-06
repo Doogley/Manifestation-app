@@ -16,6 +16,7 @@ const files = [
   'affirmations.js',
   'capacitor-init.js',
   'revenuecat-handler.js',
+  'push-notifications.js',
 ];
 
 rmSync(www, { recursive: true, force: true });

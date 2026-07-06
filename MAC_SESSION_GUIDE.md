@@ -7,7 +7,7 @@ up from there.
 
 **What's already in place:**
 - `capacitor.config.json` — app id `app.alreadymine`, name "Already Mine", dark theme, plugin config
-- All plugins installed: status-bar, splash-screen, keyboard, haptics, app, push-notifications, RevenueCat
+- All plugins installed: status-bar, splash-screen, keyboard, haptics, app, push-notifications, local-notifications, RevenueCat
 - `capacitor-init.js` — native shell setup (status bar, keyboard, splash, back button)
 - `revenuecat-handler.js` — purchase/restore flows (needs the real API key, step 6)
 - `index.html` — platform detection, native subscribe flow, Restore Purchases button (auto-hidden on web)
@@ -175,16 +175,24 @@ Function or a Vercel `api/` function) that updates `profiles.is_paid_member`
 on `EXPIRATION`, `CANCELLATION` (refund), and `RENEWAL` events. Until then,
 a lapsed subscriber keeps web access.
 
-## 7. Push notifications (deferred — plugin installed, not active)
+## 7. Notifications
 
+**Local daily reminders (active in v1):** `@capacitor/local-notifications`
+is installed and wired up in `push-notifications.js`. It needs **no Xcode
+capability, no APNs key, and no extra setup** — `npx cap sync ios` pulls in
+the pod and it just works. The app only prompts for notification permission
+when the user turns on the "Notifications" toggle in Profile → My
+Preferences (Apple's preferred UX: prompt on user action, not at launch).
+
+**Remote push (deferred — plugin installed, not active):**
 `@capacitor/push-notifications` is installed for later. When you're ready:
 1. Xcode → **Signing & Capabilities → + Capability → Push Notifications**.
 2. Also add **Background Modes → Remote notifications**.
 3. Create an APNs key at developer.apple.com → Keys.
 4. Wire up registration in `capacitor-init.js`.
 
-Skip all of this for v1 — do **not** add the capability now, or App Review
-will ask why the app never prompts for notification permission.
+Skip the remote-push steps for v1 — do **not** add the Push Notifications
+capability now. (Local notifications don't need it.)
 
 ## 8. Archive and upload
 
