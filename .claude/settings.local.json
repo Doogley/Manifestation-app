@@ -35,7 +35,9 @@
       "Bash(grep -n 'await db.from' __TRACKED_VAR__/inline.js)",
       "Bash(git diff *)",
       "Bash(npm run *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(curl -s 'https://cvplifgpmhqonfoggwhj.supabase.co/rest/v1/user_affirmations?select=day_number&limit=1' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2cGxpZmdwbWhxb25mb2dnd2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODU2OTIsImV4cCI6MjA5NDI2MTY5Mn0.nZ4NMFvA8xuWhpgBuWvosxyxq9zGry5K4maqqxgqjaQ' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2cGxpZmdwbWhxb25mb2dnd2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODU2OTIsImV4cCI6MjA5NDI2MTY5Mn0.nZ4NMFvA8xuWhpgBuWvosxyxq9zGry5K4maqqxgqjaQ')",
+      "Bash(curl -s 'https://cvplifgpmhqonfoggwhj.supabase.co/rest/v1/saved_affirmations?select=affirmation_id&limit=1' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2cGxpZmdwbWhxb25mb2dnd2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODU2OTIsImV4cCI6MjA5NDI2MTY5Mn0.nZ4NMFvA8xuWhpgBuWvosxyxq9zGry5K4maqqxgqjaQ' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2cGxpZmdwbWhxb25mb2dnd2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODU2OTIsImV4cCI6MjA5NDI2MTY5Mn0.nZ4NMFvA8xuWhpgBuWvosxyxq9zGry5K4maqqxgqjaQ')"
     ]
   }
 }
