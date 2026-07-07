@@ -9,7 +9,8 @@ capacitor.config.json
 stage-www.mjs
 package.json
 package-lock.json
-MAC_SESSION_GUIDE.md
-APPSTORE.md
+# All docs — internal only. Individual names would rot as docs are added
+# (LAUNCH_STRATEGY.md, APPLE_REVIEW_ACCOUNT.md etc. were about to ship public).
+*.md
 *.sql
 .claude
