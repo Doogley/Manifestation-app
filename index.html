@@ -5,7 +5,10 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Already Mine</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js" integrity="sha384-wgi7s9Y2xefdDru3II6Xb11y/YNoKVbuydTikWejwId9z2xRd8SveCTrJjj/QAnH" crossorigin="anonymous"></script>
+<!-- supabase-js v2.39.0, vendored locally (verified against the jsdelivr SRI hash).
+     Must NOT load from a CDN: in the native app a first launch without network
+     would leave `supabase` undefined and hang the splash screen forever. -->
+<script src="supabase.min.js"></script>
 <script src="affirmations.js" async onerror="window.__affirmationsFailed=true;window.__affirmationsLoaded&&window.__affirmationsLoaded([]);console.error('affirmations.js failed to load')"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
 <style>
@@ -1382,7 +1385,7 @@
     <button id="restorePurchasesBtn" onclick="handleRestorePurchases()" style="display:none;margin-top:14px;padding:10px 24px;background:none;border:none;color:var(--muted);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;text-decoration:underline;text-underline-offset:3px">Restore Purchases</button>
   </div>
   <div class="upgrade-fine-print">
-    <p>Cancel anytime. Billed through your app store.<br>By subscribing you agree to our
+    <p>Billed through your app store. Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in your app store account settings.<br>By subscribing you agree to our
       <button onclick="showLegalDoc('tos')" style="background:none;border:none;color:var(--muted);font-family:inherit;font-size:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:8px 2px">Terms</button> and
       <button onclick="showLegalDoc('privacy')" style="background:none;border:none;color:var(--muted);font-family:inherit;font-size:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:8px 2px">Privacy Policy</button>.</p>
   </div>
@@ -1406,7 +1409,7 @@
 
     <button class="btn-primary" style="width:100%;padding:18px;margin-bottom:16px" onclick="restoreFromGrace()">I'm Back — Continue My Journey</button>
     <br>
-    <button class="btn-ghost" onclick="openUpgrade()" style="font-size:12px">Members unlock the full library — 800+ affirmations</button>
+    <button class="btn-ghost" onclick="openUpgrade()" style="font-size:12px">Members journey beyond day 30 — a new affirmation daily</button>
   </div>
 </div>
 
@@ -2588,7 +2591,7 @@ function applyMembershipState() {
   const libraryCount = document.getElementById('libraryCount');
   if(libraryCount) {
     libraryCount.textContent = isPaidMember
-      ? `${unlockedCount} unlocked · full library`
+      ? `${unlockedCount} unlocked · unlimited`
       : `${unlockedCount} of 30 unlocked · 800+ with membership`;
   }
 
@@ -2868,7 +2871,7 @@ function buildLibrary(){
     const remaining = Math.max(0, 30 - unlockedCount);
     const teaser=document.createElement('div');
     teaser.style.cssText='grid-column:span 2;margin-top:8px;padding:24px 20px;background:linear-gradient(135deg,rgba(201,169,110,.06) 0%,rgba(201,169,110,.02) 100%);border:1px solid rgba(201,169,110,.15);text-align:center';
-    teaser.innerHTML=`<div style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">✦ ${remaining} more affirmations ahead</div><p style="font-size:13px;font-weight:300;color:var(--soft);line-height:1.7;margin-bottom:14px">Keep showing up — a new affirmation unlocks each day. Members get instant access to 800+.</p><button onclick="openUpgrade()" style="padding:10px 28px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Unlock Everything</button>`;
+    teaser.innerHTML=`<div style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">✦ ${remaining} more affirmations ahead</div><p style="font-size:13px;font-weight:300;color:var(--soft);line-height:1.7;margin-bottom:14px">Keep showing up — a new affirmation unlocks each day. Free journeys pause at 30; members continue every day through a library of 800+.</p><button onclick="openUpgrade()" style="padding:10px 28px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Become a Member</button>`;
     grid.appendChild(teaser);
   }
 }
@@ -3904,7 +3907,7 @@ function renderIntentions() {
       return `<div style="display:flex;align-items:flex-start;gap:10px;padding:14px 16px;background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.1);">
         <div style="flex:1;font-size:14px;font-weight:300;color:var(--soft);line-height:1.6;">${escapeHtml(intent.text)}</div>
         <div style="display:flex;gap:8px;flex-shrink:0">
-          <button onclick="markReceived('${intent.id}')" style="padding:4px 10px;background:none;border:1px solid rgba(201,169,110,.2);color:var(--muted);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;white-space:nowrap">✦ Received</button>
+          <button onclick="markReceived('${intent.id}')" style="padding:11px 12px;background:none;border:1px solid rgba(201,169,110,.2);color:var(--muted);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;white-space:nowrap">✦ Received</button>
           <button onclick="removeIntention('${intent.id}')" aria-label="Remove intention" style="padding:12px 14px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .3s">×</button>
         </div>
       </div>`;
@@ -4311,7 +4314,7 @@ function buildLibraryScreen(filter) {
     const beyondPreview = Math.max(0, totalInLib - (unlockedCount + 5));
     const footer = document.createElement('div');
     footer.style.cssText = 'grid-column:1/-1;margin-top:16px;padding:28px 20px;text-align:center;border-top:1px solid rgba(201,169,110,.08)';
-    footer.innerHTML = `<div style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(201,169,110,.75);margin-bottom:10px">✦ The journey continues</div><p style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.8;margin-bottom:16px">You're seeing a 5-day preview ahead. There are <span style="color:var(--soft)">${beyondPreview}+ more affirmations</span> beyond that — one unlocks every day you show up.<br><span style="color:rgba(201,169,110,.75);font-size:12px">Members unlock 800+ instantly.</span></p><button onclick="openUpgrade()" style="padding:10px 28px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Unlock Everything</button>`;
+    footer.innerHTML = `<div style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(201,169,110,.75);margin-bottom:10px">✦ The journey continues</div><p style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.8;margin-bottom:16px">You're seeing a 5-day preview ahead. There are <span style="color:var(--soft)">${beyondPreview}+ more affirmations</span> beyond that — one unlocks every day you show up.<br><span style="color:rgba(201,169,110,.75);font-size:12px">Members continue past day 30 — a new affirmation every day, forever.</span></p><button onclick="openUpgrade()" style="padding:10px 28px;background:none;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Become a Member</button>`;
     grid.appendChild(footer);
   }
 }
