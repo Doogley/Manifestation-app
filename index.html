@@ -1406,7 +1406,7 @@
 
     <button class="btn-primary" style="width:100%;padding:18px;margin-bottom:16px" onclick="restoreFromGrace()">I'm Back — Continue My Journey</button>
     <br>
-    <button class="btn-ghost" onclick="openUpgrade()" style="font-size:12px">Members get 1 streak freeze per month</button>
+    <button class="btn-ghost" onclick="openUpgrade()" style="font-size:12px">Members unlock the full library — 800+ affirmations</button>
   </div>
 </div>
 
@@ -2017,6 +2017,7 @@ function resetUserState() {
   journalEntryCount = 0;
   intentionsReceivedCount = 0;
   bodyScanCount = 0;
+  lastBodyScanDate = '';
   moodCheckinCount = 0;
   mantraWeekCount = 0;
   foundationDaysCount = 0;
@@ -2123,6 +2124,9 @@ async function deleteAccount() {
     }
     const { error: profileError } = await db.from('profiles').delete().eq('id', uid);
     if(profileError) throw profileError;
+    // Remove the uploaded avatar too — the storage file (and its public URL)
+    // would otherwise outlive the account. Non-fatal if it fails.
+    try { await db.storage.from('avatars').remove([uid + '/avatar.jpg']); } catch(e) {}
     // NOTE: the auth.users row cannot be deleted from the client — it requires the
     // service role key, so full GDPR erasure needs a Supabase edge function (or manual
     // deletion in the dashboard). For App Store account-deletion requirements,
@@ -2189,6 +2193,19 @@ async function loadUserProfile() {
   weeklyMantra = data.mantra || '';
   lastMantraDate = data.last_mantra_date || '';
   isPaidMember     = data.is_paid_member    || false;
+  // Native: trust the store entitlement as a fallback. If the purchase went
+  // through but the profiles.is_paid_member write failed (offline, or blocked
+  // once the server-side column protection ships), the member would otherwise
+  // be locked out of what they paid for on next launch.
+  if(!isPaidMember && IS_NATIVE_APP && window.AMPurchases) {
+    try {
+      await AMPurchases.initializePurchases(currentUser.id);
+      if(await AMPurchases.checkSubscriptionStatus()) {
+        isPaidMember = true;
+        db.from('profiles').update({ is_paid_member: true }).eq('id', currentUser.id).then(dbResult('sync membership'));
+      }
+    } catch(e) { console.error('entitlement check failed:', e); }
+  }
   featureToggles = { ...featureToggles, ...(data.feature_toggles || {}) };
   inGracePeriod    = data.in_grace_period   || false;
   graceStreakBefore = data.grace_streak_before || 0;
@@ -2320,6 +2337,7 @@ async function loadUserProfile() {
   // Refresh the daily reminder (native only; no-ops if permission was
   // never granted or the user turned the toggle off).
   if(window.AMNotifications) AMNotifications.setupNotifications(answers.timing);
+  sessionDate = getLocalDateString();
   setTimeout(() => {
     buildHome();
     showScreen('home');
@@ -2495,7 +2513,13 @@ async function goToHome(){
       .maybeSingle()
       .then(dbResult('check unlock date'));
     const alreadyUnlockedToday = affCheck?.last_affirmation_date === today;
-    await db.from('profiles').update({
+    // Upsert, not update: if the profile row is missing (signup insert failed,
+    // or the account was deleted and the user logged back in with the surviving
+    // auth session), a plain update matches 0 rows and silently does nothing —
+    // leaving the user stuck re-doing onboarding on every launch forever.
+    await db.from('profiles').upsert({
+      id: currentUser.id,
+      real_name: userRealName || null,
       intention: answers.intention || 'abundance',
       tone: answers.tone || 'gentle',
       timing: answers.timing || 'morning',
@@ -2503,7 +2527,7 @@ async function goToHome(){
       unlocked_count: 1,
       today_affirmation_text: todayAffirmation,
       today_affirmation_cat: todayCategory,
-    }).eq('id', currentUser.id).then(dbResult('save onboarding profile'));
+    }, { onConflict: 'id' }).then(dbResult('save onboarding profile'));
     if(!alreadyUnlockedToday) awardCinders(10, 'Affirmation unlocked');
   }
   awardFirstTimeCinders('onboarding_complete');
@@ -2805,11 +2829,17 @@ function buildLibrary(){
   const dayCountEl = document.getElementById('homeDayCount');
   if(dayCountEl) dayCountEl.textContent = unlockedCount;
 
-  // Today tile (full width) — always the current unlocked day
+  // Today tile (full width) — always the current unlocked day. Until the user
+  // taps Reveal, keep the text blurred so scrolling down doesn't spoil it.
   const t=document.createElement('div');
   t.className='lib-tile today';
-  t.innerHTML=`<div class="lib-tile-day">✦ Day ${unlockedCount} · Today</div><div class="lib-tile-text">${todayAffirmation}</div><div class="lib-tile-cat">${todayCategory}</div>`;
-  t.onclick=()=>openModal(`Day ${unlockedCount} · Today`,todayAffirmation,todayCategory);
+  if(dailyActions.affirmationUnlocked){
+    t.innerHTML=`<div class="lib-tile-day">✦ Day ${unlockedCount} · Today</div><div class="lib-tile-text">${todayAffirmation}</div><div class="lib-tile-cat">${todayCategory}</div>`;
+    t.onclick=()=>openModal(`Day ${unlockedCount} · Today`,todayAffirmation,todayCategory);
+  } else {
+    t.innerHTML=`<div class="lib-tile-day">✦ Day ${unlockedCount} · Today</div><div class="locked-blur-text">${todayAffirmation}</div><div class="lib-tile-cat">Waiting to be revealed</div>`;
+    t.onclick=()=>document.getElementById('todaysCard')?.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
   grid.appendChild(t);
 
   // Previously unlocked days (1 through unlockedCount-1), descending
@@ -2844,6 +2874,9 @@ function buildLibrary(){
 }
 
 function updateCountdown(){
+  // Catches the app sitting open across midnight (the countdown hits 00:00:00
+  // and restarts, but "today's" state would otherwise stay yesterday's).
+  if(currentUser && getLocalDateString() !== sessionDate) checkDayRollover();
   const now=new Date(),tom=new Date(now);
   tom.setDate(tom.getDate()+1);tom.setHours(0,0,0,0);
   const diff=tom-now;
@@ -2924,7 +2957,7 @@ function showUnsavedChangesModal(onSave, onLeave) {
   document.getElementById('modalText').textContent = 'You have unsaved reflections. Would you like to save before leaving?';
   document.getElementById('modalCat').innerHTML = `
     <div style="display:flex;gap:12px;justify-content:center;margin-top:4px;">
-      <button onclick="(async()=>{await saveJournal();dismissModal();window._unsavedOnSave&&window._unsavedOnSave();})()" style="padding:11px 22px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Save &amp; Leave</button>
+      <button onclick="(async()=>{const ok=await saveJournal();if(ok===false)return;dismissModal();window._unsavedOnSave&&window._unsavedOnSave();})()" style="padding:11px 22px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Save &amp; Leave</button>
       <button onclick="dismissModal();window._unsavedOnLeave&&window._unsavedOnLeave();" style="padding:11px 22px;background:none;border:1px solid rgba(201,169,110,.15);color:var(--muted);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;">Leave Anyway</button>
     </div>`;
   window._unsavedOnSave = onSave;
@@ -3289,20 +3322,29 @@ async function saveJournal(){
   const gratitudeVals = [...document.querySelectorAll('.gratitude-input')].map(i => i.value.trim() || null);
   const hasContent = !!(textarea.value || selectedMoodSub || gratitudeVals.some(Boolean));
 
+  // Any DB failure must NOT show "✓ Saved" — surface it, keep journalHasChanges
+  // set, and skip rewards so the user knows their words didn't reach the server.
+  const saveFailed = () => {
+    showCindersToast(0, 'Could not save — check your connection and try again');
+    return false;
+  };
+
   if(currentUser) {
     const today = getLocalDateString();
     // Check if entry exists for today
-    const { data: existing } = await db.from('journal_entries')
+    const { data: existing, error: existingError } = await db.from('journal_entries')
       .select('id')
       .eq('user_id', currentUser.id)
       .eq('entry_date', today)
       .maybeSingle()
       .then(dbResult('check existing journal entry'));
+    if(existingError) return saveFailed();
 
     if(!hasContent) {
       if(existing) {
         // User cleared their entry — delete it and reverse cinders if they were awarded
-        await db.from('journal_entries').delete().eq('id', existing.id).then(dbResult('delete journal entry'));
+        const { error: deleteError } = await db.from('journal_entries').delete().eq('id', existing.id).then(dbResult('delete journal entry'));
+        if(deleteError) return saveFailed();
         journalEntryCount = Math.max(0, journalEntryCount - 1);
         if(dailyActions.journalSaved) {
           currentCinders = Math.max(0, currentCinders - 20);
@@ -3328,9 +3370,11 @@ async function saveJournal(){
     };
 
     if(existing) {
-      await db.from('journal_entries').update(entryData).eq('id', existing.id).then(dbResult('save journal entry'));
+      const { error: updateError } = await db.from('journal_entries').update(entryData).eq('id', existing.id).then(dbResult('save journal entry'));
+      if(updateError) return saveFailed();
     } else {
-      await db.from('journal_entries').insert(entryData).then(dbResult('save journal entry'));
+      const { error: insertError } = await db.from('journal_entries').insert(entryData).then(dbResult('save journal entry'));
+      if(insertError) return saveFailed();
       journalEntryCount++;
       db.from('profiles').update({ journal_entry_count: journalEntryCount }).eq('id', currentUser.id).then(dbResult('update journal count'));
       if(!dailyActions.journalCindersClaimed) {
@@ -3344,6 +3388,7 @@ async function saveJournal(){
     if(selectedMoodSub && !dailyActions.moodCheckedIn) {
       moodCheckinCount++;
       db.from('profiles').update({ mood_checkin_count: moodCheckinCount }).eq('id', currentUser.id).then(dbResult('update mood check-in count'));
+      awardCinders(5, 'Mood check-in');
     }
     if(selectedMoodSub) dailyActions.moodCheckedIn = true;
     updateDailyPractice();
@@ -3399,9 +3444,14 @@ async function activateMembership(){
 }
 async function handleSubscribe(){
   if(!IS_NATIVE_APP) {
-    // Web: purchases run through the app stores only. Keep the existing
-    // web behavior unchanged.
-    showSubscribeSuccess();
+    // Web: purchases run through the app stores only. Never show the success
+    // state here — it told users "your library is now open" without charging
+    // them or granting membership. Point them to the app instead.
+    currentModalType = 'info';
+    document.getElementById('modalDay').textContent = 'Membership';
+    document.getElementById('modalText').textContent = 'Memberships are purchased through the Already Mine app, so your subscription stays secure and easy to manage. Download the app to become a member — your account and progress carry over automatically.';
+    document.getElementById('modalCat').textContent = '';
+    document.getElementById('modalOverlay').classList.add('open');
     return;
   }
   const btn=document.getElementById('upgradeCtaBtn');
@@ -3615,12 +3665,17 @@ let habits = [];
 let habitCompletions = {};
 let selectedHabitFrequency = 'daily';
 
+// Weekly habits key their completion on this week's Monday as a plain local
+// YYYY-MM-DD. It must be a real date (habit_completions.completed_date is a
+// Postgres date — the old 'week_...' prefix made every weekly insert fail) and
+// must use local time (toISOString flips to tomorrow's date for evening users
+// west of UTC, splitting one week across two keys).
 function getWeekKey() {
   const d = new Date();
   const day = d.getDay();
   const diff = day === 0 ? -6 : 1 - day;
   d.setDate(d.getDate() + diff);
-  return 'week_' + d.toISOString().slice(0, 10);
+  return _ds(d);
 }
 
 function _ds(d) {
@@ -3651,7 +3706,7 @@ function computeHabitStreak(habitId, freq) {
     const dow = d.getDay();
     const mon = new Date(d);
     mon.setDate(d.getDate() + (dow === 0 ? -6 : 1 - dow));
-    return 'week_' + _ds(mon);
+    return _ds(mon);
   }
   let d = new Date();
   let streak = 0;
@@ -3701,6 +3756,29 @@ const dailyActions = {
   moodCheckedIn: false,
   mantraSetThisWeek: false,
 };
+
+// ── DAY ROLLOVER ──
+// On iOS the webview lives for days; without this, an app resumed the next
+// morning still shows yesterday's affirmation as "today's", never offers the
+// new reveal, and skips the streak/grace check. When the local date changes,
+// reset the per-day flags and reload everything from the profile.
+let sessionDate = getLocalDateString();
+async function checkDayRollover() {
+  if(!currentUser || getLocalDateString() === sessionDate) return;
+  if(journalHasChanges) return; // don't yank away unsaved writing; retried on next tick/resume
+  sessionDate = getLocalDateString();
+  dailyActions.affirmationUnlocked = false;
+  dailyActions.journalSaved = false;
+  dailyActions.journalCindersClaimed = false;
+  dailyActions.moodCheckedIn = false;
+  dailyActions.mantraSetThisWeek = false;
+  dailyLoginChecked = false;
+  saved = false;
+  await loadUserProfile();
+}
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible') checkDayRollover();
+});
 
 function openBadges() {
   showScreen('badges');
@@ -3819,13 +3897,15 @@ function renderIntentions() {
   if(active.length === 0 && received.length === 0) {
     list.innerHTML = `<div class="empty-state" style="padding:20px 0"><div class="empty-state-icon">❋</div><div class="empty-state-title">No intentions yet</div><div class="empty-state-sub">Write what you are calling into your life and watch it unfold.</div></div>`;
   } else {
+    // Buttons reference the intention id, not the array index — indexes go
+    // stale between render and click (a quick second tap after a delete would
+    // act on the wrong intention).
     list.innerHTML = active.map(intent => {
-      const i = intentions.indexOf(intent);
       return `<div style="display:flex;align-items:flex-start;gap:10px;padding:14px 16px;background:rgba(201,169,110,.03);border:1px solid rgba(201,169,110,.1);">
         <div style="flex:1;font-size:14px;font-weight:300;color:var(--soft);line-height:1.6;">${escapeHtml(intent.text)}</div>
         <div style="display:flex;gap:8px;flex-shrink:0">
-          <button onclick="markReceived(${i})" style="padding:4px 10px;background:none;border:1px solid rgba(201,169,110,.2);color:var(--muted);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;white-space:nowrap">✦ Received</button>
-          <button onclick="removeIntention(${i})" aria-label="Remove intention" style="padding:12px 14px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .3s">×</button>
+          <button onclick="markReceived('${intent.id}')" style="padding:4px 10px;background:none;border:1px solid rgba(201,169,110,.2);color:var(--muted);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;white-space:nowrap">✦ Received</button>
+          <button onclick="removeIntention('${intent.id}')" aria-label="Remove intention" style="padding:12px 14px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .3s">×</button>
         </div>
       </div>`;
     }).join('');
@@ -3909,32 +3989,36 @@ function discardPastIntentionChanges() {
   document.getElementById('modalOverlay').classList.remove('open');
 }
 
-async function markReceived(i) {
-  if(receivingIntentions.has(i)) return;
-  receivingIntentions.add(i);
-  intentions[i].received = true;
+async function markReceived(id) {
+  const intent = intentions.find(x => String(x.id) === String(id));
+  if(!intent || intent.received || receivingIntentions.has(String(id))) return;
+  receivingIntentions.add(String(id));
+  intent.received = true;
   intentionsReceivedCount++;
   if(currentUser) {
     await db.from('intentions')
       .update({ is_received: true })
-      .eq('id', intentions[i].id)
+      .eq('id', intent.id)
       .then(dbResult('mark intention received'));
     await db.from('profiles').update({ intentions_received_count: intentionsReceivedCount }).eq('id', currentUser.id).then(dbResult('update intentions received count'));
   }
   renderIntentions();
-  receivingIntentions.delete(i);
+  receivingIntentions.delete(String(id));
 }
 
-async function removeIntention(i) {
+async function removeIntention(id) {
+  const idx = intentions.findIndex(x => String(x.id) === String(id));
+  if(idx === -1) return;
+  const intent = intentions[idx];
+  intentions.splice(idx, 1);
+  renderIntentions();
   if(currentUser) {
     await db.from('intentions')
       .delete()
-      .eq('id', intentions[i].id)
+      .eq('id', intent.id)
       .eq('user_id', currentUser.id)
       .then(dbResult('delete intention'));
   }
-  intentions.splice(i, 1);
-  renderIntentions();
 }
 
 // ── GRACE PERIOD ──
@@ -4125,14 +4209,23 @@ function buildLibraryScreen(filter) {
       .forEach(aff => grid.appendChild(makeLockedTile(aff, aff.cat.toLowerCase() === userPrefCat)));
   }
 
-  // Today's tile renders first, but only when it matches the active filter
+  // Today's tile renders first, but only when it matches the active filter.
+  // Before the daily reveal it stays blurred (no spoiling the home-screen ritual).
   const todayAff = entries[unlockedCount - 1];
   if(todayAff) {
     const hist = affirmationHistory[unlockedCount];
     const dText = hist ? hist.text : todayAffirmation;
     const dCat = hist ? hist.cat : todayCategory;
     if(filter === 'all' || dCat === filter) {
-      grid.appendChild(makeUnlockedTile(unlockedCount, `✦ Day ${unlockedCount} · Today`, dText, dCat, true));
+      if(dailyActions.affirmationUnlocked || isAdmin) {
+        grid.appendChild(makeUnlockedTile(unlockedCount, `✦ Day ${unlockedCount} · Today`, dText, dCat, true));
+      } else {
+        const tile = document.createElement('div');
+        tile.className = 'library-screen-tile today-tile';
+        tile.innerHTML = `<div class="lib-screen-day">✦ Day ${unlockedCount} · Today</div><div class="locked-blur-text">${dText}</div><div class="lib-screen-cat">Reveal it on your home screen</div>`;
+        tile.onclick = () => { showScreen('home'); setTabByName('today'); buildHome(); };
+        grid.appendChild(tile);
+      }
     }
   }
 
@@ -4417,7 +4510,8 @@ async function buildProfile() {
   // Member since
   const now = currentUser?.created_at ? new Date(currentUser.created_at) : new Date();
   const day = now.getDate();
-  const ordinal = day + (['th','st','nd','rd'][((day%100-20)%10)||day%100>10?0:day%10]||'th');
+  const _suffixes = ['th','st','nd','rd'];
+  const ordinal = day + (_suffixes[(day % 100 - 20) % 10] || _suffixes[day % 100] || 'th');
   const monthYear = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
   const [month, year] = monthYear.split(' ');
   document.getElementById('profileMemberDate').textContent = `${month} ${ordinal}, ${year}`;
@@ -4772,13 +4866,20 @@ async function acceptSummaryConsent(year, month) {
   startSummaryGeneration(year, month);
 }
 
+// Last calendar day of a 1-based month, as YYYY-MM-DD. A hardcoded "-31" is an
+// invalid date literal for short months and makes Postgres reject the query.
+function lastDayOfMonth(year, month) {
+  const lastDay = new Date(year, month, 0).getDate();
+  return `${year}-${String(month).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
+}
+
 async function finishSummaryUI(year, month) {
   const fromDate = `${year}-${String(month).padStart(2,'0')}-01`;
   const { data: monthEntries } = await db.from('journal_entries')
     .select('mood_sub, entry_date')
     .eq('user_id', currentUser.id)
     .gte('entry_date', fromDate)
-    .lte('entry_date', `${year}-${String(month).padStart(2,'0')}-31`);
+    .lte('entry_date', lastDayOfMonth(year, month));
 
   const entryCount = (monthEntries || []).length;
   const activeDays = new Set((monthEntries || []).map(e => e.entry_date)).size;
@@ -4859,7 +4960,7 @@ async function generateSummary(year, month) {
 
   try {
     const fromDate = `${year}-${String(month).padStart(2,'0')}-01`;
-    const toDate = `${year}-${String(month).padStart(2,'0')}-31`;
+    const toDate = lastDayOfMonth(year, month);
 
     const { data: entries, error } = await db.from('journal_entries')
       .select('*')
@@ -4891,8 +4992,10 @@ async function generateSummary(year, month) {
     const narrativeText = data.narrative || '';
     document.getElementById('summaryNarrative').textContent = narrativeText;
 
-    // Save to Supabase so we don't regenerate this month
-    if(narrativeText && currentUser) {
+    // Save to Supabase so we don't regenerate this month — but never cache the
+    // server's transient outage fallback, or it becomes the permanent
+    // "reflection" for the month and can never be regenerated.
+    if(narrativeText && currentUser && !data.transient) {
       await db.from('monthly_summaries')
         .insert({ user_id: currentUser.id, year, month, narrative: narrativeText })
         .then(dbResult('save summary'));
@@ -5065,18 +5168,23 @@ async function saveFeatureToggle(feature, value) {
 }
 
 function applyFeatureToggles() {
+  // Customization is a paid feature and its toggle UI is hidden for free
+  // users — so if a membership lapses, saved "hide" toggles would hide
+  // features forever with no way to turn them back on. Free users always get
+  // the defaults; their saved toggles reapply if they re-subscribe.
+  const ft = (isPaidMember || adminMode) ? featureToggles : {};
   const show = (sel, visible) => {
     document.querySelectorAll(sel).forEach(el => { el.style.display = visible ? '' : 'none'; });
   };
-  show('.habits-preview-wrap', featureToggles.foundations !== false);
-  show('.body-scan-entry', featureToggles.body_scan !== false);
-  show('.mantra-card-wrap', featureToggles.mantra !== false);
-  show('.practice-wrap', featureToggles.daily_practice !== false);
+  show('.habits-preview-wrap', ft.foundations !== false);
+  show('.body-scan-entry', ft.body_scan !== false);
+  show('.mantra-card-wrap', ft.mantra !== false);
+  show('.practice-wrap', ft.daily_practice !== false);
   const intentionsSection = document.querySelector('#intentionsList')?.closest('.journal-section');
-  if(intentionsSection) intentionsSection.style.display = featureToggles.intentions !== false ? '' : 'none';
+  if(intentionsSection) intentionsSection.style.display = ft.intentions !== false ? '' : 'none';
   const monthlySection = document.getElementById('profileMonthlySummarySection');
-  if(monthlySection) monthlySection.style.display = featureToggles.monthly_summary !== false ? '' : 'none';
-  document.querySelectorAll('.tooltip-btn').forEach(el => { el.style.display = featureToggles.tooltips !== false ? '' : 'none'; });
+  if(monthlySection) monthlySection.style.display = ft.monthly_summary !== false ? '' : 'none';
+  document.querySelectorAll('.tooltip-btn').forEach(el => { el.style.display = ft.tooltips !== false ? '' : 'none'; });
 }
 
 function showTooltip(title, text) {

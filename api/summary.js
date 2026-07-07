@@ -5,8 +5,12 @@ const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIs
 
 // Origins allowed to call this endpoint from a browser. Override/extend with the
 // ALLOWED_ORIGINS env var (comma-separated) when the production domain changes.
+// capacitor://localhost (iOS) and https://localhost (Android) are the origins
+// the Capacitor webview sends — without them the native app's Monthly
+// Reflection fetch fails CORS preflight. Web requests are same-origin and
+// don't need CORS at all.
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ||
-  'https://alreadymine.com,https://www.alreadymine.com')
+  'https://alreadymine.app,https://www.alreadymine.app,https://alreadymine.com,https://www.alreadymine.com,capacitor://localhost,https://localhost')
   .split(',').map(s => s.trim()).filter(Boolean);
 
 const MAX_BODY_BYTES = 256 * 1024; // hard cap on request payload
@@ -179,8 +183,11 @@ Write only the narrative — no introduction, no label, no quotes. 4-6 sentences
     // Log server-side only (no user journal data) so outages/abuse are visible
     // in Vercel logs; the client still gets a graceful fallback message.
     console.error('summary generation failed for user', user.id, '-', err.message);
+    // transient: true tells the client NOT to cache this fallback as the
+    // month's reflection, so the user can regenerate once the service is back.
     send(res, 200, headers, {
       narrative: 'This month you showed up — and that is the whole practice. Your reflection will be available once we\'re able to reach our summary service. Keep going.',
+      transient: true,
     });
   }
 }
