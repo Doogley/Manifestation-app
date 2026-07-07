@@ -14,6 +14,7 @@ const files = [
   'index.html',
   'favicon.svg',
   'affirmations.js',
+  'supabase.min.js',
   'capacitor-init.js',
   'revenuecat-handler.js',
   'push-notifications.js',
