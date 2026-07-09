@@ -33,10 +33,10 @@
   }
   /* Expand small controls to a ~44px tap area without changing their visual size */
   .tooltip-btn, .nav-bell, .nav-avatar, .nav-streak, .legal-close, .summary-close, .notif-clear-btn,
-  .habit-delete-btn, .lib-heart, .add-habit-x-btn, .upgrade-close-btn, .scan-close-btn, .btn-ghost,
+  .habit-delete-btn, .lib-heart, .lib-share, .add-habit-x-btn, .upgrade-close-btn, .scan-close-btn, .btn-ghost,
   .back-btn, .modal-close { position:relative; }
   .tooltip-btn::after, .nav-bell::after, .nav-avatar::after, .nav-streak::after, .legal-close::after,
-  .summary-close::after, .notif-clear-btn::after, .habit-delete-btn::after, .lib-heart::after,
+  .summary-close::after, .notif-clear-btn::after, .habit-delete-btn::after, .lib-heart::after, .lib-share::after,
   .add-habit-x-btn::after, .upgrade-close-btn::after, .scan-close-btn::after, .btn-ghost::after,
   .back-btn::after, .modal-close::after {
     content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
@@ -513,6 +513,8 @@
   .library-screen-tile.locked-tile::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent 0%,rgba(201,169,110,.03) 50%,transparent 100%); background-size:200% 100%; animation:shimmer 4s ease-in-out infinite; }
   .lib-heart { position:absolute; top:8px; right:10px; background:none; border:none; color:rgba(201,169,110,.6); font-size:14px; cursor:pointer; padding:4px; line-height:1; transition:color .2s; }
   .lib-heart:hover, .lib-heart.saved { color:var(--gold); }
+  .lib-share { position:absolute; bottom:6px; right:8px; background:none; border:none; color:rgba(201,169,110,.4); font-size:12px; cursor:pointer; padding:4px; line-height:1; transition:color .2s; }
+  .lib-share:hover { color:var(--gold); }
 
   @media(max-width:480px){
     .library-screen-header,.library-screen-grid{padding-left:20px;padding-right:20px}
@@ -2050,6 +2052,7 @@ function resetUserState() {
   dailyActions.journalCindersClaimed = false;
   dailyActions.moodCheckedIn = false;
   dailyActions.mantraSetThisWeek = false;
+  dailyActions.sharedToday = false;
   const mantraDisplay = document.getElementById('mantraDisplay');
   if(mantraDisplay) {
     mantraDisplay.textContent = 'Tap edit to write your mantra for this week...';
@@ -2839,6 +2842,7 @@ function buildLibrary(){
   if(dailyActions.affirmationUnlocked){
     t.innerHTML=`<div class="lib-tile-day">✦ Day ${unlockedCount} · Today</div><div class="lib-tile-text">${todayAffirmation}</div><div class="lib-tile-cat">${todayCategory}</div>`;
     t.onclick=()=>openModal(`Day ${unlockedCount} · Today`,todayAffirmation,todayCategory);
+    t.appendChild(makeLibShareBtn(todayAffirmation,todayCategory));
   } else {
     t.innerHTML=`<div class="lib-tile-day">✦ Day ${unlockedCount} · Today</div><div class="locked-blur-text">${todayAffirmation}</div><div class="lib-tile-cat">Waiting to be revealed</div>`;
     t.onclick=()=>document.getElementById('todaysCard')?.scrollIntoView({ behavior:'smooth', block:'center' });
@@ -2854,6 +2858,7 @@ function buildLibrary(){
     tile.className='lib-tile';
     tile.innerHTML=`<div class="lib-tile-day">Day ${d}</div><div class="lib-tile-text">${aff.text}</div><div class="lib-tile-cat">${aff.cat}</div>`;
     tile.onclick=()=>openModal(`Day ${d}`,aff.text,aff.cat);
+    tile.appendChild(makeLibShareBtn(aff.text,aff.cat));
     grid.appendChild(tile);
   }
 
@@ -2931,7 +2936,180 @@ async function toggleSaveByDay(dayNum, text, cat) {
     saved = isSaved;
   }
 }
-function shareAffirmation(){if(navigator.share){navigator.share({title:'Already Mine',text:todayAffirmation,url:window.location.href}).then(()=>showCindersToast(0,'✦ Shared')).catch(()=>{});}else{navigator.clipboard.writeText(todayAffirmation).then(()=>showCindersToast(0,'✦ Copied to clipboard')).catch(()=>showCindersToast(0,'Could not copy — try again'));}}
+function shareAffirmation(){ shareAffirmationCard(todayAffirmation, todayCategory); }
+
+// Plain-text share — only used when canvas rendering fails.
+function shareAffirmationText(text){
+  if(navigator.share){navigator.share({title:'Already Mine',text:text,url:window.location.href}).then(()=>showCindersToast(0,'✦ Shared')).catch(()=>{});}
+  else{navigator.clipboard.writeText(text).then(()=>showCindersToast(0,'✦ Copied to clipboard')).catch(()=>showCindersToast(0,'Could not copy — try again'));}
+}
+
+// ── SHAREABLE AFFIRMATION CARD ──
+const SHARE_CARD_FILENAME = 'already-mine-affirmation.png';
+
+function wrapCanvasText(ctx, text, maxWidth) {
+  const words = String(text).trim().split(/\s+/);
+  const lines = [];
+  let line = '';
+  for (const word of words) {
+    const test = line ? line + ' ' + word : word;
+    if (line && ctx.measureText(test).width > maxWidth) { lines.push(line); line = word; }
+    else line = test;
+  }
+  if (line) lines.push(line);
+  return lines.length ? lines : [''];
+}
+
+// Renders the branded 600x800 card on an offscreen canvas (drawn at 2x so
+// the PNG stays crisp on retina screens) and returns { blob, dataUrl }.
+async function generateShareCard(text, category) {
+  // Make sure the webfonts are ready before drawing — canvas won't trigger a
+  // font load by itself and would silently render the fallback on first use.
+  try {
+    await Promise.all([
+      document.fonts.load("italic 300 30px 'Cormorant Garamond'"),
+      document.fonts.load("300 14px 'Jost'"),
+    ]);
+  } catch(e) { /* offline / CDN blocked — Georgia and sans-serif fallbacks below */ }
+
+  const W = 600, H = 800, SCALE = 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = W * SCALE;
+  canvas.height = H * SCALE;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(SCALE, SCALE);
+
+  const GOLD = '#c9a96e', CREAM = '#f5f0e8';
+  const serif = "'Cormorant Garamond', Georgia, serif";
+  const sans = "'Jost', sans-serif";
+
+  ctx.fillStyle = '#1a1610';
+  ctx.fillRect(0, 0, W, H);
+
+  // Thin double border — .5px offsets keep the 1px lines crisp
+  ctx.strokeStyle = GOLD;
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.4;  ctx.strokeRect(40.5, 40.5, W - 81, H - 81);
+  ctx.globalAlpha = 0.25; ctx.strokeRect(50.5, 50.5, W - 101, H - 101);
+  ctx.globalAlpha = 1;
+
+  // ctx.letterSpacing isn't supported on older iOS Safari, so letter-spaced
+  // text is laid out character by character.
+  function drawSpaced(str, y, font, color, alpha, spacing) {
+    ctx.font = font; ctx.fillStyle = color; ctx.globalAlpha = alpha;
+    const chars = [...str];
+    let total = -spacing;
+    chars.forEach(c => { total += ctx.measureText(c).width + spacing; });
+    let x = (W - total) / 2;
+    chars.forEach(c => { ctx.fillText(c, x, y); x += ctx.measureText(c).width + spacing; });
+    ctx.globalAlpha = 1;
+  }
+  function drawCentered(str, y, font, color, alpha) {
+    ctx.font = font; ctx.fillStyle = color; ctx.globalAlpha = alpha;
+    ctx.textAlign = 'center';
+    ctx.fillText(str, W / 2, y);
+    ctx.textAlign = 'left';
+    ctx.globalAlpha = 1;
+  }
+
+  // Header
+  drawSpaced('ALREADY MINE', 108, '300 14px ' + sans, GOLD, 0.5, 5);
+  ctx.globalAlpha = 0.35; ctx.strokeStyle = GOLD; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(W/2 - 30, 133.5); ctx.lineTo(W/2 + 30, 133.5); ctx.stroke();
+  ctx.globalAlpha = 1;
+  drawCentered('✦', 170, '14px ' + serif, GOLD, 0.6);
+
+  // Affirmation — word-wrapped; unusually long ones shrink to keep the block
+  // clear of the header and footer ornaments
+  let fontSize = 30, lines;
+  const maxWidth = W - 160;
+  while (true) {
+    ctx.font = 'italic 300 ' + fontSize + 'px ' + serif;
+    lines = wrapCanvasText(ctx, text, maxWidth);
+    if (lines.length * fontSize * 1.5 <= 330 || fontSize <= 22) break;
+    fontSize -= 2;
+  }
+  const lineH = Math.round(fontSize * 1.5);
+  const blockH = lines.length * lineH;
+  // Vertically centered regardless of line count (baseline of first line)
+  let y = (H - blockH) / 2 + fontSize * 0.8;
+  const affFont = 'italic 300 ' + fontSize + 'px ' + serif;
+  lines.forEach(line => { drawCentered(line, y, affFont, CREAM, 1); y += lineH; });
+  y -= lineH; // back to the last line's baseline
+
+  drawCentered('✦', y + 56, '14px ' + serif, GOLD, 0.6);
+  if (category) drawSpaced(String(category).toUpperCase(), y + 94, '300 11px ' + sans, GOLD, 0.55, 3);
+
+  // Watermark
+  drawSpaced('ALREADYMINE.APP', 732, '300 10px ' + sans, GOLD, 0.3, 4);
+
+  const dataUrl = canvas.toDataURL('image/png');
+  const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+  return { blob, dataUrl };
+}
+
+function shareCardDateKey() { return 'am_share_date_' + (currentUser ? currentUser.id : 'anon'); }
+function hasSharedCardToday() {
+  if (dailyActions.sharedToday) return true;
+  try { return localStorage.getItem(shareCardDateKey()) === getLocalDateString(); } catch(e) { return false; }
+}
+
+async function shareAffirmationCard(text, category) {
+  if (!text) return;
+  let card;
+  try {
+    card = await generateShareCard(text, category);
+  } catch(e) {
+    console.error('[share] card render failed:', e);
+    shareAffirmationText(text);
+    return;
+  }
+  try {
+    const nativeShare = window.AMNative && AMNative.plugin('Share');
+    const nativeFs = window.AMNative && AMNative.plugin('Filesystem');
+    if (nativeShare && nativeFs) {
+      // Native share sheets take file URIs, not blobs — write to the app
+      // cache first (iOS cleans this directory automatically)
+      const written = await nativeFs.writeFile({
+        path: SHARE_CARD_FILENAME,
+        data: card.dataUrl.split(',')[1],
+        directory: 'CACHE',
+      });
+      await nativeShare.share({ files: [written.uri] });
+    } else {
+      const file = card.blob ? new File([card.blob], SHARE_CARD_FILENAME, { type: 'image/png' }) : null;
+      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Already Mine' });
+      } else {
+        const a = document.createElement('a');
+        a.href = card.dataUrl;
+        a.download = SHARE_CARD_FILENAME;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+    }
+  } catch(err) {
+    return; // user closed the share sheet — no toast, no cinders
+  }
+  if (!hasSharedCardToday()) {
+    dailyActions.sharedToday = true;
+    try { localStorage.setItem(shareCardDateKey(), getLocalDateString()); } catch(e) {}
+    awardCinders(5, 'Shared your affirmation');
+  } else {
+    dailyActions.sharedToday = true;
+    showCindersToast(0, '✦ Shared');
+  }
+}
+
+function makeLibShareBtn(text, cat) {
+  const b = document.createElement('button');
+  b.className = 'lib-share';
+  b.textContent = '↑';
+  b.setAttribute('aria-label', 'Share affirmation');
+  b.onclick = (e) => { e.stopPropagation(); shareAffirmationCard(text, cat); };
+  return b;
+}
 function setTab(el){document.querySelectorAll('#globalBottomNav .nav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
 function setTabByName(name){document.querySelectorAll('#globalBottomNav .nav-tab').forEach((t,i)=>{const labels=['today','library','journal','badges','profile'];if(labels[i]===name)t.classList.add('active');else t.classList.remove('active');});}
 
@@ -3758,6 +3936,7 @@ const dailyActions = {
   journalSaved: false,
   moodCheckedIn: false,
   mantraSetThisWeek: false,
+  sharedToday: false,
 };
 
 // ── DAY ROLLOVER ──
@@ -3775,6 +3954,7 @@ async function checkDayRollover() {
   dailyActions.journalCindersClaimed = false;
   dailyActions.moodCheckedIn = false;
   dailyActions.mantraSetThisWeek = false;
+  dailyActions.sharedToday = false;
   dailyLoginChecked = false;
   saved = false;
   await loadUserProfile();
@@ -4190,6 +4370,7 @@ function buildLibraryScreen(filter) {
     heartBtn.setAttribute('aria-label', savedAffirmationIds.has(id) ? 'Remove from saved' : 'Save affirmation');
     heartBtn.onclick = (e) => { e.stopPropagation(); toggleSaveByDay(id, dText, dCat); };
     tile.appendChild(heartBtn);
+    tile.appendChild(makeLibShareBtn(dText, dCat));
     return tile;
   }
 
