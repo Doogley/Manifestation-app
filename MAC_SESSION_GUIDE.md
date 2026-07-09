@@ -7,7 +7,7 @@ up from there.
 
 **What's already in place:**
 - `capacitor.config.json` — app id `app.alreadymine`, name "Already Mine", dark theme, plugin config
-- All plugins installed: status-bar, splash-screen, keyboard, haptics, app, push-notifications, local-notifications, RevenueCat
+- All plugins installed: status-bar, splash-screen, keyboard, haptics, app, push-notifications, local-notifications, share, filesystem, RevenueCat (share + filesystem power the affirmation share-card feature — `npx cap sync ios` pulls in their pods, no extra setup)
 - `capacitor-init.js` — native shell setup (status bar, keyboard, splash, back button)
 - `revenuecat-handler.js` — purchase/restore flows (needs the real API key, step 6)
 - `index.html` — platform detection, native subscribe flow, Restore Purchases button (auto-hidden on web)
