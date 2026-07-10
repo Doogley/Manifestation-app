@@ -2095,12 +2095,14 @@ async function handleSignup() {
     referral_code: referralCode || null,
   }).then(dbResult('create profile'));
   userRealName = name;
+  trackEvent('signup_complete');
   // New user goes to onboarding
   showScreen('onboarding');
   renderQuestion(0);
 }
 
 async function handleLogout() {
+  flushAnalytics(); // queued events can't insert after the session ends (RLS)
   await db.auth.signOut();
   currentUser = null;
   resetUserState();
@@ -2213,6 +2215,7 @@ async function loadUserProfile() {
     } catch(e) { console.error('entitlement check failed:', e); }
   }
   featureToggles = { ...featureToggles, ...(data.feature_toggles || {}) };
+  trackAppOpen();
   inGracePeriod    = data.in_grace_period   || false;
   graceStreakBefore = data.grace_streak_before || 0;
   graceDaysCompleted = data.grace_days_completed || 0;
@@ -2534,8 +2537,9 @@ async function goToHome(){
       today_affirmation_text: todayAffirmation,
       today_affirmation_cat: todayCategory,
     }, { onConflict: 'id' }).then(dbResult('save onboarding profile'));
-    if(!alreadyUnlockedToday) awardCinders(10, 'Affirmation unlocked');
+    if(!alreadyUnlockedToday) { awardCinders(10, 'Affirmation unlocked'); trackEvent('affirmation_revealed', { day: 1 }); }
   }
+  if(!cinderBonuses.has('onboarding_complete')) trackEvent('onboarding_complete');
   awardFirstTimeCinders('onboarding_complete');
   affirmationHistory[1] = { id: todayAffirmationId, text: todayAffirmation, cat: todayCategory };
   if(currentUser) {
@@ -2802,6 +2806,7 @@ async function unlockTodaysAffirmation() {
         return;
       }
       awardCinders(10, 'Affirmation unlocked');
+      trackEvent('affirmation_revealed', { day: unlockedCount });
       affirmationHistory[unlockedCount] = { id: todayAffirmationId, text: todayAffirmation, cat: todayCategory };
       const { error: upsertError } = await db.from('user_affirmations').upsert({
         user_id: currentUser.id, day_number: unlockedCount, affirmation_id: todayAffirmationId,
@@ -2936,6 +2941,65 @@ async function toggleSaveByDay(dayNum, text, cat) {
     saved = isSaved;
   }
 }
+// ── ANALYTICS ──
+// First-party event tracking into Supabase (see ANALYTICS_SCHEMA.sql /
+// ANALYTICS_QUERIES.sql). Fire-and-forget: events queue in memory and flush
+// as ONE batched insert every 30s, when the queue reaches 20, or when the
+// page is hidden — a trackEvent call never costs its own DB round-trip and
+// can never block or break the app.
+const analyticsQueue = [];
+let analyticsFlushTimer = null;
+const ANALYTICS_FLUSH_MS = 30000;
+
+function trackEvent(eventName, eventData) {
+  if(!currentUser) return;
+  analyticsQueue.push({
+    user_id: currentUser.id,
+    event_name: eventName,
+    event_data: eventData || {},
+    // Captured at queue time so batched events keep their real timestamp
+    created_at: new Date().toISOString(),
+  });
+  if(analyticsQueue.length >= 20) { flushAnalytics(); return; }
+  if(!analyticsFlushTimer) analyticsFlushTimer = setTimeout(flushAnalytics, ANALYTICS_FLUSH_MS);
+}
+
+function flushAnalytics() {
+  clearTimeout(analyticsFlushTimer);
+  analyticsFlushTimer = null;
+  if(!analyticsQueue.length) return;
+  const batch = analyticsQueue.splice(0);
+  try {
+    db.from('analytics_events').insert(batch).then(({ error }) => {
+      if(error) console.warn('[analytics] flush failed:', error.message);
+    });
+  } catch(e) { /* analytics must never surface to the user */ }
+}
+// beforeunload is unreliable on iOS — pagehide + visibilitychange both fire
+// in WKWebView and cover backgrounding, tab close, and app kill.
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden') flushAnalytics(); });
+window.addEventListener('pagehide', flushAnalytics);
+
+// app_open once per calendar day per page session; the visibilitychange
+// day-rollover path re-runs loadUserProfile, so an app left open overnight
+// still counts as active the next day. Also fires the day-2/7/30 retention
+// markers, measured from the auth account's creation date.
+let lastAppOpenTrackDate = null;
+function trackAppOpen() {
+  const today = getLocalDateString();
+  if(lastAppOpenTrackDate === today) return;
+  lastAppOpenTrackDate = today;
+  trackEvent('app_open');
+  const signedUp = currentUser && currentUser.created_at;
+  if(signedUp) {
+    const signupDay = new Date(formatDateYMD(new Date(signedUp)) + 'T00:00:00');
+    const dayNumber = Math.round((new Date(today + 'T00:00:00') - signupDay) / 86400000) + 1;
+    if(dayNumber === 2) trackEvent('day_2_return');
+    if(dayNumber === 7) trackEvent('day_7_return');
+    if(dayNumber === 30) trackEvent('day_30_return');
+  }
+}
+
 function shareAffirmation(){ shareAffirmationCard(todayAffirmation, todayCategory); }
 
 // Plain-text share — only used when canvas rendering fails.
@@ -3092,6 +3156,7 @@ async function shareAffirmationCard(text, category) {
   } catch(err) {
     return; // user closed the share sheet — no toast, no cinders
   }
+  trackEvent('share_card');
   if (!hasSharedCardToday()) {
     dailyActions.sharedToday = true;
     try { localStorage.setItem(shareCardDateKey(), getLocalDateString()); } catch(e) {}
@@ -3557,6 +3622,7 @@ async function saveJournal(){
       const { error: insertError } = await db.from('journal_entries').insert(entryData).then(dbResult('save journal entry'));
       if(insertError) return saveFailed();
       journalEntryCount++;
+      trackEvent('journal_saved');
       db.from('profiles').update({ journal_entry_count: journalEntryCount }).eq('id', currentUser.id).then(dbResult('update journal count'));
       if(!dailyActions.journalCindersClaimed) {
         dailyActions.journalCindersClaimed = true;
@@ -3624,6 +3690,7 @@ async function activateMembership(){
   showSubscribeSuccess();
 }
 async function handleSubscribe(){
+  trackEvent('upgrade_tapped', { platform: IS_NATIVE_APP ? 'native' : 'web' });
   if(!IS_NATIVE_APP) {
     // Web: purchases run through the app stores only. Never show the success
     // state here — it told users "your library is now open" without charging
@@ -3643,6 +3710,7 @@ async function handleSubscribe(){
     await window.AMPurchases.initializePurchases(currentUser && currentUser.id);
     const result=await window.AMPurchases.purchaseSubscription(productId);
     if(result.success) {
+      trackEvent('upgrade_completed', { plan });
       await activateMembership();
       return;
     }
@@ -4047,6 +4115,7 @@ async function createIntention(text) {
     if(data) newIntention.id = data.id;
   }
   intentions.push(newIntention);
+  trackEvent('intention_set');
   awardFirstTimeCinders('first_intention');
   renderIntentions();
   return true;
@@ -4178,6 +4247,7 @@ async function markReceived(id) {
   receivingIntentions.add(String(id));
   intent.received = true;
   intentionsReceivedCount++;
+  trackEvent('intention_received');
   if(currentUser) {
     await db.from('intentions')
       .update({ is_received: true })
@@ -5308,7 +5378,11 @@ function notifyNewlyEarnedBadges() {
     if(b.earned && !announced.has(b.id)) {
       announced.add(b.id);
       // On the very first run we seed silently to avoid notifying for past badges
-      if(!firstRun) addNotification(`You earned ${b.name} · ${cat.name} Tier ${b.tier}`, 'badge');
+      if(!firstRun) {
+        addNotification(`You earned ${b.name} · ${cat.name} Tier ${b.tier}`, 'badge');
+        // adminMode preview marks every badge earned — don't pollute analytics
+        if(!adminMode) trackEvent('badge_earned', { badge: b.id });
+      }
     }
   }));
   try { localStorage.setItem(NOTIFIED_BADGES_KEY, JSON.stringify([...announced])); } catch(e) {}
@@ -5383,6 +5457,7 @@ async function awardCinders(amount, reason) {
   const newRank = getLevelInfo(currentCinders).name;
   if(amount > 0 && newRank !== prevRank) {
     addNotification(`You reached ${newRank}`, 'rank');
+    trackEvent('rank_up', { rank: newRank });
   }
   if(currentUser) {
     await db.from('profiles').update({ cinders: currentCinders }).eq('id', currentUser.id).then(dbResult('update cinders'));
@@ -5443,6 +5518,7 @@ async function saveMantra() {
       mantraWeekCount++;
       await db.from('profiles').update({ last_mantra_date: today, mantra_week_count: mantraWeekCount }).eq('id', currentUser.id).then(dbResult('update mantra week'));
       awardCinders(10, 'Weekly mantra set');
+      trackEvent('mantra_set');
     }
     lastMantraDate = today;
   }
@@ -5738,6 +5814,7 @@ async function toggleHabitComplete(id) {
       if(allDone && lastFoundationDate !== today) {
         lastFoundationDate = today;
         foundationDaysCount++;
+        trackEvent('foundation_completed');
         db.from('profiles').update({ foundation_days_count: foundationDaysCount, last_foundation_date: today }).eq('id', currentUser.id).then(dbResult('update foundation days'));
       }
     }
@@ -5785,6 +5862,7 @@ async function createHabit(name) {
   const { data, error } = await db.from('habits').insert({ user_id: currentUser.id, name, frequency: selectedHabitFrequency }).select().single().then(dbResult('add habit'));
   if(error || !data) return;
   habits.push({ id: data.id, name: data.name, frequency: data.frequency || 'daily', milestones: new Set(data.milestones_awarded || []) });
+  trackEvent('foundation_added');
   awardFirstTimeCinders('first_foundation');
   closeAddHabitPanel();
   renderHabits();
@@ -5935,6 +6013,7 @@ function completeScan() {
     bodyScanSessions.unshift({ date: today, sections });
   }
   currentScanNotes = {};
+  trackEvent('body_scan_complete');
   if(lastBodyScanDate !== today) {
     lastBodyScanDate = today;
     bodyScanCount++;
