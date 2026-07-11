@@ -33,6 +33,33 @@
     }
   };
 
+  // ── HOME-SCREEN WIDGET SYNC (iOS) ──
+  // Pushes the data the widget renders into the shared App Group
+  // UserDefaults suite (group.app.alreadymine) through the local
+  // WidgetBridge plugin (ios-widget/WidgetBridgePlugin.swift). The plugin
+  // also calls WidgetCenter.reloadAllTimelines() so the widget updates
+  // immediately. index.html calls AMWidget.sync() on every home build and
+  // affirmation reveal; on web/Android (no plugin) this is a no-op.
+  var lastWidgetPayload = null;
+  window.AMWidget = {
+    // sync(payload) pushes new data; sync() re-pushes the last payload
+    // (used when the app returns to the foreground).
+    sync: function (data) {
+      if (data) lastWidgetPayload = data;
+      var bridge = plugin('WidgetBridge');
+      if (!bridge || !lastWidgetPayload) return Promise.resolve();
+      return bridge.setWidgetData({
+        todayAffirmation: String(lastWidgetPayload.todayAffirmation || ''),
+        todayCategory: String(lastWidgetPayload.todayCategory || ''),
+        streakCount: Number(lastWidgetPayload.streakCount) || 0,
+        currentRank: String(lastWidgetPayload.currentRank || ''),
+        unlockedCount: Number(lastWidgetPayload.unlockedCount) || 0
+      }).catch(function (e) {
+        console.error('[AMWidget] sync failed:', e);
+      });
+    }
+  };
+
   if (!isNative) return; // web browser — nothing else to do
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -74,6 +101,14 @@
         } else if (app.minimizeApp) {
           app.minimizeApp();
         }
+      });
+    }
+
+    // Re-push the last widget payload whenever the app returns to the
+    // foreground, so the widget timeline refreshes even if no state changed.
+    if (app) {
+      app.addListener('appStateChange', function (state) {
+        if (state && state.isActive) window.AMWidget.sync();
       });
     }
 
