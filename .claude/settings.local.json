@@ -42,7 +42,9 @@
       "Read(//c/Program Files \\\\\\(x86\\\\\\)/Microsoft/Edge/Application/**)",
       "Read(//c/Program Files/Google/Chrome/Application/**)",
       "Bash('/c/Program Files \\(x86\\)/Microsoft/Edge/Application/msedge.exe' --headless --disable-gpu '--screenshot=C:\\\\Users\\\\doogl\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-doogl-OneDrive-Desktop-Manifestation-app\\\\f8790a67-0ac4-4477-a2f3-15bc0da78107\\\\scratchpad\\\\cards.png' --window-size=1400,630 --virtual-time-budget=12000 'file:///C:\\\\Users\\\\doogl\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-doogl-OneDrive-Desktop-Manifestation-app\\\\f8790a67-0ac4-4477-a2f3-15bc0da78107\\\\scratchpad/card-test.html')",
-      "Bash(dir /s /b affirmations.js)"
+      "Bash(dir /s /b affirmations.js)",
+      "Bash(git check-ignore *)",
+      "Bash(grep -v \"= \\\\|=$\\\\|==\")"
     ]
   }
 }

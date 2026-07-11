@@ -822,6 +822,78 @@
   .toggle-pill-knob { position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:var(--muted); transition:transform .3s,background .3s; pointer-events:none; }
   .toggle-pill input:checked ~ .toggle-pill-knob { transform:translateX(20px); background:var(--gold); }
 
+  /* ── MICRO-ANIMATIONS ──
+     Restrained, gold-only polish. Everything here is covered by the global
+     prefers-reduced-motion override at the top of this stylesheet (durations
+     collapse to .01s, loops run once); the JS counter crossfade checks the
+     media query itself. The two one-time shimmer sweeps run 800ms — the one
+     deliberate exception to the 200–400ms budget, since a sweep can't be
+     read faster. */
+
+  /* 1 · Cinders counter breathes when the number goes up */
+  @keyframes cindersBreath { 0%{transform:scale(1); text-shadow:0 0 0 rgba(201,169,110,0)} 35%{transform:scale(1.05); text-shadow:0 0 12px rgba(201,169,110,.55)} 100%{transform:scale(1); text-shadow:0 0 0 rgba(201,169,110,0)} }
+  .nav-streak.cinders-bump { animation:cindersBreath .4s ease-out; }
+
+  /* 2 · Heart save pop / unsave fade */
+  @keyframes heartPop { 0%{transform:scale(1)} 40%{transform:scale(1.2); text-shadow:0 0 12px rgba(201,169,110,.6)} 100%{transform:scale(1); text-shadow:0 0 0 rgba(201,169,110,0)} }
+  @keyframes heartFade { from{opacity:.3} to{opacity:1} }
+  .heart-glyph { display:inline-block; }
+  .heart-glyph.heart-pop, .lib-heart.heart-pop { animation:heartPop .35s ease-out; }
+  .heart-glyph.heart-fade, .lib-heart.heart-fade { animation:heartFade .25s ease-out; }
+
+  /* 3 · Badge newly earned: settle in + one gold sweep across the circle */
+  @keyframes badgeSettle { from{transform:scale(.95); opacity:.7} to{transform:scale(1); opacity:1} }
+  @keyframes badgeSweep { from{background-position:180% 0} to{background-position:-80% 0} }
+  .badge-just-earned .badge-circle { animation:badgeSettle .4s ease-out; }
+  .badge-just-earned .badge-circle::after {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(115deg, transparent 32%, rgba(201,169,110,.4) 50%, transparent 68%);
+    background-size:220% 100%; background-position:180% 0;
+    -webkit-mask-image:radial-gradient(circle at 50% 45%, #000 52%, transparent 60%);
+    mask-image:radial-gradient(circle at 50% 45%, #000 52%, transparent 60%);
+    animation:badgeSweep .8s ease-out .2s both;
+  }
+
+  /* 4 · Counter crossfade targets (transforms need a box) */
+  #homeDayCount, #profileStatStreak { display:inline-block; }
+
+  /* 5 · Journal "✓ Saved" confirmation */
+  @keyframes savedConfirm { 0%{opacity:0; transform:scale(.95)} 55%{opacity:1; transform:scale(1); text-shadow:0 0 10px rgba(201,169,110,.55)} 100%{opacity:1; transform:scale(1); text-shadow:0 0 0 rgba(201,169,110,0)} }
+  #journalSaveBtn.saved-pop { animation:savedConfirm .4s ease-out; }
+
+  /* 6 · Affirmation text hovers gently (today card + reveal screen).
+     The reveal keeps its existing entrance (and shimmer, where supported);
+     the float starts after those finish. */
+  @keyframes gentleFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-2.5px)} }
+  .card-affirmation { animation:gentleFloat 3s ease-in-out infinite; }
+  .affirmation-text { animation:revealText 1.8s 1.2s ease forwards, gentleFloat 3s 3.4s ease-in-out infinite; }
+  @supports (-webkit-background-clip:text) {
+    .affirmation-text { animation:revealText 1.8s 1.2s ease forwards, shimmer 3.5s 3s ease-in-out 2, gentleFloat 3s 10.2s ease-in-out infinite; }
+  }
+
+  /* 7 · Rank name shimmer (cinders modal, once per rank change) */
+  @keyframes textShimmer { from{background-position:180% center} to{background-position:-80% center} }
+  @supports (-webkit-background-clip:text) {
+    .rank-shimmer {
+      background:linear-gradient(100deg, var(--gold) 42%, #f0e3c8 50%, var(--gold) 58%);
+      background-size:220% auto; -webkit-background-clip:text; background-clip:text;
+      -webkit-text-fill-color:transparent;
+      animation:textShimmer .8s ease-in-out .2s both;
+    }
+  }
+
+  /* 8 · Notification dot: soft attention pulse */
+  @keyframes dotPulse { 0%,100%{opacity:1} 50%{opacity:.7} }
+  .nav-bell-dot { animation:dotPulse 2.4s ease-in-out infinite; }
+
+  /* 9 · Toggle pills: eased thumb slide, gold fill follows */
+  .toggle-pill-knob { transition:transform .3s cubic-bezier(.22,.61,.36,1), background .3s ease-out; }
+  .toggle-pill-track { transition:background .3s ease-out, border-color .3s ease-out, box-shadow .3s ease-out; }
+  .toggle-pill input:checked + .toggle-pill-track { box-shadow:inset 0 0 8px rgba(201,169,110,.18); }
+
+  /* 10 · Tab screens fade in faster than full-screen transitions */
+  #home.active, #library.active, #journal.active, #badges.active, #profile.active { animation-duration:.15s; }
+
 </style>
 </head>
 <body>
@@ -1838,7 +1910,64 @@ function formatCinders(count) {
 }
 function updateNavCinders() {
   const el = document.getElementById('navCindersEl');
-  if(el) el.textContent = '✦ ' + formatCinders(currentCinders);
+  if(!el) return;
+  const prev = el.dataset.cinders;
+  el.textContent = '✦ ' + formatCinders(currentCinders);
+  el.dataset.cinders = currentCinders;
+  // Breathe when the number goes up (first paint stays still)
+  if(prev !== undefined && currentCinders > Number(prev)) {
+    el.classList.remove('cinders-bump');
+    void el.offsetWidth; // restart the animation if one is mid-flight
+    el.classList.add('cinders-bump');
+  }
+}
+
+// Save-button face: heart glyph + label. effect: 'pop' (just saved),
+// 'fade' (just unsaved), or undefined for a silent re-render.
+function renderSaveState(btn, isSaved, effect) {
+  if(!btn) return;
+  btn.innerHTML = '<span class="heart-glyph' + (effect ? ' heart-' + effect : '') + '">'
+    + (isSaved ? '♥︎' : '♡') + '</span>&nbsp; ' + (isSaved ? 'Saved' : 'Save');
+  btn.classList.toggle('active', isSaved);
+}
+
+// Crossfade a counter to a new value — old number fades down, new fades up.
+// The first render is instant, and reduced-motion users always get an
+// instant swap (the CSS media query can't cover Web Animations API calls).
+function swapNumber(el, value) {
+  if(!el) return;
+  const next = String(value);
+  const canAnimate = el.dataset.numInit === '1' && el.textContent !== next
+    && typeof el.animate === 'function'
+    && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  el.dataset.numInit = '1';
+  if(!canAnimate) { el.textContent = next; return; }
+  const out = el.animate(
+    [{ opacity: 1, transform: 'translateY(0)' }, { opacity: 0, transform: 'translateY(6px)' }],
+    { duration: 150, easing: 'ease-in', fill: 'forwards' });
+  out.onfinish = () => {
+    el.textContent = next;
+    out.cancel();
+    el.animate(
+      [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'translateY(0)' }],
+      { duration: 200, easing: 'ease-out' });
+  };
+}
+
+// Push current state to the iOS home-screen widget (no-op on web/Android —
+// see capacitor-init.js). Before today's reveal the widget gets an
+// invitation line instead of the affirmation text, so the in-app reveal
+// ritual isn't spoiled on the home screen.
+function syncWidgetData() {
+  if(!window.AMWidget) return;
+  const revealed = dailyActions.affirmationUnlocked;
+  window.AMWidget.sync({
+    todayAffirmation: revealed ? todayAffirmation : "Today's affirmation is waiting to be revealed.",
+    todayCategory: revealed ? todayCategory : 'Tap to reveal',
+    streakCount: streakCount || 0,
+    currentRank: getLevelInfo(currentCinders).name,
+    unlockedCount: unlockedCount || 0
+  });
 }
 
 function openCindersModal() {
@@ -1854,7 +1983,18 @@ function openCindersModal() {
   const fmtNum = n => n.toLocaleString();
 
   currentModalType = 'info';
-  document.getElementById('modalDay').textContent = info.name;
+  // One-time gold shimmer across the rank name when the rank has changed
+  // since the user last saw it. info.name comes from the fixed rank list,
+  // never user input, so innerHTML is safe here.
+  const modalDayEl = document.getElementById('modalDay');
+  let lastSeenRank = null;
+  try { lastSeenRank = localStorage.getItem('am_last_rank_seen'); } catch(e) {}
+  if(lastSeenRank && lastSeenRank !== info.name) {
+    modalDayEl.innerHTML = '<span class="rank-shimmer">' + info.name + '</span>';
+  } else {
+    modalDayEl.textContent = info.name;
+  }
+  try { localStorage.setItem('am_last_rank_seen', info.name); } catch(e) {}
   document.getElementById('modalText').innerHTML = `
     <div style="margin-top:8px">
       <div style="height:2px;background:rgba(201,169,110,.12);width:100%;border-radius:1px;margin-bottom:8px">
@@ -2649,8 +2789,7 @@ async function buildHome(){
 
   // Set day counters immediately — unlockedCount is already loaded from profile
   updateNavCinders();
-  const _dayCountEl = document.getElementById('homeDayCount');
-  if(_dayCountEl) _dayCountEl.textContent = unlockedCount;
+  swapNumber(document.getElementById('homeDayCount'), unlockedCount);
 
   // Update streak (last_visit_date rides along for the daily-login check
   // below — one profile read per home build instead of two)
@@ -2749,11 +2888,7 @@ async function buildHome(){
     unlockedEl.style.display = 'block';
     document.getElementById('homeAffirmationText').textContent = todayAffirmation;
     document.getElementById('homeAffirmationCat').textContent = '✦  ' + todayCategory;
-    const saveBtn = document.getElementById('saveBtn');
-    if(saveBtn) {
-      saveBtn.textContent = saved ? '♥︎  Saved' : '♡  Save';
-      saveBtn.classList.toggle('active', saved);
-    }
+    renderSaveState(document.getElementById('saveBtn'), saved);
   } else {
     lockedEl.style.display = 'block';
     unlockedEl.style.display = 'none';
@@ -2768,6 +2903,7 @@ async function buildHome(){
   updateDailyPractice();
   // Refresh badge-earned states so newly-crossed badges notify (and seed baseline on first run)
   updateBadgeEarnedStates();
+  syncWidgetData();
 }
 
 let unlockingAffirmation = false;
@@ -2822,13 +2958,10 @@ async function unlockTodaysAffirmation() {
     document.getElementById('homeAffirmationText').textContent = todayAffirmation;
     document.getElementById('homeAffirmationCat').textContent = '✦  ' + todayCategory;
     saved = false;
-    const saveBtn = document.getElementById('saveBtn');
-    if(saveBtn) {
-      saveBtn.textContent = '♡  Save';
-      saveBtn.classList.remove('active');
-    }
+    renderSaveState(document.getElementById('saveBtn'), false);
     updateDailyPractice();
     buildLibrary();
+    syncWidgetData();
   } finally {
     unlockingAffirmation = false;
   }
@@ -2837,8 +2970,7 @@ function buildLibrary(){
   if(!affirmationsLoaded){ affirmationsReady.then(buildLibrary); return; }
   const grid=document.getElementById('libraryGrid');
   grid.innerHTML='';
-  const dayCountEl = document.getElementById('homeDayCount');
-  if(dayCountEl) dayCountEl.textContent = unlockedCount;
+  swapNumber(document.getElementById('homeDayCount'), unlockedCount);
 
   // Today tile (full width) — always the current unlocked day. Until the user
   // taps Reveal, keep the text blurred so scrolling down doesn't spoil it.
@@ -2904,11 +3036,8 @@ let savedCindersAwarded = false;
 async function toggleSave(){
   await toggleSaveByDay(unlockedCount, todayAffirmation, todayCategory);
   saved = savedAffirmationIds.has(unlockedCount);
-  const b = document.getElementById('saveBtn');
-  if(b) {
-    b.textContent = saved ? '♥︎  Saved' : '♡  Save';
-    b.classList.toggle('active', saved);
-  }
+  // Saving pops the heart with a gold pulse; unsaving is a quiet fade.
+  renderSaveState(document.getElementById('saveBtn'), saved, saved ? 'pop' : 'fade');
 }
 
 async function toggleSaveByDay(dayNum, text, cat) {
@@ -2933,11 +3062,13 @@ async function toggleSaveByDay(dayNum, text, cat) {
     h.textContent = isSaved ? '♥︎' : '♡';
     h.classList.toggle('saved', isSaved);
     h.setAttribute('aria-label', isSaved ? 'Remove from saved' : 'Save affirmation');
+    h.classList.remove('heart-pop', 'heart-fade');
+    void h.offsetWidth; // restart if toggled rapidly
+    h.classList.add(isSaved ? 'heart-pop' : 'heart-fade');
   });
   const saveBtn = document.getElementById('saveBtn');
   if (saveBtn && dayNum === unlockedCount) {
-    saveBtn.textContent = isSaved ? '♥︎  Saved' : '♡  Save';
-    saveBtn.classList.toggle('active', isSaved);
+    renderSaveState(saveBtn, isSaved);
     saved = isSaved;
   }
 }
@@ -3646,14 +3777,15 @@ async function saveJournal(){
   updateLastSavedTime();
   const saveBtn = document.getElementById('journalSaveBtn');
   if(saveBtn) {
-    const originalText = saveBtn.textContent;
     saveBtn.textContent = '✓ Saved';
     saveBtn.style.borderColor = 'var(--gold)';
     saveBtn.style.color = 'var(--gold)';
+    saveBtn.classList.add('saved-pop');
     setTimeout(() => {
       saveBtn.textContent = 'Save Entry';
       saveBtn.style.borderColor = '';
       saveBtn.style.color = '';
+      saveBtn.classList.remove('saved-pop');
     }, 1500);
   }
 }
@@ -4393,6 +4525,11 @@ function buildBadgeScreen() {
       const isPinned = pinnedBadges.includes(b.id);
       const item = document.createElement('div');
       item.className = 'badge-item' + (b.earned ? ' earned' : ' locked-badge') + (isPinned ? ' pinned' : '');
+      // One-time settle + gold sweep for badges earned since the last visit
+      if(b.earned && recentlyEarnedBadges.has(b.id)) {
+        item.classList.add('badge-just-earned');
+        recentlyEarnedBadges.delete(b.id);
+      }
       item.onclick = () => openBadgeModal(b.id);
       item.innerHTML = renderBadgeCircle(cat.icon, b.tier, b.earned, color) +
         `<div class="badge-pin-dot"></div>` +
@@ -4787,7 +4924,7 @@ async function buildProfile() {
   document.getElementById('profileNextRank').textContent = info.nextName;
 
   // Stats
-  document.getElementById('profileStatStreak').textContent = streakCount;
+  swapNumber(document.getElementById('profileStatStreak'), streakCount);
   document.getElementById('profileStatAffirmations').textContent = unlockedCount;
   if(currentUser) {
     const { count } = await db.from('journal_entries')
@@ -5369,6 +5506,10 @@ function closeNotifOutside(e) {
 // Fires a notification the first time each badge is earned, persisting which
 // badges have already been announced so existing users don't get a backlog burst.
 const NOTIFIED_BADGES_KEY = 'am_notified_badges';
+// Badges earned since the last time the badges screen was built — these get
+// a one-time gold shimmer sweep when the user next sees them (consumed there).
+const recentlyEarnedBadges = new Set();
+
 function notifyNewlyEarnedBadges() {
   let announced;
   const firstRun = localStorage.getItem(NOTIFIED_BADGES_KEY) === null;
@@ -5379,6 +5520,7 @@ function notifyNewlyEarnedBadges() {
       announced.add(b.id);
       // On the very first run we seed silently to avoid notifying for past badges
       if(!firstRun) {
+        recentlyEarnedBadges.add(b.id);
         addNotification(`You earned ${b.name} · ${cat.name} Tier ${b.tier}`, 'badge');
         // adminMode preview marks every badge earned — don't pollute analytics
         if(!adminMode) trackEvent('badge_earned', { badge: b.id });
