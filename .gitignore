@@ -3,3 +3,5 @@ node_modules/
 www/
 .vercel
 .DS_Store
+# Local Supabase CLI cache/link state (machine-specific, not source)
+supabase/.temp/

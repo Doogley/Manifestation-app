@@ -1,5 +1,5 @@
 {
-  "appId": "app.alreadymine",
+  "appId": "app.alreadymine.ios",
   "appName": "Already Mine",
   "webDir": "www",
   "server": {
@@ -10,7 +10,8 @@
     ]
   },
   "ios": {
-    "contentInset": "automatic"
+    "contentInset": "automatic",
+    "backgroundColor": "#1a1610"
   },
   "plugins": {
     "StatusBar": {

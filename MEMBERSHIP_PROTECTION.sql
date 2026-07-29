@@ -1,0 +1,28 @@
+-- ═══════════════════════════════════════════════════════════════════
+-- MEMBERSHIP_PROTECTION.sql — stop clients from granting themselves
+-- premium.
+--
+-- SUPERSEDED — kept for history only, do not run.
+--
+-- This file originally created protect_is_paid_member() /
+-- trg_protect_is_paid_member to block client writes to
+-- profiles.is_paid_member. After creating it, we discovered
+-- SECURITY_FIXES.sql's protect_privileged_profile_columns() /
+-- trg_protect_privileged_profile_columns was already live on the
+-- database (applied at some earlier point, separately from this file) —
+-- checked via pg_trigger/pg_get_functiondef — and does the exact same
+-- thing: rejects any change to is_paid_member unless auth.role() =
+-- 'service_role'. The two triggers were redundant, so
+-- trg_protect_is_paid_member and protect_is_paid_member() were dropped,
+-- leaving SECURITY_FIXES.sql's original trigger as the sole guard.
+--
+-- Current live protection (already applied, nothing to run here):
+--   CREATE TRIGGER trg_protect_privileged_profile_columns
+--     BEFORE UPDATE ON public.profiles
+--     FOR EACH ROW EXECUTE FUNCTION protect_privileged_profile_columns();
+-- See SECURITY_FIXES.sql for that function's definition.
+--
+-- Only the service_role (the RevenueCat webhook's Edge Function — see
+-- supabase/functions/revenuecat-webhook/) may change is_paid_member from
+-- here on. The client does not write this column (see index.html).
+-- ═══════════════════════════════════════════════════════════════════

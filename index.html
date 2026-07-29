@@ -149,7 +149,7 @@
   .nav-bell { position:relative; display:flex; align-items:center; justify-content:center; width:24px; height:24px; color:var(--gold); cursor:pointer; }
   .nav-bell-svg { width:18px; height:18px; opacity:.82; transition:opacity .3s; }
   .nav-bell:hover .nav-bell-svg { opacity:1; }
-  .nav-bell-dot { display:none; position:absolute; top:0; right:0; width:6px; height:6px; border-radius:50%; background:#d9534f; box-shadow:0 0 0 2px var(--deep); }
+  .nav-bell-dot { display:none; position:absolute; top:-4px; right:-6px; min-width:16px; height:16px; padding:0 3px; border-radius:999px; background:var(--gold); color:var(--deep); align-items:center; justify-content:center; font-family:'Jost',sans-serif; font-size:9px; font-weight:600; box-shadow:0 0 0 2px var(--deep); }
   /* ── NOTIFICATIONS ── */
   .notif-panel { display:none; position:fixed; inset:0; background:rgba(10,8,5,.88); z-index:200; align-items:flex-end; justify-content:center; backdrop-filter:blur(8px); }
   .notif-panel.open { display:flex; }
@@ -237,7 +237,7 @@
   .nav-tab svg { width:18px; height:18px; stroke:currentColor; transition:stroke .3s; }
   .nav-tab-label { font-size:10px; letter-spacing:.1em; text-transform:uppercase; }
 
-  #auth { overflow-y:auto; }
+  #auth { padding-bottom:250px; overflow-y:auto; }
 
   /* ── MONTHLY SUMMARY ── */
   #monthlySummary { align-items:center; justify-content:flex-start; padding-bottom:90px; overflow-y:auto; }
@@ -527,7 +527,7 @@
   .profile-member-since { font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); }
 
   .profile-nickname-edit { display:flex; align-items:center; gap:8px; justify-content:center; margin-top:12px; }
-  .profile-nickname-input { background:none; border:none; border-bottom:1px solid rgba(201,169,110,.2); color:var(--cream); font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; text-align:center; outline:none; width:200px; padding:4px 0; transition:border-color .3s; display:none; }
+  .profile-nickname-input { background:none; border:none; border-bottom:1px solid rgba(201,169,110,.2); color:var(--cream); font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; text-align:center; outline:none; width:200px; margin:0 auto; padding:4px 0; transition:border-color .3s; display:none; }
   .profile-nickname-input:focus { border-bottom-color:var(--gold); }
   .profile-edit-btn { background:none; border:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:11px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:color .3s; padding:4px 0; }
   .profile-edit-btn:hover { color:var(--gold); }
@@ -575,7 +575,7 @@
     .profile-stat{padding:12px 8px}
     .profile-stat-num{font-size:24px}
   }
-  #upgrade { padding-bottom:40px; overflow-y:auto; }
+  #upgrade { padding-bottom:200px; overflow-y:auto; }
   .upgrade-close-btn { background:none; border:none; color:var(--muted); font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.15em; text-transform:uppercase; cursor:pointer; transition:color .3s; }
   .upgrade-close-btn:hover { color:var(--cream); }
   .upgrade-hero { position:relative; z-index:1; text-align:center; padding:36px 32px 28px; }
@@ -616,7 +616,7 @@
   .compare-yes { color:var(--gold); }
   .compare-no { color:rgba(255,255,255,.5); }
   .compare-table .highlight-col { color:var(--cream); }
-  .upgrade-cta-wrap { position:relative; z-index:1; padding:0 32px 16px; }
+  .upgrade-cta-wrap { position:fixed; left:0; right:0; bottom:0; z-index:100; padding:16px 32px calc(16px + env(safe-area-inset-bottom,0px)); background:rgba(26,22,16,.95); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-top:1px solid rgba(201,169,110,.1); }
   .upgrade-cta-btn { width:100%; padding:20px; background:var(--gold); border:none; color:var(--deep); font-family:'Jost',sans-serif; font-weight:400; font-size:14px; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; transition:all .3s; }
   .upgrade-cta-btn:hover { opacity:.9; }
   .upgrade-fine-print { position:relative; z-index:1; text-align:center; padding:0 32px 8px; }
@@ -947,7 +947,16 @@
       <input id="signupPassword" aria-label="Password" type="password" placeholder="Password (min 6 characters)" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
       <input id="signupReferral" aria-label="Referral code (optional)" type="text" placeholder="Referral code (optional)" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%">
       <div id="signupError" style="font-size:12px;color:#c97070;min-height:18px;text-align:left"></div>
-      <button onclick="handleSignup()" class="btn-primary" style="width:100%;padding:16px">Begin My Journey</button>
+      <button id="signupSubmitBtn" onclick="handleSignup()" class="btn-primary" style="width:100%;padding:16px">Begin My Journey</button>
+    </div>
+
+    <!-- OTP verification form (shown after signup when email confirmation is required) -->
+    <div id="otpForm" style="max-width:320px;margin:0 auto;display:none;flex-direction:column;gap:12px">
+      <p id="otpInstructions" style="font-size:13px;font-weight:300;color:var(--muted);line-height:1.7;text-align:left;margin:0">We sent a code to your email. Enter it below to confirm your account.</p>
+      <input id="otpCode" aria-label="Confirmation code" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter code" style="background:rgba(201,169,110,.04);border:1px solid rgba(201,169,110,.2);color:var(--cream);font-family:'Jost',sans-serif;font-size:14px;padding:14px 16px;outline:none;width:100%;text-align:center;letter-spacing:.2em">
+      <div id="otpError" style="font-size:12px;color:#c97070;min-height:18px;text-align:left"></div>
+      <button onclick="handleVerifyOtp()" class="btn-primary" style="width:100%;padding:16px">Confirm Account</button>
+      <button onclick="handleResendOtp()" style="background:none;border:none;color:var(--muted);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.08em;cursor:pointer;text-decoration:underline;text-underline-offset:3px;margin-top:4px">Resend code</button>
     </div>
 
     <!-- Forgot password form -->
@@ -1114,7 +1123,7 @@
     </div>
   </div>
   <div class="library-wrap">
-    <div class="section-label">Your Library</div>
+    <div class="section-label" onclick="openLibrary()" style="cursor:pointer">Your Library</div>
     <div class="library-header"><div class="library-count" id="libraryCount">1 of 30 unlocked · 800+ with membership</div></div>
     <div class="library-grid" id="libraryGrid"></div>
   </div>
@@ -1424,14 +1433,14 @@
   <div class="pricing-toggle-wrap">
     <div class="pricing-toggle">
       <button class="toggle-btn" id="toggleMonthly" onclick="setPricing('monthly')">Monthly</button>
-      <button class="toggle-btn active" id="toggleAnnual" onclick="setPricing('annual')">Annual <span class="save-badge">Save 40%</span></button>
+      <button class="toggle-btn active" id="toggleAnnual" onclick="setPricing('annual')">Annual <span class="save-badge" id="saveBadge">Save 46%</span></button>
     </div>
   </div>
   <div class="price-card-wrap">
     <div class="price-card">
       <div class="price-label" id="priceLabel">Annual Plan</div>
-      <div class="price-amount" id="priceAmount">$1.79</div>
-      <div class="price-period" id="pricePeriod">per month · billed $21.49/year</div>
+      <div class="price-amount" id="priceAmount">$1.83</div>
+      <div class="price-period" id="pricePeriod">per month · billed $22.00/year</div>
       <div class="price-equiv" id="priceEquiv">Less than a cup of coffee per month</div>
     </div>
   </div>
@@ -1970,6 +1979,10 @@ function syncWidgetData() {
   });
 }
 
+function lastRankSeenKey() {
+  return currentUser ? ('am_last_rank_seen_' + currentUser.id) : null;
+}
+
 function openCindersModal() {
   const info = getLevelInfo(currentCinders);
   const pct = info.pct;
@@ -1987,14 +2000,19 @@ function openCindersModal() {
   // since the user last saw it. info.name comes from the fixed rank list,
   // never user input, so innerHTML is safe here.
   const modalDayEl = document.getElementById('modalDay');
+  const rankKey = lastRankSeenKey();
   let lastSeenRank = null;
-  try { lastSeenRank = localStorage.getItem('am_last_rank_seen'); } catch(e) {}
+  if(rankKey) {
+    try { lastSeenRank = localStorage.getItem(rankKey); } catch(e) {}
+  }
   if(lastSeenRank && lastSeenRank !== info.name) {
     modalDayEl.innerHTML = '<span class="rank-shimmer">' + info.name + '</span>';
   } else {
     modalDayEl.textContent = info.name;
   }
-  try { localStorage.setItem('am_last_rank_seen', info.name); } catch(e) {}
+  if(rankKey) {
+    try { localStorage.setItem(rankKey, info.name); } catch(e) {}
+  }
   document.getElementById('modalText').innerHTML = `
     <div style="margin-top:8px">
       <div style="height:2px;background:rgba(201,169,110,.12);width:100%;border-radius:1px;margin-bottom:8px">
@@ -2083,6 +2101,11 @@ function friendlyAuthError(error, context) {
       return 'Password must be at least 6 characters.';
     }
   }
+  if (context === 'otp') {
+    if (raw.includes('expired') || raw.includes('invalid')) {
+      return 'That code is incorrect or has expired. Please try again or request a new one.';
+    }
+  }
   if (raw.includes('rate') || raw.includes('too many')) {
     return 'Too many attempts. Please try again in a few minutes.';
   }
@@ -2107,6 +2130,7 @@ function showAuthForm(form) {
   document.getElementById('authTabs').style.display = (form === 'login' || form === 'signup') ? 'flex' : 'none';
   document.getElementById('loginForm').style.display = form === 'login' ? 'flex' : 'none';
   document.getElementById('signupForm').style.display = form === 'signup' ? 'flex' : 'none';
+  document.getElementById('otpForm').style.display = form === 'otp' ? 'flex' : 'none';
   document.getElementById('forgotForm').style.display = form === 'forgot' ? 'flex' : 'none';
   document.getElementById('resetPasswordForm').style.display = form === 'reset' ? 'flex' : 'none';
 }
@@ -2204,41 +2228,117 @@ function resetUserState() {
   if(profileAvatar) { profileAvatar.innerHTML = ''; profileAvatar.textContent = resetInitial; }
   const navAvatar = document.getElementById('navAvatar');
   if(navAvatar) { navAvatar.innerHTML = ''; navAvatar.textContent = resetInitial; }
+  // Notifications belong to the account that's leaving — clear the in-memory
+  // list and badge so nothing lingers on screen for whoever logs in next on
+  // this device. Their own scoped notifications get loaded back in by
+  // loadUserProfile() -> loadNotifications() once they log in.
+  notifications = [];
+  updateBellBadge();
+  const notifList = document.getElementById('notifList');
+  if(notifList) notifList.innerHTML = '';
 }
 
-async function handleSignup() {
-  resetUserState();
-  const name = document.getElementById('signupName').value.trim();
-  const email = document.getElementById('signupEmail').value.trim();
-  const password = document.getElementById('signupPassword').value;
-  const referralCode = document.getElementById('signupReferral').value.trim();
-  const errorEl = document.getElementById('signupError');
-  errorEl.textContent = '';
-  if(!name || !email || !password) { errorEl.textContent = 'Please fill in all fields.'; return; }
-  if(password.length < 6) { errorEl.textContent = 'Password must be at least 6 characters.'; return; }
-  const { data, error } = await db.auth.signUp({ email, password });
-  if(error) { errorEl.textContent = friendlyAuthError(error, 'signup'); return; }
-  // When confirmation is enabled, Supabase returns a user with no identities for
-  // an already-registered email (to avoid leaking existence). Treat that as a
-  // duplicate so we don't silently create a broken signup flow.
-  if(data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-    errorEl.textContent = 'An account with this email already exists.';
-    return;
-  }
-  currentUser = data.user;
-  // Create their profile in the database
+// Finishes account setup once we have a real, authenticated session for a
+// brand-new user — whether that session came back immediately from signUp()
+// (confirmation off) or from a later verifyOtp()/email-link confirmation.
+// Reads real_name/referral_code from auth user_metadata (set at signUp time
+// via options.data) rather than form fields, so this works identically no
+// matter how long confirmation took or which screen triggered it.
+async function completeSignup(user) {
+  currentUser = user;
+  const meta = user.user_metadata || {};
   await db.from('profiles').insert({
     id: currentUser.id,
-    real_name: name,
+    real_name: meta.real_name || null,
     cinders: 0,
     streak: 0,
-    referral_code: referralCode || null,
+    referral_code: meta.referral_code || null,
   }).then(dbResult('create profile'));
-  userRealName = name;
+  userRealName = meta.real_name || '';
   trackEvent('signup_complete');
-  // New user goes to onboarding
   showScreen('onboarding');
   renderQuestion(0);
+}
+
+// Email this signup's OTP was sent to, so handleVerifyOtp()/handleResendOtp()
+// know who to verify/resend for without depending on the signup form's DOM
+// state still being intact once the user has moved to the OTP screen.
+let pendingVerifyEmail = '';
+
+async function handleSignup() {
+  const errorEl = document.getElementById('signupError');
+  const btn = document.getElementById('signupSubmitBtn');
+  errorEl.textContent = '';
+  errorEl.style.color = '#c97070';
+  try {
+    resetUserState();
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const referralCode = document.getElementById('signupReferral').value.trim();
+    if(!name || !email || !password) { errorEl.textContent = 'Please fill in all fields.'; return; }
+    if(password.length < 6) { errorEl.textContent = 'Password must be at least 6 characters.'; return; }
+    // Guard against double-taps firing overlapping signUp() calls (e.g. a slow
+    // network response with no other feedback) — same pattern as handleSubscribe().
+    if(btn){ btn.disabled = true; btn.textContent = 'Creating Account…'; }
+    // Pass the typed name and referral code as auth user_metadata (not just
+    // local variables) so they survive regardless of whether email confirmation
+    // delays the session — stored on the auth user immediately, and available
+    // via user.user_metadata whenever completeSignup() actually runs.
+    const { data, error } = await db.auth.signUp({ email, password, options: { data: { real_name: name, referral_code: referralCode || null } } });
+    if(error) { errorEl.textContent = friendlyAuthError(error, 'signup'); return; }
+    // When confirmation is enabled, Supabase returns a user with no identities for
+    // an already-registered email (to avoid leaking existence). Treat that as a
+    // duplicate so we don't silently create a broken signup flow.
+    if(data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      errorEl.textContent = 'An account with this email already exists.';
+      return;
+    }
+    // Email confirmation required (mailer autoconfirm off): signUp() creates the
+    // auth user but returns no session until the code is verified. Don't treat
+    // them as logged in or create a profile row yet — there's no authenticated
+    // session for RLS to allow that write. Send them to the OTP screen instead;
+    // completeSignup() runs from handleVerifyOtp() once they confirm.
+    if(!data.session) {
+      pendingVerifyEmail = email;
+      document.getElementById('otpInstructions').textContent = 'We sent a code to ' + email + '. Enter it below to confirm your account.';
+      document.getElementById('otpError').textContent = '';
+      document.getElementById('otpCode').value = '';
+      showAuthForm('otp');
+      return;
+    }
+    await completeSignup(data.user);
+  } catch(e) {
+    console.error('Signup error:', e);
+    errorEl.textContent = 'Something went wrong. Please try again.';
+  } finally {
+    if(btn && document.getElementById('signupSubmitBtn')){ btn.disabled = false; btn.textContent = 'Begin My Journey'; }
+  }
+}
+
+async function handleVerifyOtp() {
+  const code = document.getElementById('otpCode').value.trim();
+  const errorEl = document.getElementById('otpError');
+  errorEl.textContent = '';
+  errorEl.style.color = '#c97070';
+  if(!code) { errorEl.textContent = 'Please enter the code from your email.'; return; }
+  if(!pendingVerifyEmail) { errorEl.textContent = 'Please sign up again.'; return; }
+  const { data, error } = await db.auth.verifyOtp({ email: pendingVerifyEmail, token: code, type: 'signup' });
+  if(error) { errorEl.textContent = friendlyAuthError(error, 'otp'); return; }
+  if(!data.session || !data.user) { errorEl.textContent = 'Something went wrong. Please try again.'; return; }
+  pendingVerifyEmail = '';
+  await completeSignup(data.user);
+}
+
+async function handleResendOtp() {
+  const errorEl = document.getElementById('otpError');
+  errorEl.textContent = '';
+  errorEl.style.color = '#c97070';
+  if(!pendingVerifyEmail) { errorEl.textContent = 'Please sign up again.'; return; }
+  const { error } = await db.auth.resend({ type: 'signup', email: pendingVerifyEmail });
+  if(error) { errorEl.textContent = friendlyAuthError(error, 'otp'); return; }
+  errorEl.style.color = 'var(--gold)';
+  errorEl.textContent = 'A new code has been sent.';
 }
 
 async function handleLogout() {
@@ -2265,7 +2365,7 @@ async function deleteAccount() {
   try {
     const uid = currentUser.id;
     // Child tables first, profiles last
-    const tables = ['habit_completions', 'habits', 'intentions', 'journal_entries', 'saved_affirmations', 'user_affirmations', 'monthly_summaries', 'feedback'];
+    const tables = ['habit_completions', 'habits', 'intentions', 'journal_entries', 'saved_affirmations', 'user_affirmations', 'monthly_summaries', 'feedback', 'body_scan_sessions'];
     for(const table of tables) {
       const { error } = await db.from(table).delete().eq('user_id', uid);
       if(error) throw error;
@@ -2309,6 +2409,10 @@ function getUserAffirmationSequence() {
 
 // ── PROFILE LOADING ──
 async function loadUserProfile() {
+  // Re-scope notifications to whichever account just became currentUser —
+  // covers login, signup, password-reset auto-login, and cold-start-with-
+  // existing-session, since they all funnel through here.
+  loadNotifications();
   await affirmationsReady;
   const { data, error } = await db.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
   if(error && error.code !== 'PGRST116') {
@@ -2317,7 +2421,16 @@ async function loadUserProfile() {
     showScreen('auth');
     return;
   }
-  if(!data) { showScreen('onboarding'); renderQuestion(0); return; }
+  if(!data) {
+    // No profile row yet (e.g. they just confirmed their email and this is
+    // their first real login) — seed the name from auth user_metadata, set
+    // at signup, so the onboarding reveal screen's greeting is personalized
+    // even before goToHome() creates the row.
+    userRealName = currentUser.user_metadata?.real_name || '';
+    showScreen('onboarding');
+    renderQuestion(0);
+    return;
+  }
   // If onboarding was never completed, send back to onboarding
   if(data.unlocked_count == null || data.intention == null) {
     userRealName = data.real_name || '';
@@ -2341,16 +2454,17 @@ async function loadUserProfile() {
   weeklyMantra = data.mantra || '';
   lastMantraDate = data.last_mantra_date || '';
   isPaidMember     = data.is_paid_member    || false;
-  // Native: trust the store entitlement as a fallback. If the purchase went
-  // through but the profiles.is_paid_member write failed (offline, or blocked
-  // once the server-side column protection ships), the member would otherwise
-  // be locked out of what they paid for on next launch.
+  // Native: trust the store entitlement as a fallback so a member isn't
+  // locked out of what they paid for on this device while the RevenueCat
+  // webhook -> Edge Function catches up writing is_paid_member server-side.
+  // This only affects local session state, never the database — the client
+  // is blocked from writing is_paid_member directly (MEMBERSHIP_PROTECTION.sql),
+  // so the row itself stays whatever the webhook last verified it to be.
   if(!isPaidMember && IS_NATIVE_APP && window.AMPurchases) {
     try {
       await AMPurchases.initializePurchases(currentUser.id);
       if(await AMPurchases.checkSubscriptionStatus()) {
         isPaidMember = true;
-        db.from('profiles').update({ is_paid_member: true }).eq('id', currentUser.id).then(dbResult('sync membership'));
       }
     } catch(e) { console.error('entitlement check failed:', e); }
   }
@@ -2562,7 +2676,7 @@ document.addEventListener('keydown', e => {
   }
 });
 
-const noNavScreens = ['loading','auth','splash','onboarding','reveal','grace','monthlySummary'];
+const noNavScreens = ['loading','auth','splash','onboarding','reveal','grace','monthlySummary','upgrade'];
 function _navigateToScreen(id){
   currentScreen = id;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -2624,7 +2738,8 @@ function renderQuestion(i){
   `;
 }
 function selectOpt(el,val){document.querySelectorAll('.option-btn').forEach(b=>{b.classList.remove('selected');b.setAttribute('aria-pressed','false');});el.classList.add('selected');el.setAttribute('aria-pressed','true');selectedOption=val;document.getElementById('nextBtn').classList.add('ready');}
-function nextQ(){if(!selectedOption||questionLeaving)return;answers[questions[currentQuestion].id]=selectedOption;if(currentQuestion<questions.length-1){currentQuestion++;transitionToQuestion(currentQuestion);}else showReveal();}
+function nextQ(){if(!selectedOption||questionLeaving)return;answers[questions[currentQuestion].id]=selectedOption;if(currentQuestion<questions.length-1){currentQuestion++;transitionToQuestion(currentQuestion);}else showReveal();
+}
 
 function showReveal(){
   if(!affirmationsLoaded){ affirmationsReady.then(showReveal); return; }
@@ -2668,7 +2783,10 @@ async function goToHome(){
     // leaving the user stuck re-doing onboarding on every launch forever.
     await db.from('profiles').upsert({
       id: currentUser.id,
-      real_name: userRealName || null,
+      // Prefer the name captured at signup (auth user_metadata — survives
+      // regardless of whether email confirmation delayed this profile row
+      // from being created) over the in-memory fallback.
+      real_name: currentUser.user_metadata?.real_name || userRealName || null,
       intention: answers.intention || 'abundance',
       tone: answers.tone || 'gentle',
       timing: answers.timing || 'morning',
@@ -2986,8 +3104,11 @@ function buildLibrary(){
   }
   grid.appendChild(t);
 
-  // Previously unlocked days (1 through unlockedCount-1), descending
-  for(let d=unlockedCount-1;d>=1;d--){
+  // Previously unlocked days, descending — capped to the last 5. The Today
+  // tab is a quick-glance recap, not a duplicate of the Library tab (which
+  // shows the full history); see openLibrary() / buildLibraryScreen().
+  const recentHistoryFloor = Math.max(1, unlockedCount - 5);
+  for(let d=unlockedCount-1;d>=recentHistoryFloor;d--){
     const hist=affirmationHistory[d];
     const aff=hist||affirmationLibrary[d-1];
     if(!aff) continue;
@@ -3792,20 +3913,109 @@ async function saveJournal(){
 function openModal(day,text,cat){document.getElementById('modalDay').textContent=day;document.getElementById('modalText').textContent=text;document.getElementById('modalCat').textContent=cat;document.getElementById('modalOverlay').classList.add('open');}
 // ── UPGRADE ──
 let currentPricing='annual';
-function openUpgrade(){showScreen('upgrade');setPricing(currentPricing);}
+
+// Live StoreKit/Play prices from RevenueCat, populated on first visit to
+// the upgrade screen. Falls back to the static text below (kept as the
+// source of truth for web, and for native before/if the fetch fails).
+let livePricing = null;
+let livePricingPromise = null;
+let livePricingFetchDone = false; // true once the fetch settles, success or fail
+
+function loadLivePricing(){
+  if(livePricingPromise) return livePricingPromise;
+  if(!IS_NATIVE_APP || !window.AMPurchases || !window.AMPurchases.getOfferings){
+    livePricingFetchDone = true;
+    return Promise.resolve(null);
+  }
+  livePricingPromise = (async () => {
+    try {
+      const offerings = await window.AMPurchases.getOfferings();
+      const pkgs = (offerings && offerings.current && offerings.current.availablePackages) || [];
+      const findProduct = (productId) => {
+        const pkg = pkgs.find(p => p.product && p.product.identifier === productId);
+        return pkg && pkg.product;
+      };
+      const monthlyProduct = findProduct(window.AMPurchases.PRODUCTS.monthly);
+      const annualProduct = findProduct(window.AMPurchases.PRODUCTS.annual);
+      const result = {};
+      if(monthlyProduct && monthlyProduct.priceString){
+        result.monthly = {
+          priceString: monthlyProduct.priceString,
+          price: typeof monthlyProduct.price === 'number' ? monthlyProduct.price : null
+        };
+      }
+      if(annualProduct && annualProduct.priceString){
+        let perMonthString = null;
+        try {
+          if(typeof annualProduct.price === 'number' && annualProduct.currencyCode){
+            perMonthString = new Intl.NumberFormat(undefined, { style: 'currency', currency: annualProduct.currencyCode }).format(annualProduct.price / 12);
+          }
+        } catch(e) {}
+        result.annual = {
+          priceString: annualProduct.priceString,
+          perMonthString: perMonthString,
+          price: typeof annualProduct.price === 'number' ? annualProduct.price : null
+        };
+      }
+      // Savings badge: what paying annually saves vs. 12x the monthly price.
+      if(result.monthly && result.monthly.price != null && result.annual && result.annual.price != null && result.monthly.price > 0){
+        const yearIfMonthly = result.monthly.price * 12;
+        result.savingsPercent = Math.round((1 - (result.annual.price / yearIfMonthly)) * 100);
+      }
+      livePricing = result;
+      return result;
+    } catch(e) {
+      console.error('[Pricing] failed to load offerings:', e);
+      return null;
+    } finally {
+      livePricingFetchDone = true;
+    }
+  })();
+  return livePricingPromise;
+}
+
+function openUpgrade(){
+  showScreen('upgrade');
+  if(IS_NATIVE_APP && !livePricing && !livePricingFetchDone){
+    loadLivePricing().then(() => setPricing(currentPricing));
+  }
+  setPricing(currentPricing);
+}
 function setPricing(type){
   currentPricing=type;
   document.getElementById('toggleMonthly').classList.toggle('active',type==='monthly');
   document.getElementById('toggleAnnual').classList.toggle('active',type==='annual');
+  const loading = !livePricing && !livePricingFetchDone && !!livePricingPromise;
+  const saveBadge = document.getElementById('saveBadge');
+  if(saveBadge){
+    const pct = livePricing && typeof livePricing.savingsPercent === 'number' ? livePricing.savingsPercent : 46;
+    saveBadge.textContent = 'Save ' + pct + '%';
+  }
   if(type==='annual'){
     document.getElementById('priceLabel').textContent='Annual Plan';
-    document.getElementById('priceAmount').textContent='$1.79';
-    document.getElementById('pricePeriod').textContent='per month · billed $21.49/year';
+    if(livePricing && livePricing.annual){
+      document.getElementById('priceAmount').textContent = livePricing.annual.perMonthString || livePricing.annual.priceString;
+      document.getElementById('pricePeriod').textContent = 'per month · billed ' + livePricing.annual.priceString + '/year';
+    } else if(loading){
+      document.getElementById('priceAmount').textContent='…';
+      document.getElementById('pricePeriod').textContent='Loading price…';
+    } else {
+      document.getElementById('priceAmount').textContent='$1.83';
+      document.getElementById('pricePeriod').textContent='per month · billed $22.00/year';
+    }
     document.getElementById('priceEquiv').textContent='A small commitment to something that changes everything.';
   } else {
     document.getElementById('priceLabel').textContent='Monthly Plan';
-    document.getElementById('priceAmount').textContent='$2.99';
-    document.getElementById('pricePeriod').textContent='per month · cancel anytime';
+    if(livePricing && livePricing.monthly){
+      document.getElementById('priceAmount').textContent = livePricing.monthly.priceString;
+      document.getElementById('pricePeriod').textContent = 'per month · cancel anytime';
+    } else if(loading){
+      document.getElementById('priceAmount').textContent='…';
+      document.getElementById('pricePeriod').textContent='Loading price…';
+    } else {
+      document.getElementById('priceAmount').textContent='$3.39';
+      document.getElementById('pricePeriod').textContent='per month · cancel anytime';
+    }
     document.getElementById('priceEquiv').textContent='A small commitment to something that changes everything.';
   }
 }
@@ -3814,12 +4024,25 @@ function showSubscribeSuccess(){
   wrap.innerHTML=`<div style="text-align:center;padding:24px;border:1px solid rgba(201,169,110,.2)"><div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--cream);margin-bottom:8px">Welcome, ${escapeHtml(userNickname || userRealName)}.</div><div style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:20px">✦ Your library is now open</div><button onclick="showScreen('home');setTabByName('today');buildHome()" style="padding:14px 32px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer">Enter the App</button></div>`;
 }
 async function activateMembership(){
+  // Optimistic, local-only: RevenueCat/StoreKit already verified this
+  // purchase before resolving, so it's safe to unlock the UI on this device
+  // immediately. The client no longer writes is_paid_member to the database
+  // (MEMBERSHIP_PROTECTION.sql blocks it) — that's the RevenueCat webhook's
+  // job, via a server-side Edge Function using the service_role key. Below,
+  // re-fetch after a short delay to reconcile with what the webhook actually
+  // persisted, in case the store entitlement and the server ever disagree.
   isPaidMember = true;
-  if(currentUser) {
-    try { await db.from('profiles').update({ is_paid_member: true }).eq('id', currentUser.id); }
-    catch(e) { console.error('Failed to persist membership:', e); }
-  }
   showSubscribeSuccess();
+  if(currentUser) {
+    const uid = currentUser.id;
+    setTimeout(() => {
+      db.from('profiles').select('is_paid_member').eq('id', uid).maybeSingle()
+        .then(({ data, error }) => {
+          if(error) { console.error('[Membership] reconcile fetch failed:', error.message); return; }
+          if(data) isPaidMember = !!data.is_paid_member;
+        });
+    }, 4000);
+  }
 }
 async function handleSubscribe(){
   trackEvent('upgrade_tapped', { platform: IS_NATIVE_APP ? 'native' : 'web' });
@@ -5400,20 +5623,30 @@ async function generateSummary(year, month) {
 }
 
 // ── NOTIFICATIONS ──
+// All three localStorage keys below are scoped per-user (currentUser.id) so
+// a second account on the same device never sees the previous account's
+// notifications, badge-announcement history, or streak-milestone history.
 let notifications = [];
-const NOTIF_KEY = 'am_notifications';
 const NOTIF_MAX = 50;
 
+function notifKey() {
+  return currentUser ? ('am_notifications_' + currentUser.id) : null;
+}
+
 function loadNotifications() {
+  const key = notifKey();
+  if(!key) { notifications = []; updateBellBadge(); return; }
   try {
-    const raw = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
+    const raw = JSON.parse(localStorage.getItem(key) || '[]');
     notifications = Array.isArray(raw) ? raw : [];
   } catch(e) { notifications = []; }
   updateBellBadge();
 }
 
 function saveNotifications() {
-  try { localStorage.setItem(NOTIF_KEY, JSON.stringify(notifications)); } catch(e) {}
+  const key = notifKey();
+  if(!key) return;
+  try { localStorage.setItem(key, JSON.stringify(notifications)); } catch(e) {}
 }
 
 function addNotification(message, type) {
@@ -5438,7 +5671,15 @@ function unreadNotifCount() {
 
 function updateBellBadge() {
   const dot = document.getElementById('notifDot');
-  if(dot) dot.style.display = unreadNotifCount() > 0 ? 'block' : 'none';
+  if(!dot) return;
+  const count = unreadNotifCount();
+  if(count > 0) {
+    dot.textContent = count > 9 ? '9+' : String(count);
+    dot.style.display = 'flex';
+  } else {
+    dot.textContent = '';
+    dot.style.display = 'none';
+  }
 }
 
 function markAllRead() {
@@ -5505,15 +5746,19 @@ function closeNotifOutside(e) {
 
 // Fires a notification the first time each badge is earned, persisting which
 // badges have already been announced so existing users don't get a backlog burst.
-const NOTIFIED_BADGES_KEY = 'am_notified_badges';
+function notifiedBadgesKey() {
+  return currentUser ? ('am_notified_badges_' + currentUser.id) : null;
+}
 // Badges earned since the last time the badges screen was built — these get
 // a one-time gold shimmer sweep when the user next sees them (consumed there).
 const recentlyEarnedBadges = new Set();
 
 function notifyNewlyEarnedBadges() {
+  const key = notifiedBadgesKey();
+  if(!key) return;
   let announced;
-  const firstRun = localStorage.getItem(NOTIFIED_BADGES_KEY) === null;
-  try { announced = new Set(JSON.parse(localStorage.getItem(NOTIFIED_BADGES_KEY) || '[]')); }
+  const firstRun = localStorage.getItem(key) === null;
+  try { announced = new Set(JSON.parse(localStorage.getItem(key) || '[]')); }
   catch(e) { announced = new Set(); }
   badgeCategories.forEach(cat => cat.badges.forEach(b => {
     if(b.earned && !announced.has(b.id)) {
@@ -5527,20 +5772,24 @@ function notifyNewlyEarnedBadges() {
       }
     }
   }));
-  try { localStorage.setItem(NOTIFIED_BADGES_KEY, JSON.stringify([...announced])); } catch(e) {}
+  try { localStorage.setItem(key, JSON.stringify([...announced])); } catch(e) {}
 }
 
 // Fires once for each streak milestone reached, persisted so it never repeats.
-const NOTIFIED_STREAKS_KEY = 'am_notified_streaks';
+function notifiedStreaksKey() {
+  return currentUser ? ('am_notified_streaks_' + currentUser.id) : null;
+}
 function notifyStreakMilestone(count) {
   const milestones = [7, 30, 90, 180, 365];
   if(!milestones.includes(count)) return;
+  const key = notifiedStreaksKey();
+  if(!key) return;
   let announced;
-  try { announced = new Set(JSON.parse(localStorage.getItem(NOTIFIED_STREAKS_KEY) || '[]')); }
+  try { announced = new Set(JSON.parse(localStorage.getItem(key) || '[]')); }
   catch(e) { announced = new Set(); }
   if(announced.has(count)) return;
   announced.add(count);
-  try { localStorage.setItem(NOTIFIED_STREAKS_KEY, JSON.stringify([...announced])); } catch(e) {}
+  try { localStorage.setItem(key, JSON.stringify([...announced])); } catch(e) {}
   addNotification(`You reached a ${count}-day streak`, 'streak');
 }
 
@@ -6153,6 +6402,13 @@ function completeScan() {
   }));
   if(sections.some(s => s.note)) {
     bodyScanSessions.unshift({ date: today, sections });
+    if(currentUser) {
+      db.from('body_scan_sessions').insert({
+        user_id: currentUser.id,
+        session_date: today,
+        sections: sections
+      }).then(dbResult('save body scan session'));
+    }
   }
   currentScanNotes = {};
   trackEvent('body_scan_complete');

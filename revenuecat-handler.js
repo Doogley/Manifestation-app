@@ -6,7 +6,7 @@
 // BEFORE SHIPPING, replace the placeholders below with real values from
 // the RevenueCat dashboard (see MAC_SESSION_GUIDE.md):
 
-var RC_API_KEY_IOS = 'REVENUECAT_IOS_API_KEY_PLACEHOLDER';        // appl_xxxx
+var RC_API_KEY_IOS = 'appl_UFTKipKKGCtCkAkpdWVuvWceFKo';        // appl_xxxx
 var RC_API_KEY_ANDROID = 'REVENUECAT_ANDROID_API_KEY_PLACEHOLDER'; // goog_xxxx
 var RC_ENTITLEMENT_ID = 'member'; // the entitlement that unlocks paid features
 
@@ -67,6 +67,21 @@ var RC_PRODUCTS = {
     } catch (e) {
       console.error('[AMPurchases] getCustomerInfo failed:', e);
       return false;
+    }
+  }
+
+  // Fetches the current RevenueCat offering, used to display live
+  // StoreKit/Play prices on the upgrade screen. Resolves null on web
+  // or if the fetch fails.
+  async function getOfferings() {
+    var purchases = purchasesPlugin();
+    if (!purchases) return null;
+    try {
+      if (!configured) await initializePurchases();
+      return await purchases.getOfferings();
+    } catch (e) {
+      console.error('[AMPurchases] getOfferings failed:', e);
+      return null;
     }
   }
 
@@ -137,6 +152,7 @@ var RC_PRODUCTS = {
   window.AMPurchases = {
     initializePurchases: initializePurchases,
     checkSubscriptionStatus: checkSubscriptionStatus,
+    getOfferings: getOfferings,
     purchaseSubscription: purchaseSubscription,
     restorePurchases: restorePurchases,
     PRODUCTS: RC_PRODUCTS,
